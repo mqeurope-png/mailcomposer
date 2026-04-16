@@ -137,20 +137,24 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 
 .form-group{margin-bottom:16px}
 .form-label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px}
-.form-input,.form-textarea,.form-select,.form-color{width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-family:inherit;outline:none}
-.form-input:focus,.form-textarea:focus,.form-select:focus,.form-color:focus{border-color:#93c5fd;box-shadow:0 0 0 2px rgba(59,130,246,.15)}
+.form-input,.form-textarea,.form-select,.form-color{width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s;background:#fff}
+.form-input:focus,.form-textarea:focus,.form-select:focus,.form-color:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
 .form-textarea{resize:vertical;min-height:80px}
+.form-input:disabled{background:#f3f4f6;color:#9ca3af}
 .form-color{cursor:pointer}
 
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000}
-.modal-panel{background:#fff;border-radius:12px;padding:24px;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
-.modal-header{font-size:18px;font-weight:800;color:#0f172a;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
-.modal-close{background:transparent;border:none;color:#9ca3af;cursor:pointer;font-size:20px;padding:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
-.modal-close:hover{color:#374151}
-.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #e5e7eb}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal-panel{background:#fff;border-radius:16px;padding:0;width:90vw;max-width:800px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25)}
+.modal-header{font-size:18px;font-weight:800;color:#0f172a;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5e7eb;position:sticky;top:0;background:#fff;z-index:5;border-radius:16px 16px 0 0}
+.modal-body{padding:24px 28px}
+.modal-close{background:#f3f4f6;border:none;color:#6b7280;cursor:pointer;font-size:16px;padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:all .15s}
+.modal-close:hover{color:#111827;background:#e5e7eb}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:16px 28px;border-top:1px solid #e5e7eb;position:sticky;bottom:0;background:#fff;border-radius:0 0 16px 16px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+.modal-grid .form-group-full{grid-column:1/-1}
 
 .image-preview{max-width:150px;max-height:120px;border:1px solid #e5e7eb;border-radius:6px;margin-top:8px}
 
@@ -256,6 +260,17 @@ function getDefaultState() {
       {id:'tpl-002',name:'PimPam Vending',colorClass:'orange',blocks:['text-003','block-009','block-011','text-005']},
       {id:'tpl-003',name:'Formatos varios',colorClass:'purple',blocks:['text-001','block-004','text-004','text-002','block-005','text-005']},
       {id:'tpl-004',name:'Bloques modulares',colorClass:'gray',blocks:['text-001','block-001','block-002','block-003','block-004','block-005','block-006','block-007','block-008','block-009','block-010','block-011','text-005']},
+    ],
+    standaloneBlocks: [
+      {id:'sb-001',title:'Brand artisJet',desc:'Logo + enlace artisJet',icon:'aJ',iconBg:'#dbeafe',section:'otros',blockType:'brand_strip',config:{brand:'artisjet'}},
+      {id:'sb-002',title:'Brand MBO',desc:'Logo + enlace MBO',icon:'MBO',iconBg:'#ede9fe',section:'otros',blockType:'brand_strip',config:{brand:'mbo'}},
+      {id:'sb-003',title:'Brand PimPam',desc:'Logo + enlace PimPam',icon:'PP',iconBg:'#ffedd5',section:'otros',blockType:'brand_strip',config:{brand:'pimpam'}},
+      {id:'sb-004',title:'Vídeo Freebird',desc:'Banner con vídeo YouTube',icon:'▶',iconBg:'#1e3a8a',iconColor:'#fff',section:'otros',blockType:'video',config:{youtubeUrl:'https://www.youtube.com/watch?v=gp-x_jRBRcE',thumbnailOverride:''}},
+      {id:'sb-005',title:'1 Producto',desc:'Individual con selector',icon:'📦',iconBg:'#dcfce7',section:'otros',blockType:'product_single',config:{defaultProduct:'young'}},
+      {id:'sb-006',title:'2 Productos',desc:'Par con selectores',icon:'📦📦',iconBg:'#dcfce7',section:'otros',blockType:'product_pair',config:{defaultProduct1:'young',defaultProduct2:'3000pro'}},
+      {id:'sb-007',title:'3 Productos',desc:'Trío con selectores',icon:'📦³',iconBg:'#dcfce7',section:'otros',blockType:'product_trio',config:{defaultProduct1:'uv1612g',defaultProduct2:'uv1812',defaultProduct3:'uv2513'}},
+      {id:'sb-008',title:'PimPam Hero',desc:'Banner vending',icon:'🖼',iconBg:'#ffedd5',section:'otros',blockType:'pimpam_hero',config:{}},
+      {id:'sb-009',title:'PimPam 4 Pasos',desc:'Proceso en 4 pasos',icon:'1234',iconBg:'#ffedd5',section:'otros',blockType:'pimpam_steps',config:{}},
     ],
   };
 }
@@ -370,16 +385,30 @@ function productTrioHtml(p1, p2, p3) {
     '</tr></table></td></tr>';
 }
 
-function freebirdHtml() {
-  return '<tr><td style="padding:0 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:10px;overflow:hidden">' +
-    '<tr><td style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);padding:0;text-align:center">' +
-    '<img src="https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png" width="280" alt="Freebird" style="width:100%;max-width:280px;height:auto;max-height:160px;object-fit:contain;margin:16px auto 0;display:block">' +
+function freebirdHtml(config) {
+  config = config || {};
+  var youtubeUrl = config.youtubeUrl || 'https://www.youtube.com/watch?v=gp-x_jRBRcE';
+  var thumbnailUrl = config.thumbnailOverride;
+  if (!thumbnailUrl && youtubeUrl) {
+    var videoIdMatch = youtubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+    if (videoIdMatch) {
+      var videoId = videoIdMatch[1];
+      thumbnailUrl = 'https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg';
+    }
+  }
+  if (!thumbnailUrl) {
+    thumbnailUrl = 'https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png';
+  }
+  return '<tr><td style="padding:8px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:12px;overflow:hidden;background:#0f172a">' +
+    '<tr><td style="text-align:center;padding:0">' +
+    '<a href="' + youtubeUrl + '" target="_blank" style="text-decoration:none">' +
+    '<img src="' + thumbnailUrl + '" alt="Video" width="480" style="width:100%;max-width:480px;display:block;margin:0 auto;opacity:0.85"/>' +
+    '</a>' +
     '</td></tr>' +
-    '<tr><td style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);padding:4px 18px 18px;text-align:center">' +
-    '<p style="font-size:14px;font-weight:900;color:#ffffff;margin:0 0 4px">Tecnología Freebird</p>' +
-    '<p style="font-size:11px;color:rgba(255,255,255,0.85);margin:0 0 10px;line-height:1.4">Altura variable automática — impresión sobre superficies irregulares sin ajustes manuales</p>' +
-    '<a href="https://boprint.net/freebird" style="display:inline-block;font-size:11px;font-weight:800;text-decoration:none;padding:8px 20px;border-radius:6px;background:#ffffff;color:#1d4ed8;text-transform:uppercase">▶ Ver vídeo</a>' +
-    '</td></tr></table></td></tr>';
+    '<tr><td style="text-align:center;padding:12px 16px;background:#0f172a">' +
+    '<a href="' + youtubeUrl + '" target="_blank" style="color:#93c5fd;font-size:14px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">▶ Ver vídeo</a>' +
+    '</td></tr>' +
+    '</table></td></tr>';
 }
 
 function pimpamHeroHtml() {
@@ -452,7 +481,7 @@ function generateFullHtml(blocks, products) {
         var pt3 = products.find(function(p){return p.id===b.product3});
         if(pt1&&pt2&&pt3) rows += productTrioHtml(pt1,pt2,pt3);
         break;
-      case 'freebird': rows += freebirdHtml(); break;
+      case 'freebird': rows += freebirdHtml(b); break;
       case 'pimpam_hero': rows += pimpamHeroHtml(); break;
       case 'pimpam_steps': rows += pimpamStepsHtml(); break;
     }
@@ -498,89 +527,72 @@ function ProductEditorModal(props) {
         e('button', {className:'modal-close', onClick:props.onClose}, '✕')
       ),
 
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'ID (único)'),
-        e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
-      ),
-
-      e('div', {className:'form-row'},
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Nombre'),
-          e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
-        ),
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Marca'),
-          e('select', {className:'form-select', value:form.brand, onChange:function(ev){updateForm('brand', ev.target.value)}},
-            e('option', {value:'artisjet'}, 'artisJet'),
-            e('option', {value:'mbo'}, 'MBO'),
-            e('option', {value:'pimpam'}, 'PimPam')
+      e('div', {className:'modal-body'},
+        e('div', {className:'modal-grid'},
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'ID (único)'),
+            e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Marca'),
+            e('select', {className:'form-select', value:form.brand, onChange:function(ev){updateForm('brand', ev.target.value)}},
+              e('option', {value:'artisjet'}, 'artisJet'),
+              e('option', {value:'mbo'}, 'MBO'),
+              e('option', {value:'pimpam'}, 'PimPam')
+            )
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Nombre'),
+            e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Badge'),
+            e('input', {className:'form-input', value:form.badge, onChange:function(ev){updateForm('badge', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Badge BG / Color'),
+            e('div', {style:{display:'flex',gap:'8px'}},
+              e('input', {className:'form-color', type:'color', value:form.badgeBg, onChange:function(ev){updateForm('badgeBg', ev.target.value)}}),
+              e('input', {className:'form-color', type:'color', value:form.badgeColor, onChange:function(ev){updateForm('badgeColor', ev.target.value)}})
+            )
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'URL de imagen'),
+            e('input', {className:'form-input', value:form.img, onChange:function(ev){updateForm('img', ev.target.value)}}),
+            form.img && e('img', {src:form.img, alt:'preview', className:'image-preview', onError:function(ev){ev.target.style.display='none'}})
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Descripción'),
+            e('textarea', {className:'form-textarea', value:form.desc, onChange:function(ev){updateForm('desc', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Área'),
+            e('input', {className:'form-input', value:form.area, onChange:function(ev){updateForm('area', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Altura máxima'),
+            e('input', {className:'form-input', value:form.alt, onChange:function(ev){updateForm('alt', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Feature 1'),
+            e('input', {className:'form-input', value:form.feat1, onChange:function(ev){updateForm('feat1', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Feature 2'),
+            e('input', {className:'form-input', value:form.feat2, onChange:function(ev){updateForm('feat2', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Precio'),
+            e('input', {className:'form-input', value:form.price, onChange:function(ev){updateForm('price', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Color acentuado'),
+            e('input', {className:'form-color', type:'color', value:form.accent, onChange:function(ev){updateForm('accent', ev.target.value)}})
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Link'),
+            e('input', {className:'form-input', value:form.link, onChange:function(ev){updateForm('link', ev.target.value)}})
           )
-        )
-      ),
-
-      e('div', {className:'form-row-3'},
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Badge'),
-          e('input', {className:'form-input', value:form.badge, onChange:function(ev){updateForm('badge', ev.target.value)}})
-        ),
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Badge BG'),
-          e('input', {className:'form-color', type:'color', value:form.badgeBg, onChange:function(ev){updateForm('badgeBg', ev.target.value)}})
-        ),
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Badge Color'),
-          e('input', {className:'form-color', type:'color', value:form.badgeColor, onChange:function(ev){updateForm('badgeColor', ev.target.value)}})
-        )
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'URL de imagen'),
-        e('input', {className:'form-input', value:form.img, onChange:function(ev){updateForm('img', ev.target.value)}}),
-        form.img && e('img', {src:form.img, alt:'preview', className:'image-preview', onError:function(ev){ev.target.style.display='none'}})
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Descripción'),
-        e('textarea', {className:'form-textarea', value:form.desc, onChange:function(ev){updateForm('desc', ev.target.value)}})
-      ),
-
-      e('div', {className:'form-row'},
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Área'),
-          e('input', {className:'form-input', value:form.area, onChange:function(ev){updateForm('area', ev.target.value)}})
-        ),
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Altura máxima'),
-          e('input', {className:'form-input', value:form.alt, onChange:function(ev){updateForm('alt', ev.target.value)}})
-        )
-      ),
-
-      e('div', {className:'form-row'},
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Feature 1'),
-          e('input', {className:'form-input', value:form.feat1, onChange:function(ev){updateForm('feat1', ev.target.value)}})
-        ),
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Feature 2'),
-          e('input', {className:'form-input', value:form.feat2, onChange:function(ev){updateForm('feat2', ev.target.value)}})
-        )
-      ),
-
-      e('div', {className:'form-row'},
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Precio'),
-          e('input', {className:'form-input', value:form.price, onChange:function(ev){updateForm('price', ev.target.value)}})
-        ),
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Link'),
-          e('input', {className:'form-input', value:form.link, onChange:function(ev){updateForm('link', ev.target.value)}})
-        )
-      ),
-
-      e('div', {className:'form-row'},
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Color acentuado'),
-          e('input', {className:'form-color', type:'color', value:form.accent, onChange:function(ev){updateForm('accent', ev.target.value)}})
         )
       ),
 
@@ -607,73 +619,71 @@ function BlockEditorModal(props) {
   return e('div', {className:'modal-overlay', onClick:props.onClose},
     e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}},
       e('div', {className:'modal-header'},
-        e('span', null, props.isNew ? 'Nuevo bloque' : 'Editar bloque'),
+        e('span', null, props.isNew ? 'Nuevo bloque compuesto' : 'Editar bloque compuesto'),
         e('button', {className:'modal-close', onClick:props.onClose}, '✕')
       ),
 
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'ID (único)'),
-        e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Título'),
-        e('input', {className:'form-input', value:form.title, onChange:function(ev){updateForm('title', ev.target.value)}})
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Descripción'),
-        e('input', {className:'form-input', value:form.desc, onChange:function(ev){updateForm('desc', ev.target.value)}})
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Rango de precio'),
-        e('input', {className:'form-input', value:form.priceRange, onChange:function(ev){updateForm('priceRange', ev.target.value)}})
-      ),
-
-      e('div', {className:'form-row'},
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Color tag'),
-          e('select', {className:'form-select', value:form.colorTag, onChange:function(ev){updateForm('colorTag', ev.target.value)}},
-            e('option', {value:'blue'}, 'Azul'),
-            e('option', {value:'purple'}, 'Púrpura'),
-            e('option', {value:'orange'}, 'Naranja'),
-            e('option', {value:'gray'}, 'Gris')
+      e('div', {className:'modal-body'},
+        e('div', {className:'modal-grid'},
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'ID (único)'),
+            e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Tipo de bloque'),
+            e('select', {className:'form-select', value:form.blockType, onChange:function(ev){updateForm('blockType', ev.target.value)}},
+              e('option', {value:'product_pair'}, 'Par de productos'),
+              e('option', {value:'product_trio'}, 'Trío de productos'),
+              e('option', {value:'product_single'}, 'Producto único')
+            )
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Título'),
+            e('input', {className:'form-input', value:form.title, onChange:function(ev){updateForm('title', ev.target.value)}})
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Descripción'),
+            e('input', {className:'form-input', value:form.desc, onChange:function(ev){updateForm('desc', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Rango de precio'),
+            e('input', {className:'form-input', value:form.priceRange, onChange:function(ev){updateForm('priceRange', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Color tag'),
+            e('select', {className:'form-select', value:form.colorTag, onChange:function(ev){updateForm('colorTag', ev.target.value)}},
+              e('option', {value:'blue'}, 'Azul'),
+              e('option', {value:'purple'}, 'Púrpura'),
+              e('option', {value:'orange'}, 'Naranja'),
+              e('option', {value:'gray'}, 'Gris')
+            )
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Brand strip'),
+            e('select', {className:'form-select', value:form.brandStrip, onChange:function(ev){updateForm('brandStrip', ev.target.value)}},
+              e('option', {value:'none'}, 'Ninguno'),
+              e('option', {value:'artisjet'}, 'artisJet'),
+              e('option', {value:'mbo'}, 'MBO'),
+              e('option', {value:'pimpam'}, 'PimPam')
+            )
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Opciones'),
+            e('div', {style:{display:'flex',gap:'20px',paddingTop:'4px'}},
+              e('label', {style:{fontSize:'12px',display:'flex',alignItems:'center',gap:'6px',cursor:'pointer'}},
+                e('input', {type:'checkbox', checked:form.includeHero, onChange:function(ev){updateForm('includeHero', ev.target.checked)}}),
+                'Incluir hero'
+              ),
+              e('label', {style:{fontSize:'12px',display:'flex',alignItems:'center',gap:'6px',cursor:'pointer'}},
+                e('input', {type:'checkbox', checked:form.includeSteps, onChange:function(ev){updateForm('includeSteps', ev.target.checked)}}),
+                'Incluir pasos'
+              )
+            )
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Texto de introducción'),
+            e('textarea', {className:'form-textarea', value:form.introText, onChange:function(ev){updateForm('introText', ev.target.value)}, style:{minHeight:'100px'}})
           )
-        ),
-        e('div', {className:'form-group'},
-          e('label', {className:'form-label'}, 'Brand strip'),
-          e('select', {className:'form-select', value:form.brandStrip, onChange:function(ev){updateForm('brandStrip', ev.target.value)}},
-            e('option', {value:'none'}, 'Ninguno'),
-            e('option', {value:'artisjet'}, 'artisJet'),
-            e('option', {value:'mbo'}, 'MBO'),
-            e('option', {value:'pimpam'}, 'PimPam')
-          )
-        )
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Tipo de bloque'),
-        e('select', {className:'form-select', value:form.blockType, onChange:function(ev){updateForm('blockType', ev.target.value)}},
-          e('option', {value:'product_pair'}, 'Par de productos'),
-          e('option', {value:'product_trio'}, 'Trío de productos'),
-          e('option', {value:'product_single'}, 'Producto único')
-        )
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Intro text'),
-        e('textarea', {className:'form-textarea', value:form.introText, onChange:function(ev){updateForm('introText', ev.target.value)}})
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label', style:{marginBottom:'10px'}},
-          e('input', {type:'checkbox', checked:form.includeHero, onChange:function(ev){updateForm('includeHero', ev.target.checked)}, style:{marginRight:'6px'}}),
-          'Incluir hero'
-        ),
-        e('label', {className:'form-label'},
-          e('input', {type:'checkbox', checked:form.includeSteps, onChange:function(ev){updateForm('includeSteps', ev.target.checked)}, style:{marginRight:'6px'}}),
-          'Incluir pasos'
         )
       ),
 
@@ -704,24 +714,25 @@ function TextEditorModal(props) {
         e('button', {className:'modal-close', onClick:props.onClose}, '✕')
       ),
 
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'ID (único)'),
-        e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Nombre'),
-        e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Icono (emoji o carácter)'),
-        e('input', {className:'form-input', value:form.icon, onChange:function(ev){updateForm('icon', ev.target.value)}, style:{maxWidth:'80px'}})
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Texto'),
-        e('textarea', {className:'form-textarea', value:form.text, onChange:function(ev){updateForm('text', ev.target.value)}, style:{minHeight:'150px'}})
+      e('div', {className:'modal-body'},
+        e('div', {className:'modal-grid'},
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'ID (único)'),
+            e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Icono'),
+            e('input', {className:'form-input', value:form.icon, onChange:function(ev){updateForm('icon', ev.target.value)}, placeholder:'emoji', style:{maxWidth:'80px'}})
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Nombre'),
+            e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Texto'),
+            e('textarea', {className:'form-textarea', value:form.text, onChange:function(ev){updateForm('text', ev.target.value)}, style:{minHeight:'180px'}})
+          )
+        )
       ),
 
       e('div', {className:'modal-footer'},
@@ -784,55 +795,199 @@ function TemplateEditorModal(props) {
         e('button', {className:'modal-close', onClick:props.onClose}, '✕')
       ),
 
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'ID (único)'),
-        e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
-      ),
+      e('div', {className:'modal-body'},
+        e('div', {className:'modal-grid'},
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'ID (único)'),
+            e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Color'),
+            e('select', {className:'form-select', value:form.colorClass, onChange:function(ev){updateForm('colorClass', ev.target.value)}},
+              e('option', {value:'blue'}, 'Azul'),
+              e('option', {value:'purple'}, 'Púrpura'),
+              e('option', {value:'orange'}, 'Naranja'),
+              e('option', {value:'gray'}, 'Gris')
+            )
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Nombre'),
+            e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
+          ),
 
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Nombre'),
-        e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
-      ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label', style:{marginBottom:'10px'}}, 'Bloques en plantilla'),
+            e('div', null,
+              form.blocks.length > 0
+                ? form.blocks.map(function(bid, idx){
+                    var item = allItems.find(function(x){return x.id===bid});
+                    return e('div', {key:bid+'-'+idx, style:{background:'#f9fafb',padding:'10px 12px',borderRadius:'8px',marginBottom:'6px',display:'flex',justifyContent:'space-between',alignItems:'center',border:'1px solid #e5e7eb'}},
+                      e('span', {style:{fontSize:'13px',fontWeight:600}}, (item ? (item.icon||'') + ' ' : '') + (item ? (item.name || item.title || bid) : bid)),
+                      e('div', {style:{display:'flex',gap:'4px'}},
+                        e('button', {className:'btn btn-sm btn-ghost', onClick:function(){moveBlockUp(idx)}, disabled:idx===0}, '▲'),
+                        e('button', {className:'btn btn-sm btn-ghost', onClick:function(){moveBlockDown(idx)}, disabled:idx===form.blocks.length-1}, '▼'),
+                        e('button', {className:'btn btn-sm btn-danger', onClick:function(){removeBlock(idx)}}, '✕')
+                      )
+                    );
+                  })
+                : e('p', {style:{fontSize:'12px',color:'#9ca3af',fontStyle:'italic',padding:'12px',textAlign:'center',background:'#f9fafb',borderRadius:'8px'}}, 'Sin bloques añadidos')
+            )
+          ),
 
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label'}, 'Clase de color'),
-        e('select', {className:'form-select', value:form.colorClass, onChange:function(ev){updateForm('colorClass', ev.target.value)}},
-          e('option', {value:'blue'}, 'Azul'),
-          e('option', {value:'purple'}, 'Púrpura'),
-          e('option', {value:'orange'}, 'Naranja'),
-          e('option', {value:'gray'}, 'Gris')
-        )
-      ),
-
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label', style:{marginBottom:'10px'}}, 'Bloques en plantilla'),
-        e('div', null,
-          form.blocks.length > 0
-            ? form.blocks.map(function(bid, idx){
-                var item = allItems.find(function(x){return x.id===bid});
-                return e('div', {key:bid, style:{background:'#f9fafb',padding:'10px',borderRadius:'6px',marginBottom:'8px',display:'flex',justifyContent:'space-between',alignItems:'center'}},
-                  e('span', {style:{fontSize:'12px',fontWeight:600}}, item ? (item.name || bid) : bid),
-                  e('div', null,
-                    e('button', {className:'btn btn-sm btn-ghost', onClick:function(){moveBlockUp(idx)}, disabled:idx===0, style:{marginRight:'4px'}}, '▲'),
-                    e('button', {className:'btn btn-sm btn-ghost', onClick:function(){moveBlockDown(idx)}, disabled:idx===form.blocks.length-1, style:{marginRight:'4px'}}, '▼'),
-                    e('button', {className:'btn btn-sm btn-danger', onClick:function(){removeBlock(idx)}}, '✕')
-                  )
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label', style:{marginBottom:'10px'}}, 'Añadir bloques / textos'),
+            e('div', {style:{background:'#f9fafb',padding:'12px',borderRadius:'8px',maxHeight:'220px',overflowY:'auto',border:'1px solid #e5e7eb'}},
+              allItems.map(function(item){
+                var isSelected = form.blocks.indexOf(item.id) >= 0;
+                return e('label', {key:item.id, style:{display:'flex',alignItems:'center',gap:'8px',marginBottom:'8px',cursor:'pointer',fontSize:'13px',padding:'4px 0'}},
+                  e('input', {type:'checkbox', checked:isSelected, onChange:function(){toggleBlock(item.id)}}),
+                  e('span', null, (item.icon||'') + ' ' + (item.name || item.title || item.id))
                 );
               })
-            : e('p', {style:{fontSize:'11px',color:'#9ca3af',fontStyle:'italic'}}, 'Sin bloques añadidos')
+            )
+          )
         )
       ),
 
-      e('div', {className:'form-group'},
-        e('label', {className:'form-label', style:{marginBottom:'10px'}}, 'Añadir bloques/textos'),
-        e('div', {style:{background:'#f3f4f6',padding:'10px',borderRadius:'6px',maxHeight:'200px',overflowY:'auto'}},
-          allItems.map(function(item){
-            var isSelected = form.blocks.indexOf(item.id) >= 0;
-            return e('label', {key:item.id, style:{display:'block',marginBottom:'6px',cursor:'pointer',fontSize:'12px'}},
-              e('input', {type:'checkbox', checked:isSelected, onChange:function(){toggleBlock(item.id)}, style:{marginRight:'6px'}}),
-              item.name || item.id
-            );
-          })
+      e('div', {className:'modal-footer'},
+        e('button', {className:'btn btn-ghost', onClick:props.onClose}, 'Cancelar'),
+        e('button', {className:'btn btn-primary', onClick:function(){props.onSave(form)}}, 'Guardar')
+      )
+    )
+  );
+}
+
+// ─── STANDALONE BLOCK EDITOR MODAL ──────────────────────────
+function StandaloneBlockEditorModal(props) {
+  var sb = props.standaloneBlock || {id:'',title:'',desc:'',icon:'',iconBg:'#f3f4f6',iconColor:'',section:'otros',blockType:'brand_strip',config:{}};
+  var _form = useState(sb);
+  var form = _form[0], setForm = _form[1];
+
+  var updateForm = function(key, value) {
+    var newForm = Object.assign({}, form, {});
+    newForm[key] = value;
+    setForm(newForm);
+  };
+
+  var updateConfig = function(key, value) {
+    var newForm = Object.assign({}, form, {});
+    newForm.config = Object.assign({}, form.config, {});
+    newForm.config[key] = value;
+    setForm(newForm);
+  };
+
+  var cfg = form.config || {};
+  var youtubeIdMatch = cfg.youtubeUrl ? cfg.youtubeUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/) : null;
+  var youtubeVideoId = youtubeIdMatch ? youtubeIdMatch[1] : '';
+  var youtubeThumbnail = youtubeVideoId ? 'https://img.youtube.com/vi/' + youtubeVideoId + '/hqdefault.jpg' : '';
+
+  return e('div', {className:'modal-overlay', onClick:props.onClose},
+    e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}},
+      e('div', {className:'modal-header'},
+        e('span', null, props.isNew ? 'Nuevo bloque suelto' : 'Editar bloque suelto'),
+        e('button', {className:'modal-close', onClick:props.onClose}, '✕')
+      ),
+
+      e('div', {className:'modal-body'},
+        e('div', {className:'modal-grid'},
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'ID (único)'),
+            e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew, placeholder:'sb-001'})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Tipo de bloque'),
+            e('select', {className:'form-select', value:form.blockType, onChange:function(ev){updateForm('blockType', ev.target.value)}},
+              e('option', {value:'brand_strip'}, 'Marca (strip)'),
+              e('option', {value:'video'}, 'Vídeo'),
+              e('option', {value:'product_single'}, 'Producto individual'),
+              e('option', {value:'product_pair'}, 'Par de productos'),
+              e('option', {value:'product_trio'}, 'Trío de productos'),
+              e('option', {value:'pimpam_hero'}, 'PimPam Hero'),
+              e('option', {value:'pimpam_steps'}, 'PimPam 4 Pasos')
+            )
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Título'),
+            e('input', {className:'form-input', value:form.title, onChange:function(ev){updateForm('title', ev.target.value)}, placeholder:'Brand artisJet'})
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Descripción'),
+            e('input', {className:'form-input', value:form.desc, onChange:function(ev){updateForm('desc', ev.target.value)}, placeholder:'Logo + enlace'})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Icono'),
+            e('input', {className:'form-input', value:form.icon, onChange:function(ev){updateForm('icon', ev.target.value)}, placeholder:'aJ, MBO, ▶', style:{maxWidth:'100px'}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Color fondo icono'),
+            e('input', {type:'color', value:form.iconBg, onChange:function(ev){updateForm('iconBg', ev.target.value)}, style:{width:'48px',height:'36px',border:'1px solid #d1d5db',borderRadius:'6px',cursor:'pointer'}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Sección en sidebar'),
+            e('select', {className:'form-select', value:form.section, onChange:function(ev){updateForm('section', ev.target.value)}},
+              e('option', {value:'texto'}, 'Bloques de texto'),
+              e('option', {value:'producto'}, 'Bloques de producto'),
+              e('option', {value:'otros'}, 'Otros bloques')
+            )
+          )
+        ),
+
+        // Config section based on blockType
+        e('div', {style:{marginTop:'16px',padding:'16px',background:'#f9fafb',borderRadius:'10px',border:'1px solid #e5e7eb'}},
+          e('div', {style:{fontSize:'11px',fontWeight:700,color:'#6b7280',textTransform:'uppercase',letterSpacing:'1px',marginBottom:'12px'}}, 'Configuración del bloque'),
+
+          form.blockType === 'brand_strip' && e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Marca'),
+            e('select', {className:'form-select', value:cfg.brand||'artisjet', onChange:function(ev){updateConfig('brand', ev.target.value)}},
+              e('option', {value:'artisjet'}, 'artisJet'),
+              e('option', {value:'mbo'}, 'MBO'),
+              e('option', {value:'pimpam'}, 'PimPam')
+            )
+          ),
+
+          form.blockType === 'video' && e('div', null,
+            e('div', {className:'form-group'},
+              e('label', {className:'form-label'}, 'YouTube URL'),
+              e('input', {className:'form-input', value:cfg.youtubeUrl||'', onChange:function(ev){updateConfig('youtubeUrl', ev.target.value)}, placeholder:'https://www.youtube.com/watch?v=...'})
+            ),
+            youtubeVideoId && e('div', {style:{marginTop:'8px',textAlign:'center'}},
+              e('img', {src:youtubeThumbnail, style:{maxWidth:'320px',width:'100%',borderRadius:'8px',border:'1px solid #e5e7eb'}})
+            )
+          ),
+
+          form.blockType === 'product_single' && e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Producto por defecto'),
+            e('input', {className:'form-input', value:cfg.defaultProduct||'young', onChange:function(ev){updateConfig('defaultProduct', ev.target.value)}})
+          ),
+
+          form.blockType === 'product_pair' && e('div', {className:'modal-grid'},
+            e('div', {className:'form-group'},
+              e('label', {className:'form-label'}, 'Producto 1'),
+              e('input', {className:'form-input', value:cfg.defaultProduct1||'young', onChange:function(ev){updateConfig('defaultProduct1', ev.target.value)}})
+            ),
+            e('div', {className:'form-group'},
+              e('label', {className:'form-label'}, 'Producto 2'),
+              e('input', {className:'form-input', value:cfg.defaultProduct2||'3000pro', onChange:function(ev){updateConfig('defaultProduct2', ev.target.value)}})
+            )
+          ),
+
+          form.blockType === 'product_trio' && e('div', {className:'modal-grid'},
+            e('div', {className:'form-group'},
+              e('label', {className:'form-label'}, 'Producto 1'),
+              e('input', {className:'form-input', value:cfg.defaultProduct1||'uv1612g', onChange:function(ev){updateConfig('defaultProduct1', ev.target.value)}})
+            ),
+            e('div', {className:'form-group'},
+              e('label', {className:'form-label'}, 'Producto 2'),
+              e('input', {className:'form-input', value:cfg.defaultProduct2||'uv1812', onChange:function(ev){updateConfig('defaultProduct2', ev.target.value)}})
+            ),
+            e('div', {className:'form-group form-group-full'},
+              e('label', {className:'form-label'}, 'Producto 3'),
+              e('input', {className:'form-input', value:cfg.defaultProduct3||'uv2513', onChange:function(ev){updateConfig('defaultProduct3', ev.target.value)}})
+            )
+          ),
+
+          (form.blockType === 'pimpam_hero' || form.blockType === 'pimpam_steps') &&
+            e('p', {style:{fontSize:'12px',color:'#9ca3af',fontStyle:'italic'}}, 'Este tipo de bloque no tiene configuración adicional.')
         )
       ),
 
@@ -989,6 +1144,9 @@ function EmailComposer() {
   var _editingTemplate = useState(null);
   var editingTemplate = _editingTemplate[0], setEditingTemplate = _editingTemplate[1];
 
+  var _editingStandaloneBlock = useState(null);
+  var editingStandaloneBlock = _editingStandaloneBlock[0], setEditingStandaloneBlock = _editingStandaloneBlock[1];
+
   // Compositor handlers
   function addBlock(type) { setBlocks(function(prev){return prev.concat([createBlock(type)])}); }
   function updateBlock(id, updated) { setBlocks(function(prev){return prev.map(function(b){return b.id===id?updated:b})}); }
@@ -1035,6 +1193,22 @@ function EmailComposer() {
 
   function addPrewrittenText(textObj) {
     setBlocks(function(prev){ return prev.concat([{id: ++blockIdCounter, type:'text', text: textObj.text}]); });
+  }
+
+  function addStandaloneBlock(sb) {
+    var newBlock;
+    var cfg = sb.config || {};
+    switch(sb.blockType) {
+      case 'brand_strip': newBlock = {id: ++blockIdCounter, type:'brand_' + cfg.brand, brand: cfg.brand}; break;
+      case 'video': newBlock = {id: ++blockIdCounter, type:'freebird', youtubeUrl: cfg.youtubeUrl, thumbnailOverride: cfg.thumbnailOverride}; break;
+      case 'product_single': newBlock = {id: ++blockIdCounter, type:'product_single', product1: cfg.defaultProduct || 'young'}; break;
+      case 'product_pair': newBlock = {id: ++blockIdCounter, type:'product_pair', product1: cfg.defaultProduct1 || 'young', product2: cfg.defaultProduct2 || '3000pro'}; break;
+      case 'product_trio': newBlock = {id: ++blockIdCounter, type:'product_trio', product1: cfg.defaultProduct1 || 'uv1612g', product2: cfg.defaultProduct2 || 'uv1812', product3: cfg.defaultProduct3 || 'uv2513'}; break;
+      case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'pimpam_hero'}; break;
+      case 'pimpam_steps': newBlock = {id: ++blockIdCounter, type:'pimpam_steps'}; break;
+      default: newBlock = {id: ++blockIdCounter, type: sb.blockType}; break;
+    }
+    setBlocks(function(prev){ return prev.concat([newBlock]); });
   }
 
   function loadTemplate(template) {
@@ -1210,6 +1384,26 @@ function EmailComposer() {
     }
   }
 
+  // Standalone blocks management
+  function saveStandaloneBlock(block) {
+    var blocks = appState.standaloneBlocks.slice();
+    var idx = blocks.findIndex(function(b){return b.id===block.id});
+    if(idx >= 0) {
+      blocks[idx] = block;
+    } else {
+      blocks.push(block);
+    }
+    persistState(Object.assign({}, appState, {standaloneBlocks:blocks}));
+    setEditingStandaloneBlock(null);
+  }
+
+  function deleteStandaloneBlock(id) {
+    if(window.confirm('¿Eliminar este bloque suelto?')) {
+      var blocks = appState.standaloneBlocks.filter(function(b){return b.id!==id});
+      persistState(Object.assign({}, appState, {standaloneBlocks:blocks}));
+    }
+  }
+
   var fullHtml = generateFullHtml(blocks, appState.products);
   var sizeKb = (new Blob([fullHtml]).size / 1024).toFixed(1);
 
@@ -1286,71 +1480,17 @@ function EmailComposer() {
             })
           ),
 
-          // OTROS BLOQUES (standalone)
+          // OTROS BLOQUES (standalone, data-driven)
           e(SidebarSection, {title:'OTROS BLOQUES'},
-            e('button', {className:'add-btn', onClick:function(){addBlock("brand_artisjet")}},
-              e('span', {className:'add-btn-icon', style:{background:"#dbeafe"}},'aJ'),
-              e('div', null,
-                e('div', {className:'add-btn-label'}, 'Brand artisJet'),
-                e('div', {className:'add-btn-desc'}, 'Logo + enlace')
-              )
-            ),
-            e('button', {className:'add-btn', onClick:function(){addBlock("brand_mbo")}},
-              e('span', {className:'add-btn-icon', style:{background:"#ede9fe"}},'MBO'),
-              e('div', null,
-                e('div', {className:'add-btn-label'}, 'Brand MBO'),
-                e('div', {className:'add-btn-desc'}, 'Logo + enlace')
-              )
-            ),
-            e('button', {className:'add-btn', onClick:function(){addBlock("brand_pimpam")}},
-              e('span', {className:'add-btn-icon', style:{background:"#ffedd5"}},'PP'),
-              e('div', null,
-                e('div', {className:'add-btn-label'}, 'Brand PimPam'),
-                e('div', {className:'add-btn-desc'}, 'Logo + enlace')
-              )
-            ),
-            e('button', {className:'add-btn', onClick:function(){addBlock("freebird")}},
-              e('span', {className:'add-btn-icon', style:{background:"#1e3a8a", color:"#fff"}},'▶'),
-              e('div', null,
-                e('div', {className:'add-btn-label'}, 'Vídeo Freebird'),
-                e('div', {className:'add-btn-desc'}, 'Banner azul con preview')
-              )
-            ),
-            e('button', {className:'add-btn', onClick:function(){addBlock("product_single")}},
-              e('span', {className:'add-btn-icon', style:{background:"#dcfce7"}},'📦'),
-              e('div', null,
-                e('div', {className:'add-btn-label'}, '1 Producto'),
-                e('div', {className:'add-btn-desc'}, 'Individual con selector')
-              )
-            ),
-            e('button', {className:'add-btn', onClick:function(){addBlock("product_pair")}},
-              e('span', {className:'add-btn-icon', style:{background:"#dcfce7"}},'📦📦'),
-              e('div', null,
-                e('div', {className:'add-btn-label'}, '2 Productos'),
-                e('div', {className:'add-btn-desc'}, 'Par con selectores')
-              )
-            ),
-            e('button', {className:'add-btn', onClick:function(){addBlock("product_trio")}},
-              e('span', {className:'add-btn-icon', style:{background:"#dcfce7"}},'📦³'),
-              e('div', null,
-                e('div', {className:'add-btn-label'}, '3 Productos'),
-                e('div', {className:'add-btn-desc'}, 'Trío con selectores')
-              )
-            ),
-            e('button', {className:'add-btn', onClick:function(){addBlock("pimpam_hero")}},
-              e('span', {className:'add-btn-icon', style:{background:"#ffedd5"}},'🖼'),
-              e('div', null,
-                e('div', {className:'add-btn-label'}, 'PimPam Hero'),
-                e('div', {className:'add-btn-desc'}, 'Banner vending')
-              )
-            ),
-            e('button', {className:'add-btn', onClick:function(){addBlock("pimpam_steps")}},
-              e('span', {className:'add-btn-icon', style:{background:"#ffedd5"}},'1234'),
-              e('div', null,
-                e('div', {className:'add-btn-label'}, 'PimPam 4 Pasos'),
-                e('div', {className:'add-btn-desc'}, 'Proceso en 4 pasos')
-              )
-            )
+            appState.standaloneBlocks.filter(function(sb){return sb.section==='otros'}).map(function(sb) {
+              return e('button', {key:sb.id, className:'add-btn', onClick:function(){addStandaloneBlock(sb)}},
+                e('span', {className:'add-btn-icon', style:{background:sb.iconBg, color:sb.iconColor||'#000'}}, sb.icon),
+                e('div', null,
+                  e('div', {className:'add-btn-label'}, sb.title),
+                  e('div', {className:'add-btn-desc'}, sb.desc)
+                )
+              );
+            })
           )
         ),
 
@@ -1397,12 +1537,12 @@ function EmailComposer() {
 
       // PASSWORD MODAL (compositor mode)
       showBoLogin && e('div', {className:'modal-overlay', onClick:function(){setShowBoLogin(false)}},
-        e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}, style:{maxWidth:'360px'}},
+        e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}, style:{maxWidth:'420px'}},
           e('div', {className:'modal-header'},
             e('span', null, '🔒 Acceso Backoffice'),
             e('button', {className:'modal-close', onClick:function(){setShowBoLogin(false)}}, '✕')
           ),
-          e('div', {style:{padding:'20px'}},
+          e('div', {className:'modal-body'},
             e('p', {style:{fontSize:'13px',color:'#6b7280',marginBottom:'16px'}}, 'Introduce la contraseña para acceder al panel de administración.'),
             e('input', {
               className:'form-input',
@@ -1451,7 +1591,8 @@ function EmailComposer() {
         e('button', {className:'backoffice-tab ' + (backofficeTab==='products'?'active':''), onClick:function(){setBackofficeTab('products')}}, 'Productos'),
         e('button', {className:'backoffice-tab ' + (backofficeTab==='blocks'?'active':''), onClick:function(){setBackofficeTab('blocks')}}, 'Bloques'),
         e('button', {className:'backoffice-tab ' + (backofficeTab==='texts'?'active':''), onClick:function(){setBackofficeTab('texts')}}, 'Textos'),
-        e('button', {className:'backoffice-tab ' + (backofficeTab==='templates'?'active':''), onClick:function(){setBackofficeTab('templates')}}, 'Plantillas')
+        e('button', {className:'backoffice-tab ' + (backofficeTab==='templates'?'active':''), onClick:function(){setBackofficeTab('templates')}}, 'Plantillas'),
+        e('button', {className:'backoffice-tab ' + (backofficeTab==='sueltos'?'active':''), onClick:function(){setBackofficeTab('sueltos')}}, 'Sueltos')
       ),
 
       e('div', {className:'backoffice-content'},
@@ -1551,6 +1692,27 @@ function EmailComposer() {
               );
             })
           )
+        ),
+
+        // SUELTOS (standalone blocks)
+        backofficeTab === 'sueltos' && e('div', null,
+          e('div', {className:'backoffice-actions'},
+            e('button', {className:'btn btn-primary', onClick:function(){setEditingStandaloneBlock({})}}, '+ Añadir bloque suelto')
+          ),
+          e('div', null,
+            appState.standaloneBlocks.map(function(sb){
+              return e('div', {key:sb.id, className:'list-item'},
+                e('div', {className:'list-item-info'},
+                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, sb.icon + ' ' + sb.title),
+                  e('div', {style:{fontSize:'11px',color:'#6b7280'}}, sb.desc + ' · ' + sb.section)
+                ),
+                e('div', {className:'list-item-actions'},
+                  e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingStandaloneBlock(sb)}}, 'Editar'),
+                  e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteStandaloneBlock(sb.id)}}, 'Borrar')
+                )
+              );
+            })
+          )
         )
       )
     ),
@@ -1583,6 +1745,13 @@ function EmailComposer() {
       texts: appState.prewrittenTexts,
       onClose: function(){setEditingTemplate(null)},
       onSave: saveTemplate
+    }),
+
+    editingStandaloneBlock !== null && e(StandaloneBlockEditorModal, {
+      standaloneBlock: editingStandaloneBlock.id ? editingStandaloneBlock : null,
+      isNew: !editingStandaloneBlock.id,
+      onClose: function(){setEditingStandaloneBlock(null)},
+      onSave: saveStandaloneBlock
     })
   );
 }
