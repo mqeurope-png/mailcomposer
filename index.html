@@ -713,10 +713,68 @@ function ChevronDown(){return e('svg',{width:14,height:14,viewBox:"0 0 24 24",fi
 
 // ─── PRODUCT SELECT ──────────────────────────────────────────
 function ProductSelect(props) {
-  return e('select', {value:props.value, onChange:function(ev){props.onChange(ev.target.value)}, className:'form-select'},
-    props.products.filter(function(p){return p.visible !== false}).map(function(p){
-      return e('option', {key:p.id, value:p.id, disabled:p.id===props.exclude||p.id===props.exclude2}, p.name + ' — ' + p.price);
-    })
+  var _open = useState(false);
+  var open = _open[0], setOpen = _open[1];
+  var _search = useState('');
+  var search = _search[0], setSearch = _search[1];
+  var ref = React.useRef(null);
+
+  // Close on outside click
+  React.useEffect(function(){
+    if (!open) return;
+    function handleClick(ev) {
+      if (ref.current && !ref.current.contains(ev.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return function(){ document.removeEventListener('mousedown', handleClick); };
+  }, [open]);
+
+  var allProducts = (props.products||[]).filter(function(p){ return p.visible !== false && p.id !== props.exclude && p.id !== props.exclude2; });
+  var filtered = search.trim() ? allProducts.filter(function(p){
+    var q = search.toLowerCase();
+    return (p.name||'').toLowerCase().indexOf(q) >= 0 || (p.id||'').toLowerCase().indexOf(q) >= 0 || (p.price||'').toLowerCase().indexOf(q) >= 0 || (p.brand||'').toLowerCase().indexOf(q) >= 0;
+  }) : allProducts;
+
+  var selected = (props.products||[]).find(function(p){ return p.id === props.value; });
+  var label = selected ? selected.name + ' — ' + selected.price : '(Seleccionar producto)';
+
+  return e('div', {ref:ref, style:{position:'relative'}},
+    e('button', {
+      type:'button',
+      onClick:function(){ setOpen(!open); setSearch(''); },
+      className:'form-select',
+      style:{textAlign:'left',cursor:'pointer',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',width:'100%',paddingRight:'24px',position:'relative',background:'#fff'}
+    },
+      label,
+      e('span', {style:{position:'absolute',right:'8px',top:'50%',transform:'translateY(-50%)',fontSize:'10px',color:'#999',pointerEvents:'none'}}, open ? '▲' : '▼')
+    ),
+    open && e('div', {style:{position:'absolute',top:'100%',left:0,right:0,zIndex:999,background:'#fff',border:'1.5px solid #d1d5db',borderRadius:'0 0 8px 8px',boxShadow:'0 8px 24px rgba(0,0,0,.15)',maxHeight:'220px',display:'flex',flexDirection:'column'}},
+      e('div', {style:{padding:'6px'}},
+        e('input', {
+          type:'text',
+          value:search,
+          onChange:function(ev){ setSearch(ev.target.value); },
+          placeholder:'Buscar producto...',
+          autoFocus:true,
+          style:{width:'100%',boxSizing:'border-box',padding:'6px 10px',border:'1.5px solid #e5e7eb',borderRadius:'6px',fontSize:'12px',outline:'none'}
+        })
+      ),
+      e('div', {style:{overflowY:'auto',flex:1}},
+        filtered.length === 0
+          ? e('div', {style:{padding:'10px',fontSize:'12px',color:'#999',textAlign:'center'}}, 'Sin resultados')
+          : filtered.map(function(p){
+              var isSelected = p.id === props.value;
+              return e('div', {
+                key:p.id,
+                onClick:function(){ props.onChange(p.id); setOpen(false); setSearch(''); },
+                style:{padding:'6px 10px',fontSize:'12px',cursor:'pointer',background:isSelected?'#eff6ff':'transparent',borderBottom:'1px solid #f3f4f6',color:'#333',display:'flex',justifyContent:'space-between',alignItems:'center'}
+              },
+                e('span', {style:{fontWeight:isSelected?600:400}}, p.name),
+                e('span', {style:{fontSize:'11px',color:'#888',marginLeft:'8px',whiteSpace:'nowrap'}}, p.price)
+              );
+            })
+      )
+    )
   );
 }
 
@@ -956,17 +1014,86 @@ function ProductEditorModal(props) {
 }
 
 // ─── BLOCK EDITOR MODAL ──────────────────────────────────────
-var INNER_BLOCK_TYPES = [
-  {value:'text', label:'Texto libre', icon:'Aa'},
-  {value:'brand_strip', label:'Franja de marca', icon:'🏷'},
-  {value:'product_single', label:'Producto (1)', icon:'📦'},
-  {value:'product_pair', label:'Productos (2)', icon:'📦📦'},
-  {value:'product_trio', label:'Productos (3)', icon:'📦📦📦'},
-  {value:'pimpam_hero', label:'Hero imagen', icon:'📱'},
-  {value:'pimpam_steps', label:'Pasos (1-2-3-4)', icon:'1234'},
-  {value:'separator', label:'Separador', icon:'—'}
-];
 var innerBlockIdCounter = 0;
+
+// Searchable block library picker
+function BlockLibraryPicker(props) {
+  var _search = useState('');
+  var search = _search[0], setSearch = _search[1];
+  var ref = React.useRef(null);
+
+  React.useEffect(function(){
+    function handleClick(ev) { if (ref.current && !ref.current.contains(ev.target)) props.onClose(); }
+    document.addEventListener('mousedown', handleClick);
+    return function(){ document.removeEventListener('mousedown', handleClick); };
+  }, []);
+
+  // Build library items from all backoffice sources
+  var items = [];
+  // 1. Fixed utility items
+  items.push({cat:'Utilidades', icon:'Aa', title:'Texto libre (vacío)', desc:'Bloque de texto en blanco', _action:{type:'text', text:''}});
+  items.push({cat:'Utilidades', icon:'—', title:'Separador', desc:'Línea horizontal', _action:{type:'separator'}});
+  // 2. Prewritten texts
+  (props.prewrittenTexts||[]).filter(function(t){return t.visible!==false}).forEach(function(t){
+    items.push({cat:'Textos preescritos', icon:t.icon||'📝', title:t.name, desc:(t.text||'').substring(0,60)+'...', _action:{type:'text', text:t.text||'', i18n:t.i18n||{}, _sourceId:t.id}});
+  });
+  // 3. Standalone blocks from backoffice
+  (props.standaloneBlocks||[]).filter(function(sb){return sb.visible!==false}).forEach(function(sb){
+    var cfg = sb.config || {};
+    var action = null;
+    switch(sb.blockType) {
+      case 'brand_strip': action = {type:'brand_strip', brand:cfg.brand}; break;
+      case 'video': action = {type:'freebird', youtubeUrl:cfg.youtubeUrl, thumbnailOverride:cfg.thumbnailOverride}; break;
+      case 'product_single': action = {type:'product_single', product1:cfg.defaultProduct||''}; break;
+      case 'product_pair': action = {type:'product_pair', product1:cfg.defaultProduct1||'', product2:cfg.defaultProduct2||''}; break;
+      case 'product_trio': action = {type:'product_trio', product1:cfg.defaultProduct1||'', product2:cfg.defaultProduct2||'', product3:cfg.defaultProduct3||''}; break;
+      case 'pimpam_hero': action = {type:'pimpam_hero', heroImage:cfg.heroImage||'', heroTitle:cfg.heroTitle||'', heroSubtitle:cfg.heroSubtitle||'', heroBullets:cfg.heroBullets||[], heroImageLink:cfg.heroImageLink||'', heroCtaText:cfg.heroCtaText||'', heroCtaUrl:cfg.heroCtaUrl||'', heroBgColor:cfg.heroBgColor||'#fff'}; break;
+      case 'pimpam_steps': action = {type:'pimpam_steps', steps:cfg.steps||[], stepsBgColor:cfg.stepsBgColor||'', stepsBorderColor:cfg.stepsBorderColor||''}; break;
+      default: action = {type:sb.blockType}; break;
+    }
+    if (action) {
+      action._sourceId = sb.id;
+      items.push({cat:'Bloques sueltos', icon:sb.icon||'📦', title:sb.title, desc:sb.desc, _action:action});
+    }
+  });
+
+  var q = search.toLowerCase().trim();
+  var filtered = q ? items.filter(function(it){
+    return it.title.toLowerCase().indexOf(q)>=0 || it.desc.toLowerCase().indexOf(q)>=0 || it.cat.toLowerCase().indexOf(q)>=0;
+  }) : items;
+
+  // Group by category
+  var cats = [];
+  var catMap = {};
+  filtered.forEach(function(it){
+    if (!catMap[it.cat]) { catMap[it.cat] = []; cats.push(it.cat); }
+    catMap[it.cat].push(it);
+  });
+
+  return e('div', {ref:ref, style:{position:'absolute',bottom:'100%',left:0,right:0,zIndex:999,background:'#fff',border:'1.5px solid #d1d5db',borderRadius:'12px',boxShadow:'0 -8px 30px rgba(0,0,0,.18)',maxHeight:'320px',display:'flex',flexDirection:'column',marginBottom:'4px'}},
+    e('div', {style:{padding:'8px 10px',borderBottom:'1px solid #f3f4f6'}},
+      e('input', {type:'text', value:search, onChange:function(ev){setSearch(ev.target.value)}, placeholder:'Buscar bloque... (texto, hero, marca, vídeo, productos...)', autoFocus:true, style:{width:'100%',boxSizing:'border-box',padding:'8px 12px',border:'1.5px solid #e5e7eb',borderRadius:'8px',fontSize:'13px',outline:'none'}})
+    ),
+    e('div', {style:{overflowY:'auto',flex:1,padding:'4px 0'}},
+      filtered.length === 0
+        ? e('div', {style:{padding:'16px',textAlign:'center',fontSize:'13px',color:'#999'}}, 'Sin resultados')
+        : cats.map(function(cat){
+            return e('div', {key:cat},
+              e('div', {style:{padding:'6px 14px 2px',fontSize:'10px',fontWeight:700,color:'#9ca3af',textTransform:'uppercase',letterSpacing:'0.5px'}}, cat),
+              catMap[cat].map(function(it, i){
+                return e('div', {key:cat+'-'+i, onClick:function(){props.onSelect(it._action); props.onClose();}, style:{padding:'7px 14px',fontSize:'13px',cursor:'pointer',display:'flex',alignItems:'center',gap:'10px',borderBottom:'1px solid #f9fafb'}},
+                  e('span', {style:{fontSize:'16px',width:'24px',textAlign:'center',flexShrink:0}}, it.icon),
+                  e('div', {style:{flex:1,minWidth:0}},
+                    e('div', {style:{fontWeight:600,color:'#1f2937',fontSize:'13px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}, it.title),
+                    e('div', {style:{fontSize:'11px',color:'#9ca3af',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}, it.desc)
+                  )
+                );
+              })
+            );
+          })
+    )
+  );
+}
 
 function BlockEditorModal(props) {
   var block = props.block || {id:'',title:'',desc:'',priceRange:'',colorTag:'blue',brandStrip:'none',innerBlocks:[],i18n:{},langs:['es','fr','de','en','nl']};
@@ -987,6 +1114,8 @@ function BlockEditorModal(props) {
   var form = _form[0], setForm = _form[1];
   var _editLang = useState('es');
   var editLang = _editLang[0], setEditLang = _editLang[1];
+  var _showPicker = useState(false);
+  var showPicker = _showPicker[0], setShowPicker = _showPicker[1];
 
   var updateForm = function(key, value) {
     setForm(function(prev){ var n = Object.assign({}, prev); n[key] = value; return n; });
@@ -1003,13 +1132,8 @@ function BlockEditorModal(props) {
   };
 
   // Inner blocks management
-  var addInnerBlock = function(type) {
-    var nb = {_id:++innerBlockIdCounter, type:type};
-    if (type === 'text') nb.text = '';
-    if (type === 'brand_strip') nb.brand = (props.brands && props.brands[0]) ? props.brands[0].id : 'none';
-    if (type === 'product_single') nb.product1 = (props.products && props.products[0]) ? props.products[0].id : '';
-    if (type === 'product_pair') { nb.product1 = ''; nb.product2 = ''; }
-    if (type === 'product_trio') { nb.product1 = ''; nb.product2 = ''; nb.product3 = ''; }
+  var addInnerBlockFromAction = function(action) {
+    var nb = Object.assign({_id:++innerBlockIdCounter}, action);
     updateForm('innerBlocks', (form.innerBlocks||[]).concat([nb]));
   };
   var removeInnerBlock = function(idx) {
@@ -1041,9 +1165,14 @@ function BlockEditorModal(props) {
     updateForm('innerBlocks', arr);
   };
 
+  // Icon/label map for inner block types
+  var typeLabels = {text:{icon:'Aa',label:'Texto'},brand_strip:{icon:'🏷',label:'Marca'},product_single:{icon:'📦',label:'Producto (1)'},product_pair:{icon:'📦📦',label:'Productos (2)'},product_trio:{icon:'📦³',label:'Productos (3)'},pimpam_hero:{icon:'🖼',label:'Hero'},pimpam_steps:{icon:'1234',label:'Pasos'},separator:{icon:'—',label:'Separador'},freebird:{icon:'▶',label:'Vídeo'}};
+
   // Render an inner block editor row
   var renderInnerBlockRow = function(ib, idx) {
-    var typeInfo = INNER_BLOCK_TYPES.find(function(t){return t.value===ib.type}) || {icon:'?',label:ib.type};
+    var tl = typeLabels[ib.type] || {icon:'?',label:ib.type};
+    // Show source name if available
+    var sourceLabel = ib._sourceId ? ' · ' + ib._sourceId : '';
     var content = null;
     if (ib.type === 'text') {
       content = editLang === 'es'
@@ -1066,12 +1195,19 @@ function BlockEditorModal(props) {
         e('div', {style:{display:'flex',gap:'6px',alignItems:'center'}}, e('span',{style:{fontSize:'10px',color:'#999',width:'18px'}},'2:'), e(ProductSelect, {value:ib.product2||'', products:props.products||[], exclude:ib.product1, exclude2:ib.product3, onChange:function(v){updateInnerBlock(idx,'product2',v)}})),
         e('div', {style:{display:'flex',gap:'6px',alignItems:'center'}}, e('span',{style:{fontSize:'10px',color:'#999',width:'18px'}},'3:'), e(ProductSelect, {value:ib.product3||'', products:props.products||[], exclude:ib.product1, exclude2:ib.product2, onChange:function(v){updateInnerBlock(idx,'product3',v)}}))
       );
+    } else if (ib.type === 'pimpam_hero') {
+      content = e('div', {style:{fontSize:'11px',color:'#666'}}, ib.heroTitle ? '🖼 ' + ib.heroTitle : '(Hero por defecto)');
+    } else if (ib.type === 'pimpam_steps') {
+      content = e('div', {style:{fontSize:'11px',color:'#666'}}, (ib.steps||[]).length > 0 ? (ib.steps||[]).map(function(s){return s.t}).join(' → ') : '(Pasos por defecto)');
+    } else if (ib.type === 'freebird') {
+      content = e('div', {style:{fontSize:'11px',color:'#666'}}, '▶ ' + (ib.youtubeUrl||'(sin URL)'));
     }
     return e('div', {key:ib._id||idx, style:{border:'1px solid #e5e7eb',borderRadius:'8px',padding:'10px',marginBottom:'8px',background:'#fafbfc'}},
       e('div', {style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom: content?'8px':'0'}},
         e('div', {style:{display:'flex',alignItems:'center',gap:'8px'}},
-          e('span', {style:{fontSize:'14px'}}, typeInfo.icon),
-          e('span', {style:{fontSize:'12px',fontWeight:600,color:'#374151'}}, typeInfo.label)
+          e('span', {style:{fontSize:'14px'}}, tl.icon),
+          e('span', {style:{fontSize:'12px',fontWeight:600,color:'#374151'}}, tl.label),
+          sourceLabel && e('span', {style:{fontSize:'10px',color:'#9ca3af'}}, sourceLabel)
         ),
         e('div', {style:{display:'flex',gap:'4px'}},
           e('button', {onClick:function(){moveInnerBlock(idx,-1)}, disabled:idx===0, style:{fontSize:'10px',padding:'2px 6px',border:'1px solid #d1d5db',borderRadius:'4px',background:'#fff',cursor:'pointer',color:'#666'}}, '↑'),
@@ -1157,12 +1293,16 @@ function BlockEditorModal(props) {
           e('label', {className:'form-label', style:{marginBottom:'8px',display:'block'}}, 'Contenido del bloque (' + (form.innerBlocks||[]).length + ' elementos)'),
           (form.innerBlocks||[]).map(function(ib, idx){ return renderInnerBlockRow(ib, idx); }),
 
-          // Add inner block buttons
-          e('div', {style:{display:'flex',gap:'4px',flexWrap:'wrap',marginTop:'8px'}},
-            INNER_BLOCK_TYPES.map(function(t){
-              return e('button', {key:t.value, onClick:function(){addInnerBlock(t.value)}, style:{fontSize:'11px',padding:'4px 10px',border:'1px solid #d1d5db',borderRadius:'6px',background:'#fff',cursor:'pointer',color:'#374151',display:'flex',alignItems:'center',gap:'4px'}},
-                e('span', null, t.icon), ' + ', t.label
-              );
+          // Add inner block via library picker
+          e('div', {style:{position:'relative',marginTop:'8px'}},
+            e('button', {onClick:function(){setShowPicker(!showPicker)}, style:{fontSize:'12px',padding:'6px 14px',border:'2px dashed #d1d5db',borderRadius:'8px',background:'#f9fafb',cursor:'pointer',color:'#6b7280',display:'flex',alignItems:'center',gap:'6px',width:'100%',justifyContent:'center'}},
+              e('span', {style:{fontSize:'16px'}}, '+'), showPicker ? 'Cerrar selector' : 'Añadir elemento'
+            ),
+            showPicker && e(BlockLibraryPicker, {
+              prewrittenTexts: props.prewrittenTexts || [],
+              standaloneBlocks: props.standaloneBlocks || [],
+              onSelect: function(action){ addInnerBlockFromAction(action); setShowPicker(false); },
+              onClose: function(){ setShowPicker(false); }
             })
           )
         )
@@ -2810,7 +2950,9 @@ function EmailComposer() {
       onClose: function(){setEditingBlock(null)},
       onSave: saveComposedBlock,
       brands: appState.brands,
-      products: appState.products
+      products: appState.products,
+      prewrittenTexts: appState.prewrittenTexts,
+      standaloneBlocks: appState.standaloneBlocks
     }),
 
     editingText !== null && e(TextEditorModal, {
