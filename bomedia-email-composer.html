@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bomedia Email Composer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;color:#1e293b;overflow:hidden;height:100vh}
+
+/* Layout */
+.app{display:flex;flex-direction:column;height:100vh}
+.header{background:#fff;border-bottom:1px solid #e5e7eb;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.header-left{display:flex;align-items:center;gap:10px}
+.logo{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:14px}
+.header-title{font-size:13px;font-weight:800;color:#111}
+.header-sub{font-size:11px;color:#9ca3af}
+.header-right{display:flex;gap:8px;align-items:center}
+
+.main{display:flex;flex:1;overflow:hidden}
+.footer{background:#fff;border-top:1px solid #e5e7eb;padding:5px 16px;display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;flex-shrink:0}
+
+/* Sidebar */
+.sidebar{width:200px;background:#fff;border-right:1px solid #e5e7eb;padding:12px;overflow-y:auto;flex-shrink:0}
+.sidebar-title{font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
+.add-btn{width:100%;display:flex;align-items:center;gap:8px;padding:6px 8px;border:none;background:transparent;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s}
+.add-btn:hover{background:#f3f4f6}
+.add-btn-icon{font-size:14px;opacity:.7}
+.add-btn-label{font-size:11px;font-weight:600;color:#374151}
+.add-btn-desc{font-size:10px;color:#9ca3af}
+
+.template-section{margin-top:16px;padding-top:12px;border-top:1px solid #f3f4f6}
+.tpl-btn{width:100%;padding:8px;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:4px;transition:all .15s}
+.tpl-blue{background:#eff6ff;color:#1d4ed8}.tpl-blue:hover{background:#dbeafe}
+.tpl-orange{background:#fff7ed;color:#c2410c}.tpl-orange:hover{background:#ffedd5}
+.tpl-purple{background:#f5f3ff;color:#6d28d9}.tpl-purple:hover{background:#ede9fe}
+
+/* Editor panel */
+.editor{flex:1;padding:16px;overflow-y:auto}
+.editor-inner{max-width:500px;margin:0 auto}
+.empty-state{text-align:center;padding:60px 20px;color:#9ca3af}
+.empty-icon{font-size:40px;opacity:.4;margin-bottom:12px}
+
+/* Block card */
+.block-card{background:#fff;border-radius:8px;border:1px solid #e5e7eb;border-left:4px solid #9ca3af;margin-bottom:8px;overflow:hidden}
+.block-card.blue{border-left-color:#3b82f6}
+.block-card.purple{border-left-color:#8b5cf6}
+.block-card.orange{border-left-color:#f97316}
+.block-card.green{border-left-color:#22c55e}
+.block-card.dark{border-left-color:#475569}
+
+.block-header{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#f9fafb;border-bottom:1px solid #f3f4f6}
+.block-header-left{display:flex;align-items:center;gap:6px}
+.block-type-icon{font-size:12px}
+.block-type-label{font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.8px}
+.block-actions{display:flex;align-items:center;gap:2px}
+.block-actions button{border:none;background:transparent;cursor:pointer;padding:3px;color:#9ca3af;border-radius:4px;display:flex;align-items:center;transition:color .15s}
+.block-actions button:hover{color:#374151}
+.block-actions button:disabled{opacity:.25;cursor:default}
+.block-actions .del-btn:hover{color:#ef4444}
+
+.block-body{padding:8px 10px}
+.block-body textarea{width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:8px;font-size:12px;font-family:inherit;resize:vertical;min-height:70px;outline:none;line-height:1.5}
+.block-body textarea:focus{border-color:#93c5fd;box-shadow:0 0 0 2px rgba(59,130,246,.15)}
+.block-body select{font-size:11px;border:1px solid #d1d5db;border-radius:6px;padding:4px 8px;background:#fff;outline:none}
+.block-body select:focus{border-color:#93c5fd}
+.block-body .prod-selectors{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.block-body .prod-selectors label{font-size:10px;color:#9ca3af;display:flex;align-items:center;gap:4px}
+.block-body .fixed-msg{font-size:11px;color:#9ca3af;font-style:italic}
+
+/* Preview */
+.preview-panel{width:50%;border-left:1px solid #e5e7eb;background:#fff;overflow-y:auto;display:flex;flex-direction:column}
+.preview-header{position:sticky;top:0;background:#fff;border-bottom:1px solid #f3f4f6;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;z-index:10}
+.preview-label{font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:1px}
+.preview-content{padding:16px;flex:1}
+.preview-frame{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}
+.html-code{padding:16px;font-family:'Menlo','Monaco','Courier New',monospace;font-size:10px;line-height:1.6;color:#475569;white-space:pre-wrap;word-break:break-all;overflow-x:auto}
+
+/* Buttons */
+.btn{border:none;padding:6px 14px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-primary{background:#2563eb;color:#fff}.btn-primary:hover{background:#1d4ed8}
+.btn-success{background:#22c55e;color:#fff}
+.btn-ghost{background:#f3f4f6;color:#6b7280}.btn-ghost:hover{background:#e5e7eb}
+.btn-toggle{background:#eff6ff;color:#2563eb}
+.btn-toggle.off{background:#f3f4f6;color:#9ca3af}
+
+/* Responsive */
+@media(max-width:900px){
+  .sidebar{width:160px}
+  .preview-panel{display:none}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const e = React.createElement;
+const { useState, useRef, useCallback } = React;
+
+// ─── PRODUCT DATABASE ────────────────────────────────────────
+const PRODUCTS = [
+  { id:"young", brand:"artisjet", name:"artisJet Young", badge:"A4", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://artisjet-printers.eu/wp-content/uploads/2020/10/Imagen-102.png", desc:"Compacta para personalización en punto de venta, stands y start-ups.", area:"20 × 30 cm", alt:"5 cm", feat1:"Sensor de altura automático", feat2:"CMYK + Blanco", price:"9.300 €", link:"https://boprint.net/producto/artis-young-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
+  { id:"3000pro", brand:"artisjet", name:"artisJet 3000Pro Freebird", badge:"Freebird", badgeBg:"#dbeafe", badgeColor:"#1d4ed8", img:"https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png", desc:"Flatbed pro con Freebird. Velocidad 2,5× y certificación Braille/ADA.", area:"35 × 50 cm", alt:"17 cm", feat1:"Módulo Freebird integrado", feat2:"Mesa de vacío", price:"13.900 €", link:"https://boprint.net/contacto/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
+  { id:"proud", brand:"artisjet", name:"artisJet Proud", badge:"Tarjetas", badgeBg:"#fef3c7", badgeColor:"#92400e", img:"https://artisjet-printers.eu/wp-content/uploads/2024/05/artisJet-proud-card-printer-left-side-view.jpeg", desc:"Especialista en tarjetas, carnets y artículos promocionales.", area:"-", alt:"-", feat1:"Alta precisión piezas pequeñas", feat2:"CR80 y tarjetas grandes", price:"21.500 €", link:"https://boprint.net/?post_type=product&p=3276", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
+  { id:"5000u", brand:"artisjet", name:"artisJet 5000U", badge:"A3+ Freebird", badgeBg:"#e0e7ff", badgeColor:"#4338ca", img:"https://artisjet-printers.eu/wp-content/uploads/2017/11/artis5000Uimg1.jpg", desc:"Formato medio para volúmenes crecientes y objetos 3D.", area:"A3+", alt:"-", feat1:"Velocidad profesional", feat2:"CMYK + Blanco", price:"18.900 €", link:"https://boprint.net/producto/5000-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
+  { id:"6090trust", brand:"artisjet", name:"artisJet 6090 Trust", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#991b1b", img:"https://artisjet-printers.eu/wp-content/uploads/2024/08/trust-freebird.png", desc:"Producción industrial: señalización, placas, paneles decorativos.", area:"59 × 89 cm", alt:"10 cm", feat1:"Freebird integrado", feat2:"Alta productividad", price:"20.900 €", link:"https://boprint.net/producto/artisjet-6090-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
+  { id:"mbo3050", brand:"mbo", name:"MBO 3050", badge:"Nuevo", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://mboprinters.com/wp-content/uploads/2026/02/mbo3050.png", desc:"Compacta multifuncional, la más reciente de MBO.", area:"30 × 50 cm", alt:"10 cm", feat1:"Sensor 1-3 mm", feat2:"Tanques 250 cc", price:"6.495 €", link:"https://mboprinters.com/product/mbo-3050-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
+  { id:"mbo4060", brand:"mbo", name:"MBO 4060", badge:"Top ventas", badgeBg:"#ede9fe", badgeColor:"#6d28d9", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo4060-1.jpg", desc:"El mejor ratio calidad-precio del mercado.", area:"33 × 55 cm", alt:"20 cm", feat1:"Pantalla táctil", feat2:"Control inteligente", price:"7.995 €", link:"https://mboprinters.com/product/mbo-4060-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
+  { id:"mbo6090", brand:"mbo", name:"MBO 6090", badge:"Semiformato", badgeBg:"#ede9fe", badgeColor:"#6d28d9", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo6090.jpg", desc:"Producción profesional multicolor. 3 cabezales.", area:"60 × 90 cm", alt:"20 cm", feat1:"CMYK LC LM+W+Barniz", feat2:"Servomotor", price:"14.500 €", link:"https://mboprinters.com/product/mbo-6090-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
+  { id:"mbo1015", brand:"mbo", name:"MBO 1015", badge:"Industrial", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo1015.jpg", desc:"Gran formato para tiradas grandes.", area:"100 × 150 cm", alt:"10 cm", feat1:"Epson i3200", feat2:"CMYK+WWWW+Barniz", price:"desde 21.500 €", link:"https://mboprinters.com/product/mbo-1015-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
+  { id:"uv1612g", brand:"mbo", name:"MBO UV1612G", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo1612g.jpg", desc:"Industrial de alta velocidad. Acero reforzado.", area:"160 × 120 cm", alt:"20 cm", feat1:"Múltiples cabezales", feat2:"Alta velocidad", price:"desde 26.500 €", link:"https://mboprinters.com/product/mbo-uv1612g", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
+  { id:"uv1812", brand:"mbo", name:"MBO UV1812", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo1812.jpg", desc:"Displays y publicidad. 180×120cm.", area:"180 × 120 cm", alt:"20 cm", feat1:"CMYK+W+Barniz", feat2:"PVC, madera, metal, vidrio", price:"desde 27.500 €", link:"https://mboprinters.com/product/mbo-uv1812", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
+  { id:"uv2513", brand:"mbo", name:"MBO UV2513", badge:"Súper Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo2513.jpg", desc:"Producción masiva. 250×130cm.", area:"250 × 130 cm", alt:"20 cm", feat1:"Cabezales alta velocidad", feat2:"Rígidos y flexibles", price:"desde 34.000 €", link:"https://mboprinters.com/product/mbo-uv2513", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
+  { id:"casebox", brand:"pimpam", name:"PimPam CaseBox", badge:"Interior · Retail", badgeBg:"#ffedd5", badgeColor:"#9a3412", img:"https://pimpam-vending.com/wp-content/uploads/2026/01/pimpam-aeropuerto.png", desc:"Máquina compacta de interior para centros comerciales y aeropuertos.", area:"-", alt:"-", feat1:"UV en TPU/Silicona/PC", feat2:"Múltiples formas de pago", price:"Consultar", link:"https://pimpam-vending.com/casebox-vending/", accent:"#ea580c", gradient:"linear-gradient(90deg,#ea580c,#f97316)" },
+  { id:"custom", brand:"pimpam", name:"PimPam Custom", badge:"Tu marca", badgeBg:"#ffedd5", badgeColor:"#9a3412", img:"https://pimpam-vending.com/wp-content/uploads/2026/01/custom-pimpam-851x1024.png", desc:"Branding completo: vinilos, pantalla y campañas con tu marca.", area:"-", alt:"-", feat1:"Vinilos personalizados", feat2:"Campañas temporales", price:"Consultar", link:"https://pimpam-vending.com/custom/", accent:"#ea580c", gradient:"linear-gradient(90deg,#ea580c,#f97316)" },
+];
+
+const BRAND_STRIPS = {
+  artisjet: { logo:"https://artisjet-printers.eu/wp-content/uploads/2017/12/logoartisjet.jpg", label:"artisJet", url:"https://boprint.net", urlLabel:"boprint.net →", color:"#2563eb", divider:"#e2e8f0", h:"18" },
+  mbo: { logo:"https://mboprinters.com/wp-content/uploads/2022/10/logomboprinterslongb.png", label:"MBO Printers", url:"https://mboprinters.com", urlLabel:"mboprinters.com →", color:"#7c3aed", divider:"#e2e8f0", h:"18" },
+  pimpam: { logo:"https://pimpam-vending.com/wp-content/uploads/2025/11/WhatsApp_Image_2025-11-14_at_10.12.57-removebg-preview-e1763541822221.png", label:"PimPam Vending", url:"https://pimpam-vending.com", urlLabel:"pimpam-vending.com →", color:"#ea580c", divider:"#fed7aa", h:"22" },
+};
+
+const BLOCK_TYPES = [
+  { type:"text", label:"Texto libre", icon:"\u{1F4DD}", desc:"Párrafo editable", cardClass:"" },
+  { type:"brand_artisjet", label:"Brand artisJet", icon:"\u{1F535}", desc:"Cabecera de marca", cardClass:"blue" },
+  { type:"brand_mbo", label:"Brand MBO", icon:"\u{1F7E3}", desc:"Cabecera de marca", cardClass:"purple" },
+  { type:"brand_pimpam", label:"Brand PimPam", icon:"\u{1F7E0}", desc:"Cabecera de marca", cardClass:"orange" },
+  { type:"product_pair", label:"2 Productos", icon:"\u{1F4E6}", desc:"Par de fichas", cardClass:"green" },
+  { type:"product_single", label:"1 Producto", icon:"\u{1F4E6}", desc:"Ficha individual", cardClass:"green" },
+  { type:"freebird", label:"Freebird vídeo", icon:"\u25B6\uFE0F", desc:"Bloque Freebird", cardClass:"blue" },
+  { type:"pimpam_hero", label:"PimPam Hero", icon:"\u{1F3AF}", desc:"Sección hero", cardClass:"orange" },
+  { type:"pimpam_steps", label:"Pasos PimPam", icon:"1\uFE0F\u20E3", desc:"4 pasos proceso", cardClass:"orange" },
+];
+
+let blockIdCounter = 0;
+function createBlock(type) {
+  const id = ++blockIdCounter;
+  switch(type) {
+    case "text": return { id, type, text:"Hola,\n\nEscribe aquí tu texto personalizado." };
+    case "brand_artisjet": return { id, type, brand:"artisjet" };
+    case "brand_mbo": return { id, type, brand:"mbo" };
+    case "brand_pimpam": return { id, type, brand:"pimpam" };
+    case "product_pair": return { id, type, product1:"young", product2:"3000pro" };
+    case "product_single": return { id, type, product1:"young" };
+    case "freebird": return { id, type };
+    case "pimpam_hero": return { id, type };
+    case "pimpam_steps": return { id, type };
+    default: return { id, type };
+  }
+}
+
+// ─── HTML GENERATORS ─────────────────────────────────────────
+function productCardHtml(p) {
+  var areaBlock = '';
+  if (p.area !== '-') {
+    areaBlock = '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0">' +
+      '<tr><td width="38%" style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">Área</td><td style="font-size:10px;font-weight:700;color:#334155">' + p.area + '</td></tr>' +
+      (p.alt !== '-' ? '<tr><td style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">Alt. máx.</td><td style="font-size:10px;font-weight:700;color:#334155">' + p.alt + '</td></tr>' : '') +
+      '</table>';
+  }
+  var priceExtra = p.price !== 'Consultar' ? ' <span style="font-size:10px;font-weight:500;color:#475569">+ IVA</span>' : '';
+  var ctaLabel = p.brand === 'pimpam' ? 'Detalles' : 'Más info';
+  var bgExtra = p.brand === 'pimpam' ? ';background:#fff7ed' : '';
+  return '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1.5px solid ' + (p.brand==='pimpam'?'#fed7aa':'#e2e8f0') + ';border-radius:12px;overflow:hidden;background:#fff">' +
+    '<tr><td style="background:#fff;padding:16px 12px 8px;border-bottom:1px solid ' + (p.brand==='pimpam'?'#ffedd5':'#f1f5f9') + ';text-align:center">' +
+    '<img src="' + p.img + '" width="160" alt="' + p.name + '" style="object-fit:contain;width:100%;max-width:160px;max-height:130px;height:auto">' +
+    '</td></tr>' +
+    '<tr><td style="padding:12px' + bgExtra + '">' +
+    '<span style="display:inline-block;font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:20px;margin-bottom:6px;background:' + p.badgeBg + ';color:' + p.badgeColor + '">' + p.badge + '</span>' +
+    '<p style="font-size:13px;font-weight:900;color:#0f172a;margin:0">' + p.name + '</p>' +
+    '<p style="font-size:10px;color:#64748b;margin:4px 0 0;line-height:1.45">' + p.desc + '</p>' +
+    areaBlock +
+    '<p style="font-size:10px;color:#475569;padding:2px 0;margin:' + (p.area==='-'?'6px':'0') + ' 0 0">✓ ' + p.feat1 + '</p>' +
+    '<p style="font-size:10px;color:#475569;padding:2px 0;margin:0">✓ ' + p.feat2 + '</p>' +
+    '<p style="font-size:13px;font-weight:900;color:' + p.accent + ';margin:8px 0 0;text-align:center">' + p.price + priceExtra + '</p>' +
+    '<a href="' + p.link + '" style="display:block;text-align:center;font-size:11px;font-weight:800;text-decoration:none;padding:9px 10px;border-radius:8px;text-transform:uppercase;background:' + p.gradient + ';color:#fff;margin-top:6px">' + ctaLabel + ' →</a>' +
+    '</td></tr></table>';
+}
+
+function brandStripHtml(key) {
+  var b = BRAND_STRIPS[key];
+  return '<tr><td style="padding:16px 8px 8px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
+    '<td valign="middle"><img src="' + b.logo + '" height="' + b.h + '" alt="' + b.label + '" style="max-width:140px;width:auto"></td>' +
+    '<td valign="middle" align="right"><a href="' + b.url + '" style="font-size:11px;font-weight:700;color:' + b.color + ';text-decoration:none">' + b.urlLabel + '</a></td>' +
+    '</tr></table><div style="height:1px;background:' + b.divider + ';margin-top:8px"></div></td></tr>';
+}
+
+function textBlockHtml(text) {
+  var lines = text.split('\n');
+  var html = '';
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].trim()) html += '<p style="margin:0 0 14px">' + lines[i] + '</p>\n';
+  }
+  return '<tr><td style="padding:16px 8px;font-size:14px;color:#1e293b;line-height:1.65">\n' + html + '</td></tr>';
+}
+
+function productPairHtml(p1, p2) {
+  return '<tr><td style="padding:8px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr class="prod-row">' +
+    '<td class="col-half prod-cell" width="50%" valign="top" style="padding:0 5px 0 0">' + productCardHtml(p1) + '</td>' +
+    '<td class="col-half prod-cell" width="50%" valign="top" style="padding:0 0 0 5px">' + productCardHtml(p2) + '</td>' +
+    '</tr></table></td></tr>';
+}
+
+function productSingleHtml(p) {
+  return '<tr><td style="padding:8px 8px 16px"><table width="320" cellpadding="0" cellspacing="0" border="0">' +
+    productCardHtml(p).slice(71) + '</td></tr>';
+}
+
+function freebirdHtml() {
+  return '<tr><td style="padding:0 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#1e3a8a,#3b82f6)"><tr><td style="padding:18px;text-align:center">' +
+    '<p style="font-size:36px;margin:0">▶️</p>' +
+    '<p style="font-size:12px;font-weight:800;color:#ffffff;margin:6px 0 0">Tecnología Freebird — altura variable automática</p>' +
+    '<p style="font-size:11px;color:rgba(255,255,255,0.85);margin:4px 0 0;line-height:1.4">Impresión sobre superficies irregulares sin ajustes manuales</p>' +
+    '<a href="https://boprint.net/freebird" style="display:inline-block;margin-top:10px;font-size:11px;font-weight:800;text-decoration:none;padding:8px 16px;border-radius:6px;background:#ffffff;color:#1d4ed8;text-transform:uppercase">Ver vídeo →</a>' +
+    '</td></tr></table></td></tr>';
+}
+
+function pimpamHeroHtml() {
+  return '<tr><td style="padding:12px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
+    '<td class="pp-img-cell" width="45%" valign="top" style="padding:0 12px 0 0"><img src="https://pimpam-vending.com/wp-content/uploads/2026/01/ChatGPT-Image-22-ene-2026-16_17_36.png" width="260" alt="PimPam" style="width:100%;height:auto;max-height:220px;border-radius:10px;object-fit:cover"></td>' +
+    '<td class="pp-body-cell" valign="top" style="padding:0">' +
+    '<p style="font-size:14px;font-weight:900;color:#0f172a;margin:0 0 8px">Personaliza, imprime y vende… sin operario</p>' +
+    '<p style="font-size:11px;color:#64748b;margin:0 0 10px;line-height:1.5">Impresión UV-LED directa sobre fundas de móvil en autoservicio completo.</p>' +
+    '<p style="font-size:10px;color:#475569;margin:0 0 3px">✓ Autoservicio 100% — sin personal</p>' +
+    '<p style="font-size:10px;color:#475569;margin:0 0 3px">✓ Pago con tarjeta, móvil o QR</p>' +
+    '<p style="font-size:10px;color:#475569;margin:0 0 3px">✓ Funda impresa en HD en 30 segundos</p>' +
+    '<p style="font-size:10px;color:#475569;margin:0">✓ Compatible con +600 modelos de móvil</p>' +
+    '</td></tr></table></td></tr>';
+}
+
+function pimpamStepsHtml() {
+  var steps = [
+    {n:"1️⃣",t:"Elige diseño",s:"Pantalla táctil"},
+    {n:"2️⃣",t:"Personaliza",s:"Texto, colores…"},
+    {n:"3️⃣",t:"Paga",s:"Tarjeta / QR"},
+    {n:"4️⃣",t:"¡Listo!",s:"Funda en 30s"}
+  ];
+  var cells = '';
+  for (var i = 0; i < 4; i++) {
+    var pad = i===0?'0 4px 0 0':i===3?'0 0 0 4px':'0 4px';
+    cells += '<td class="step-cell" width="25%" valign="top" style="padding:'+pad+'">' +
+      '<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px;text-align:center">' +
+      '<div style="font-size:22px;margin-bottom:4px">'+steps[i].n+'</div>' +
+      '<p style="font-size:10px;font-weight:800;color:#0f172a;margin:0 0 2px">'+steps[i].t+'</p>' +
+      '<p style="font-size:9px;color:#64748b;margin:0">'+steps[i].s+'</p></div></td>';
+  }
+  return '<tr><td style="padding:0 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'+cells+'</tr></table></td></tr>';
+}
+
+var CSS_BLOCK = '<style>' +
+  'body,table,td,p,a,h1,h2,h3,h4{margin:0;padding:0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}' +
+  'table{border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0}' +
+  'img{border:0;display:block;line-height:100%;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;max-width:100%}' +
+  'body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:#ffffff;color:#1e293b}' +
+  '@media only screen and (max-width:600px){' +
+  '.wrap{width:100%!important}.col-half,.col-third{width:100%!important;display:block!important;padding:0 0 12px 0!important}' +
+  '.prod-row{display:block!important;width:100%!important}.prod-cell{display:block!important;width:100%!important;padding:0 0 16px 0!important}' +
+  '.prod-cell table{width:100%!important}.pp-img-cell{display:block!important;width:100%!important}' +
+  '.pp-body-cell{display:block!important;width:100%!important;padding:18px 16px!important}' +
+  '.step-cell{width:50%!important;display:inline-block!important;padding:0 4px 12px!important}' +
+  '}' +
+  '</style>';
+
+function generateFullHtml(blocks) {
+  var rows = '';
+  for (var i = 0; i < blocks.length; i++) {
+    var b = blocks[i];
+    switch(b.type) {
+      case 'text': rows += textBlockHtml(b.text); break;
+      case 'brand_artisjet': rows += brandStripHtml('artisjet'); break;
+      case 'brand_mbo': rows += brandStripHtml('mbo'); break;
+      case 'brand_pimpam': rows += brandStripHtml('pimpam'); break;
+      case 'product_pair':
+        var p1 = PRODUCTS.find(function(p){return p.id===b.product1});
+        var p2 = PRODUCTS.find(function(p){return p.id===b.product2});
+        if(p1&&p2) rows += productPairHtml(p1,p2);
+        break;
+      case 'product_single':
+        var ps = PRODUCTS.find(function(p){return p.id===b.product1});
+        if(ps) rows += productSingleHtml(ps);
+        break;
+      case 'freebird': rows += freebirdHtml(); break;
+      case 'pimpam_hero': rows += pimpamHeroHtml(); break;
+      case 'pimpam_steps': rows += pimpamStepsHtml(); break;
+    }
+  }
+  return '<html><head>'+CSS_BLOCK+'</head><body style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;margin:0;padding:0;background:#ffffff;color:#1e293b">' +
+    '<table class="wrap" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto">' + rows + '</table></body></html>';
+}
+
+// ─── ARROW SVG ───────────────────────────────────────────────
+function ArrowUp(){return e('svg',{width:14,height:14,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2},e('path',{d:"M18 15l-6-6-6 6"}))}
+function ArrowDown(){return e('svg',{width:14,height:14,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2},e('path',{d:"M6 9l6 6 6-6"}))}
+function XIcon(){return e('svg',{width:14,height:14,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2},e('path',{d:"M18 6L6 18M6 6l12 12"}))}
+
+// ─── PRODUCT SELECT ──────────────────────────────────────────
+function ProductSelect(props) {
+  return e('select', {value:props.value, onChange:function(ev){props.onChange(ev.target.value)}},
+    PRODUCTS.map(function(p){
+      return e('option', {key:p.id, value:p.id, disabled:p.id===props.exclude}, p.name + ' — ' + p.price);
+    })
+  );
+}
+
+// ─── BLOCK EDITOR ────────────────────────────────────────────
+function BlockEditor(props) {
+  var block = props.block;
+  var info = BLOCK_TYPES.find(function(t){return t.type===block.type}) || {icon:'',label:'',cardClass:''};
+
+  var body;
+  if (block.type === 'text') {
+    body = e('textarea', {
+      value: block.text,
+      onChange: function(ev) { props.onChange(Object.assign({}, block, {text: ev.target.value})); },
+      placeholder: "Escribe tu texto aquí..."
+    });
+  } else if (block.type === 'product_pair') {
+    body = e('div', {className:'prod-selectors'},
+      e('label', null, 'Izq: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}, exclude:block.product2})),
+      e('label', null, 'Der: ', e(ProductSelect, {value:block.product2, onChange:function(v){props.onChange(Object.assign({},block,{product2:v}))}, exclude:block.product1}))
+    );
+  } else if (block.type === 'product_single') {
+    body = e('div', {className:'prod-selectors'},
+      e('label', null, 'Producto: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}}))
+    );
+  } else {
+    body = e('p', {className:'fixed-msg'}, 'Bloque predefinido — sin opciones editables');
+  }
+
+  return e('div', {className:'block-card ' + info.cardClass},
+    e('div', {className:'block-header'},
+      e('div', {className:'block-header-left'},
+        e('span', {className:'block-type-icon'}, info.icon),
+        e('span', {className:'block-type-label'}, info.label)
+      ),
+      e('div', {className:'block-actions'},
+        e('button', {onClick:props.onMoveUp, disabled:props.isFirst, title:'Subir'}, e(ArrowUp)),
+        e('button', {onClick:props.onMoveDown, disabled:props.isLast, title:'Bajar'}, e(ArrowDown)),
+        e('button', {onClick:props.onDelete, className:'del-btn', title:'Eliminar'}, e(XIcon))
+      )
+    ),
+    e('div', {className:'block-body'}, body)
+  );
+}
+
+// ─── MAIN APP ────────────────────────────────────────────────
+function EmailComposer() {
+  var _s1 = useState([createBlock("text")]);
+  var blocks = _s1[0], setBlocks = _s1[1];
+  var _s2 = useState(false);
+  var copied = _s2[0], setCopied = _s2[1];
+  var _s3 = useState(true);
+  var showPreview = _s3[0], setShowPreview = _s3[1];
+  var _s4 = useState(false);
+  var showHtmlCode = _s4[0], setShowHtmlCode = _s4[1];
+
+  function addBlock(type) { setBlocks(function(prev){return prev.concat([createBlock(type)])}); }
+  function updateBlock(id, updated) { setBlocks(function(prev){return prev.map(function(b){return b.id===id?updated:b})}); }
+  function deleteBlock(id) { setBlocks(function(prev){return prev.filter(function(b){return b.id!==id})}); }
+  function moveBlock(id, dir) {
+    setBlocks(function(prev){
+      var idx = prev.findIndex(function(b){return b.id===id});
+      if((dir===-1&&idx===0)||(dir===1&&idx===prev.length-1)) return prev;
+      var arr = prev.slice();
+      var tmp = arr[idx]; arr[idx] = arr[idx+dir]; arr[idx+dir] = tmp;
+      return arr;
+    });
+  }
+
+  function copyHtml() {
+    var html = generateFullHtml(blocks);
+    try {
+      navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([html], {type:'text/html'}),
+          'text/plain': new Blob([html], {type:'text/plain'})
+        })
+      ]).then(function(){
+        setCopied(true); setTimeout(function(){setCopied(false)}, 2500);
+      });
+    } catch(err) {
+      navigator.clipboard.writeText(html).then(function(){
+        setCopied(true); setTimeout(function(){setCopied(false)}, 2500);
+      });
+    }
+  }
+
+  function loadTemplate(tpl) {
+    if (tpl === 'compactas') {
+      setBlocks([
+        createBlock("text"),
+        Object.assign(createBlock("brand_artisjet")),
+        Object.assign(createBlock("product_pair"), {product1:"young",product2:"3000pro"}),
+        Object.assign(createBlock("text"), {text:"Y en nuestra línea MBO, tenemos opciones con precios muy competitivos:"}),
+        Object.assign(createBlock("brand_mbo")),
+        Object.assign(createBlock("product_pair"), {product1:"mbo3050",product2:"mbo4060"}),
+        Object.assign(createBlock("text"), {text:"Si quieres, podemos organizar una demo sin compromiso.\n\n¡Quedo a tu disposición!\nUn saludo,"}),
+      ]);
+    } else if (tpl === 'pimpam') {
+      setBlocks([
+        createBlock("text"),
+        Object.assign(createBlock("brand_pimpam")),
+        createBlock("pimpam_hero"),
+        Object.assign(createBlock("product_pair"), {product1:"casebox",product2:"custom"}),
+        Object.assign(createBlock("text"), {text:"El proceso para el usuario es muy sencillo — 4 pasos:"}),
+        createBlock("pimpam_steps"),
+        Object.assign(createBlock("text"), {text:"Si te interesa, puedo enviarte más detalles.\n\n¡Un saludo!"}),
+      ]);
+    } else if (tpl === 'formatos') {
+      setBlocks([
+        createBlock("text"),
+        Object.assign(createBlock("brand_artisjet")),
+        Object.assign(createBlock("product_pair"), {product1:"3000pro",product2:"6090trust"}),
+        createBlock("freebird"),
+        Object.assign(createBlock("text"), {text:"En nuestra línea MBO, tenemos opciones desde semiformato hasta gran formato industrial:"}),
+        Object.assign(createBlock("brand_mbo")),
+        Object.assign(createBlock("product_pair"), {product1:"mbo6090",product2:"uv1612g"}),
+        Object.assign(createBlock("text"), {text:"¡Quedo a tu disposición!\nUn saludo,"}),
+      ]);
+    }
+  }
+
+  var fullHtml = generateFullHtml(blocks);
+  var sizeKb = (new Blob([fullHtml]).size / 1024).toFixed(1);
+
+  // ─── RENDER ─────────────────────────────────────────────
+  return e('div', {className:'app'},
+    // Header
+    e('div', {className:'header'},
+      e('div', {className:'header-left'},
+        e('div', {className:'logo'}, 'B'),
+        e('div', null,
+          e('div', {className:'header-title'}, 'Bomedia Email Composer'),
+          e('div', {className:'header-sub'}, 'Compón emails con bloques de producto UV-LED')
+        )
+      ),
+      e('div', {className:'header-right'},
+        e('button', {className:'btn ' + (showPreview?'btn-toggle':'btn-toggle off'), onClick:function(){setShowPreview(!showPreview)}}, showPreview?'Preview ON':'Preview OFF'),
+        e('button', {className:'btn ' + (copied?'btn-success':'btn-primary'), onClick:copyHtml}, copied?'¡Copiado!':'Copiar HTML')
+      )
+    ),
+
+    // Main
+    e('div', {className:'main'},
+      // Sidebar
+      e('div', {className:'sidebar'},
+        e('p', {className:'sidebar-title'}, 'Añadir bloque'),
+        BLOCK_TYPES.map(function(bt){
+          return e('button', {key:bt.type, className:'add-btn', onClick:function(){addBlock(bt.type)}},
+            e('span', {className:'add-btn-icon'}, bt.icon),
+            e('div', null,
+              e('div', {className:'add-btn-label'}, bt.label),
+              e('div', {className:'add-btn-desc'}, bt.desc)
+            )
+          );
+        }),
+        e('div', {className:'template-section'},
+          e('p', {className:'sidebar-title'}, 'Plantillas rápidas'),
+          e('button', {className:'tpl-btn tpl-blue', onClick:function(){loadTemplate('compactas')}}, 'Compactas UV-LED'),
+          e('button', {className:'tpl-btn tpl-orange', onClick:function(){loadTemplate('pimpam')}}, 'PimPam Vending'),
+          e('button', {className:'tpl-btn tpl-purple', onClick:function(){loadTemplate('formatos')}}, 'Formatos varios')
+        )
+      ),
+
+      // Editor
+      e('div', {className:'editor', style:{width:showPreview?'50%':'100%'}},
+        e('div', {className:'editor-inner'},
+          blocks.length === 0
+            ? e('div', {className:'empty-state'},
+                e('div', {className:'empty-icon'}, '📧'),
+                e('p', {style:{fontSize:13,fontWeight:500}}, 'Añade bloques desde el panel izquierdo'),
+                e('p', {style:{fontSize:11,color:'#cbd5e1',marginTop:4}}, 'o usa una plantilla rápida')
+              )
+            : blocks.map(function(block, idx){
+                return e(BlockEditor, {
+                  key: block.id,
+                  block: block,
+                  onChange: function(u){updateBlock(block.id,u)},
+                  onDelete: function(){deleteBlock(block.id)},
+                  onMoveUp: function(){moveBlock(block.id,-1)},
+                  onMoveDown: function(){moveBlock(block.id,1)},
+                  isFirst: idx===0,
+                  isLast: idx===blocks.length-1
+                });
+              })
+        )
+      ),
+
+      // Preview
+      showPreview && e('div', {className:'preview-panel'},
+        e('div', {className:'preview-header'},
+          e('span', {className:'preview-label'}, 'Vista previa email'),
+          e('button', {className:'btn btn-ghost', onClick:function(){setShowHtmlCode(!showHtmlCode)}}, showHtmlCode?'Ver preview':'Ver HTML')
+        ),
+        showHtmlCode
+          ? e('pre', {className:'html-code'}, fullHtml)
+          : e('div', {className:'preview-content'},
+              e('div', {className:'preview-frame', dangerouslySetInnerHTML:{__html:fullHtml}})
+            )
+      )
+    ),
+
+    // Footer
+    e('div', {className:'footer'},
+      e('span', null, blocks.length + ' bloque' + (blocks.length!==1?'s':'')),
+      e('span', null, sizeKb + ' KB')
+    )
+  );
+}
+
+ReactDOM.render(e(EmailComposer), document.getElementById('root'));
+</script>
+</body>
+</html>
