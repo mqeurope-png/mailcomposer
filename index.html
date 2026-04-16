@@ -495,17 +495,18 @@ function brandStripHtml(key, lang, brands) {
   if(!b) return '';
   var url = (typeof b.url === 'object') ? (b.url[lang] || b.url.es) : b.url;
   var urlLabel = (typeof b.urlLabel === 'object') ? (b.urlLabel[lang] || b.urlLabel.es) : b.urlLabel;
-  var logoHtml = '<img src="' + b.logo + '" height="' + (b.logoHeight || 22) + '" alt="' + b.label + '" style="max-width:160px;width:auto;height:' + (b.logoHeight || 22) + 'px">';
-  // If brand has logoBg, render full-width dark bar; otherwise normal light strip
+  var h = parseInt(b.logoHeight) || 28;
+  // If brand has logoBg, render full-width dark bar
   if (b.logoBg) {
     return '<tr><td style="padding:16px 8px 8px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + b.logoBg + ';border-radius:10px"><tr>' +
-      '<td valign="middle" style="padding:14px 20px">' + logoHtml + '</td>' +
-      '<td valign="middle" align="right" style="padding:14px 20px"><a href="' + url + '" style="font-size:11px;font-weight:700;color:' + b.color + ';text-decoration:none">' + urlLabel + '</a></td>' +
+      '<td valign="middle" style="padding:16px 24px"><img src="' + b.logo + '" alt="' + b.label + '" style="height:' + h + 'px;width:auto;display:block"></td>' +
+      '<td valign="middle" align="right" style="padding:16px 24px"><a href="' + url + '" style="font-size:12px;font-weight:700;color:' + b.color + ';text-decoration:none">' + urlLabel + '</a></td>' +
       '</tr></table></td></tr>';
   }
+  // Normal light strip with divider
   return '<tr><td style="padding:16px 8px 8px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
-    '<td valign="middle">' + logoHtml + '</td>' +
-    '<td valign="middle" align="right"><a href="' + url + '" style="font-size:11px;font-weight:700;color:' + b.color + ';text-decoration:none">' + urlLabel + '</a></td>' +
+    '<td valign="middle" style="padding:4px 0"><img src="' + b.logo + '" alt="' + b.label + '" style="height:' + h + 'px;width:auto;display:inline-block"></td>' +
+    '<td valign="middle" align="right" style="padding:4px 0"><a href="' + url + '" style="font-size:12px;font-weight:700;color:' + b.color + ';text-decoration:none">' + urlLabel + '</a></td>' +
     '</tr></table><div style="height:1px;background:' + b.divider + ';margin-top:8px"></div></td></tr>';
 }
 
@@ -2885,7 +2886,7 @@ function EmailComposer() {
               )
             ),
             e('tbody', null,
-              appState.products.filter(function(p){ return (brandFilter==='all' || p.brand===brandFilter) && (boLangFilter==='all' || isAvailableInLang(p, boLangFilter)); }).map(function(p){
+              appState.products.filter(function(p){ return (brandFilter==='all' || p.brand===brandFilter); }).map(function(p){
                 var pVis = isVisibleForLang(p, boLangFilter);
                 var pName = boLangFilter !== 'all' && p.i18n && p.i18n[boLangFilter] && p.i18n[boLangFilter].name ? p.i18n[boLangFilter].name : p.name;
                 var pPrice = boLangFilter !== 'all' && p.i18n && p.i18n[boLangFilter] && p.i18n[boLangFilter].price ? p.i18n[boLangFilter].price : p.price;
@@ -2949,7 +2950,7 @@ function EmailComposer() {
             e('button', {className:'brand-filter-btn' + (brandFilter==='mix'?' active':''), onClick:function(){setBrandFilter('mix')}}, 'Mix')
           ),
           e('div', null,
-            appState.composedBlocks.filter(function(b){ var bBrand = b.brandStrip === 'none' ? 'mix' : (b.brandStrip||'mix'); return (brandFilter==='all' || bBrand===brandFilter) && (boLangFilter==='all' || isAvailableInLang(b, boLangFilter)); }).map(function(b){
+            appState.composedBlocks.filter(function(b){ var bBrand = b.brandStrip === 'none' ? 'mix' : (b.brandStrip||'mix'); return (brandFilter==='all' || bBrand===brandFilter); }).map(function(b){
               var bVis = isVisibleForLang(b, boLangFilter);
               return e('div', {key:b.id, className:'block-list-item', style:{opacity:bVis?1:0.5}},
                 e('div', {className:'block-list-content'},
@@ -2980,7 +2981,7 @@ function EmailComposer() {
             e('button', {className:'brand-filter-btn' + (brandFilter==='mix'?' active':''), onClick:function(){setBrandFilter('mix')}}, 'Mix')
           ),
           e('div', null,
-            appState.prewrittenTexts.filter(function(t){ return (brandFilter==='all' || (t.brand||'mix')===brandFilter) && (boLangFilter==='all' || isAvailableInLang(t, boLangFilter)); }).map(function(t){
+            appState.prewrittenTexts.filter(function(t){ return (brandFilter==='all' || (t.brand||'mix')===brandFilter); }).map(function(t){
               var tVis = isVisibleForLang(t, boLangFilter);
               var tText = boLangFilter !== 'all' && t.i18n && t.i18n[boLangFilter] && t.i18n[boLangFilter].text ? t.i18n[boLangFilter].text : t.text;
               return e('div', {key:t.id, className:'list-item', style:{opacity:tVis?1:0.5}},
