@@ -1318,7 +1318,7 @@ function BlockEditorModal(props) {
 
 // ─── TEXT EDITOR MODAL ───────────────────────────────────────
 function TextEditorModal(props) {
-  var text = props.text || {id:'',name:'',icon:'',text:'',i18n:{},langs:['es','fr','de','en','nl']};
+  var text = props.text || {id:'',name:'',icon:'',brand:'mix',text:'',i18n:{},langs:['es','fr','de','en','nl']};
   var _form = useState(Object.assign({i18n:{}}, text));
   var form = _form[0], setForm = _form[1];
   var _editLang = useState('es');
@@ -1355,9 +1355,16 @@ function TextEditorModal(props) {
             e('label', {className:'form-label'}, 'Icono'),
             e('input', {className:'form-input', value:form.icon, onChange:function(ev){updateForm('icon', ev.target.value)}, placeholder:'emoji', style:{maxWidth:'80px'}})
           ),
-          e('div', {className:'form-group form-group-full'},
+          e('div', {className:'form-group'},
             e('label', {className:'form-label'}, 'Nombre'),
             e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Marca'),
+            e('select', {className:'form-select', value:form.brand||'mix', onChange:function(ev){updateForm('brand', ev.target.value)}},
+              e('option', {value:'mix'}, 'Mix (todas)'),
+              (props.brands||[]).map(function(b){ return e('option', {key:b.id, value:b.id}, b.label); })
+            )
           ),
           e('div', {className:'form-group form-group-full'},
             e('label', {className:'form-label'}, 'Idiomas disponibles'),
@@ -1406,7 +1413,7 @@ function TextEditorModal(props) {
 
 // ─── TEMPLATE EDITOR MODAL ──────────────────────────────────────
 function TemplateEditorModal(props) {
-  var template = props.template || {id:'',name:'',colorClass:'blue',blocks:[]};
+  var template = props.template || {id:'',name:'',brand:'mix',colorClass:'blue',blocks:[]};
   var _form = useState(template);
   var form = _form[0], setForm = _form[1];
 
@@ -1471,9 +1478,16 @@ function TemplateEditorModal(props) {
               e('option', {value:'gray'}, 'Gris')
             )
           ),
-          e('div', {className:'form-group form-group-full'},
+          e('div', {className:'form-group'},
             e('label', {className:'form-label'}, 'Nombre'),
             e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Marca'),
+            e('select', {className:'form-select', value:form.brand||'mix', onChange:function(ev){updateForm('brand', ev.target.value)}},
+              e('option', {value:'mix'}, 'Mix (todas)'),
+              (props.brands||[]).map(function(b){ return e('option', {key:b.id, value:b.id}, b.label); })
+            )
           ),
 
           e('div', {className:'form-group form-group-full'},
@@ -1520,7 +1534,7 @@ function TemplateEditorModal(props) {
 
 // ─── STANDALONE BLOCK EDITOR MODAL ──────────────────────────
 function StandaloneBlockEditorModal(props) {
-  var sb = props.standaloneBlock || {id:'',title:'',desc:'',icon:'',iconBg:'#f3f4f6',iconColor:'',section:'otros',blockType:'brand_strip',config:{}};
+  var sb = props.standaloneBlock || {id:'',title:'',desc:'',icon:'',iconBg:'#f3f4f6',iconColor:'',brand:'mix',section:'otros',blockType:'brand_strip',config:{}};
   var _form = useState(sb);
   var form = _form[0], setForm = _form[1];
 
@@ -1589,6 +1603,13 @@ function StandaloneBlockEditorModal(props) {
               e('option', {value:'texto'}, 'Bloques de texto'),
               e('option', {value:'producto'}, 'Bloques de producto'),
               e('option', {value:'otros'}, 'Otros bloques')
+            )
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Marca'),
+            e('select', {className:'form-select', value:form.brand||'mix', onChange:function(ev){updateForm('brand', ev.target.value)}},
+              e('option', {value:'mix'}, 'Mix (todas)'),
+              (props.brands||[]).map(function(b){ return e('option', {key:b.id, value:b.id}, b.label); })
             )
           )
         ),
@@ -2732,7 +2753,7 @@ function EmailComposer() {
         e('button', {className:'backoffice-tab ' + (backofficeTab==='settings'?'active':''), onClick:function(){setBackofficeTab('settings')}, style:{marginLeft:'auto'}}, '⚙ Ajustes')
       ),
 
-      (backofficeTab === 'products' || backofficeTab === 'blocks' || backofficeTab === 'texts') && e('div', {className:'brand-filter-bar', style:{marginBottom:'8px',padding:'0 16px'}},
+      (backofficeTab === 'products' || backofficeTab === 'blocks' || backofficeTab === 'texts' || backofficeTab === 'templates' || backofficeTab === 'sueltos') && e('div', {className:'brand-filter-bar', style:{marginBottom:'8px',padding:'0 16px'}},
         e('button', {className:'brand-filter-btn' + (boLangFilter==='all'?' active':''), onClick:function(){setBoLangFilter('all')}}, 'Todos'),
         LANGS.map(function(l){ return e('button', {key:l, className:'brand-filter-btn' + (boLangFilter===l?' active':''), onClick:function(){setBoLangFilter(l)}}, LANG_LABELS[l]); })
       ),
@@ -2816,10 +2837,10 @@ function EmailComposer() {
           e('div', {className:'brand-filter-bar'},
             e('button', {className:'brand-filter-btn' + (brandFilter==='all'?' active':''), onClick:function(){setBrandFilter('all')}}, 'Todos'),
             (appState.brands||[]).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (brandFilter===br.id?' active':''), onClick:function(){setBrandFilter(br.id)}}, br.label); }),
-            e('button', {className:'brand-filter-btn' + (brandFilter==='none'?' active':''), onClick:function(){setBrandFilter('none')}}, 'Mix')
+            e('button', {className:'brand-filter-btn' + (brandFilter==='mix'?' active':''), onClick:function(){setBrandFilter('mix')}}, 'Mix')
           ),
           e('div', null,
-            appState.composedBlocks.filter(function(b){ return (brandFilter==='all' || b.brandStrip===brandFilter) && (boLangFilter==='all' || isAvailableInLang(b, boLangFilter)); }).map(function(b){
+            appState.composedBlocks.filter(function(b){ var bBrand = b.brandStrip === 'none' ? 'mix' : (b.brandStrip||'mix'); return (brandFilter==='all' || bBrand===brandFilter) && (boLangFilter==='all' || isAvailableInLang(b, boLangFilter)); }).map(function(b){
               return e('div', {key:b.id, className:'block-list-item', style:{opacity:b.visible !== false?1:0.5}},
                 e('div', {className:'block-list-content'},
                   e('div', {className:'block-list-title'},
@@ -2843,11 +2864,16 @@ function EmailComposer() {
           e('div', {className:'backoffice-actions'},
             e('button', {className:'btn btn-primary', onClick:function(){setEditingText({})}}, '+ Añadir texto')
           ),
+          e('div', {className:'brand-filter-bar'},
+            e('button', {className:'brand-filter-btn' + (brandFilter==='all'?' active':''), onClick:function(){setBrandFilter('all')}}, 'Todos'),
+            (appState.brands||[]).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (brandFilter===br.id?' active':''), onClick:function(){setBrandFilter(br.id)}}, br.label); }),
+            e('button', {className:'brand-filter-btn' + (brandFilter==='mix'?' active':''), onClick:function(){setBrandFilter('mix')}}, 'Mix')
+          ),
           e('div', null,
-            appState.prewrittenTexts.filter(function(t){ return boLangFilter==='all' || isAvailableInLang(t, boLangFilter); }).map(function(t){
+            appState.prewrittenTexts.filter(function(t){ return (brandFilter==='all' || (t.brand||'mix')===brandFilter) && (boLangFilter==='all' || isAvailableInLang(t, boLangFilter)); }).map(function(t){
               return e('div', {key:t.id, className:'list-item', style:{opacity:t.visible !== false?1:0.5}},
                 e('div', {className:'list-item-info'},
-                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.icon + ' ' + t.name),
+                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.icon + ' ' + t.name, t.brand && t.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, t.brand) : null),
                   e('div', {style:{fontSize:'11px',color:'#6b7280'}}, t.text.substring(0,60) + '...')
                 ),
                 e('div', {className:'list-item-actions'},
@@ -2865,11 +2891,16 @@ function EmailComposer() {
           e('div', {className:'backoffice-actions'},
             e('button', {className:'btn btn-primary', onClick:function(){setEditingTemplate({})}}, '+ Añadir plantilla')
           ),
+          e('div', {className:'brand-filter-bar'},
+            e('button', {className:'brand-filter-btn' + (brandFilter==='all'?' active':''), onClick:function(){setBrandFilter('all')}}, 'Todos'),
+            (appState.brands||[]).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (brandFilter===br.id?' active':''), onClick:function(){setBrandFilter(br.id)}}, br.label); }),
+            e('button', {className:'brand-filter-btn' + (brandFilter==='mix'?' active':''), onClick:function(){setBrandFilter('mix')}}, 'Mix')
+          ),
           e('div', null,
-            appState.templates.map(function(t){
+            appState.templates.filter(function(t){ return brandFilter==='all' || (t.brand||'mix')===brandFilter; }).map(function(t){
               return e('div', {key:t.id, className:'list-item', style:{opacity:t.visible !== false?1:0.5}},
                 e('div', {className:'list-item-info'},
-                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.name),
+                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.name, t.brand && t.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, t.brand) : null),
                   e('div', {style:{fontSize:'11px',color:'#6b7280'}}, t.blocks.length + ' bloque(s)')
                 ),
                 e('div', {className:'list-item-actions'},
@@ -2887,11 +2918,16 @@ function EmailComposer() {
           e('div', {className:'backoffice-actions'},
             e('button', {className:'btn btn-primary', onClick:function(){setEditingStandaloneBlock({})}}, '+ Añadir bloque suelto')
           ),
+          e('div', {className:'brand-filter-bar'},
+            e('button', {className:'brand-filter-btn' + (brandFilter==='all'?' active':''), onClick:function(){setBrandFilter('all')}}, 'Todos'),
+            (appState.brands||[]).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (brandFilter===br.id?' active':''), onClick:function(){setBrandFilter(br.id)}}, br.label); }),
+            e('button', {className:'brand-filter-btn' + (brandFilter==='mix'?' active':''), onClick:function(){setBrandFilter('mix')}}, 'Mix')
+          ),
           e('div', null,
-            appState.standaloneBlocks.map(function(sb){
+            appState.standaloneBlocks.filter(function(sb){ return brandFilter==='all' || (sb.brand||'mix')===brandFilter; }).map(function(sb){
               return e('div', {key:sb.id, className:'list-item', style:{opacity:sb.visible !== false?1:0.5}},
                 e('div', {className:'list-item-info'},
-                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, sb.icon + ' ' + sb.title),
+                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, sb.icon + ' ' + sb.title, sb.brand && sb.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, sb.brand) : null),
                   e('div', {style:{fontSize:'11px',color:'#6b7280'}}, sb.desc + ' · ' + sb.section)
                 ),
                 e('div', {className:'list-item-actions'},
@@ -2959,7 +2995,8 @@ function EmailComposer() {
       text: editingText.id ? editingText : null,
       isNew: !editingText.id,
       onClose: function(){setEditingText(null)},
-      onSave: saveText
+      onSave: saveText,
+      brands: appState.brands
     }),
 
     editingTemplate !== null && e(TemplateEditorModal, {
@@ -2968,7 +3005,8 @@ function EmailComposer() {
       blocks: appState.composedBlocks,
       texts: appState.prewrittenTexts,
       onClose: function(){setEditingTemplate(null)},
-      onSave: saveTemplate
+      onSave: saveTemplate,
+      brands: appState.brands
     }),
 
     editingStandaloneBlock !== null && e(StandaloneBlockEditorModal, {
