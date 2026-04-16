@@ -659,6 +659,39 @@ function generateFullHtml(blocks, products, lang, brands) {
       case 'freebird': rows += freebirdHtml(b, lang); break;
       case 'pimpam_hero': rows += pimpamHeroHtml(b, lang); break;
       case 'pimpam_steps': rows += pimpamStepsHtml(b, lang); break;
+      case 'composed':
+        var sep = b.showSeparators ? '<tr><td style="padding:8px 20px"><hr style="border:none;border-top:1px solid #e5e7eb;margin:0"></td></tr>' : '';
+        if (b.introText) rows += textBlockHtml(b.introText);
+        if (b.brandStrip && b.brandStrip !== 'none') {
+          if(sep && b.introText) rows += sep;
+          rows += brandStripHtml(b.brandStrip, lang, brands);
+        }
+        if (b.includeHero) {
+          if(sep) rows += sep;
+          rows += pimpamHeroHtml(b, lang);
+        }
+        var cProds = b.products || [];
+        if (b.blockType === 'product_trio' && cProds.length >= 3) {
+          if(sep) rows += sep;
+          var ct1 = products.find(function(p){return p.id===cProds[0]});
+          var ct2 = products.find(function(p){return p.id===cProds[1]});
+          var ct3 = products.find(function(p){return p.id===cProds[2]});
+          if(ct1&&ct2&&ct3) { ct1 = getLocalizedProduct(ct1,lang); ct2 = getLocalizedProduct(ct2,lang); ct3 = getLocalizedProduct(ct3,lang); rows += productTrioHtml(ct1,ct2,ct3,lang); }
+        } else if (b.blockType === 'product_pair' && cProds.length >= 2) {
+          if(sep) rows += sep;
+          var cp1 = products.find(function(p){return p.id===cProds[0]});
+          var cp2 = products.find(function(p){return p.id===cProds[1]});
+          if(cp1&&cp2) { cp1 = getLocalizedProduct(cp1,lang); cp2 = getLocalizedProduct(cp2,lang); rows += productPairHtml(cp1,cp2,lang); }
+        } else if (b.blockType === 'product_single' && cProds.length >= 1) {
+          if(sep) rows += sep;
+          var cps = products.find(function(p){return p.id===cProds[0]});
+          if(cps) { cps = getLocalizedProduct(cps,lang); rows += productSingleHtml(cps,lang); }
+        }
+        if (b.includeSteps) {
+          if(sep) rows += sep;
+          rows += pimpamStepsHtml(b, lang);
+        }
+        break;
     }
   }
   return '<html><head>'+CSS_BLOCK+'</head><body style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;margin:0;padding:0;background:#ffffff;color:#1e293b">' +
@@ -1486,6 +1519,7 @@ function BlockEditor(props) {
     'freebird':{icon:'▶',label:'Freebird',cardClass:'blue'},
     'pimpam_hero':{icon:'📱',label:'Hero',cardClass:'orange'},
     'pimpam_steps':{icon:'1234',label:'Pasos',cardClass:'orange'},
+    'composed':{icon:'📋',label:'Bloque compuesto',cardClass:'dark'}
   };
   info = typeMap[block.type] || info;
 
@@ -1539,6 +1573,30 @@ function BlockEditor(props) {
   } else if (block.type === 'pimpam_steps') {
     var stepsSummary = (block.steps||[]).map(function(s){return s.t}).join(', ') || '4 pasos: Elige diseño, Personaliza, Paga, ¡Listo!';
     body = e('p', {className:'fixed-msg'}, stepsSummary);
+  } else if (block.type === 'composed') {
+    body = e('div', null,
+      block.title && e('div', {style:{fontWeight:600,fontSize:'12px',marginBottom:'6px',color:'#374151'}}, block.title),
+      e('textarea', {
+        value: block.introText || '',
+        onChange: function(ev) { props.onChange(Object.assign({}, block, {introText: ev.target.value})); },
+        placeholder: 'Texto de introducción...',
+        style: {minHeight:'50px'}
+      }),
+      e('button', {
+        style:{fontSize:'10px',padding:'3px 8px',marginTop:'4px',borderRadius:'12px',border:'1px solid #d1d5db',background:'#f9fafb',cursor:'pointer',color:'#6b7280',display:'inline-flex',alignItems:'center',gap:'4px'},
+        onClick: function(){
+          if (props.onAiAssist) props.onAiAssist(block.id);
+        },
+        title:'Redactar con IA'
+      }, '✨ IA'),
+      e('div', {style:{marginTop:'8px',display:'flex',flexWrap:'wrap',gap:'4px'}},
+        block.brandStrip && block.brandStrip !== 'none' && e('span', {style:{fontSize:'10px',padding:'2px 6px',borderRadius:'4px',background:'#ede9fe',color:'#6d28d9'}}, '🏷 ' + block.brandStrip),
+        block.includeHero && e('span', {style:{fontSize:'10px',padding:'2px 6px',borderRadius:'4px',background:'#ffedd5',color:'#c2410c'}}, '📱 Hero'),
+        block.products && block.products.length > 0 && e('span', {style:{fontSize:'10px',padding:'2px 6px',borderRadius:'4px',background:'#dcfce7',color:'#16a34a'}}, '📦 ' + block.products.length + ' producto' + (block.products.length>1?'s':'')),
+        block.includeSteps && e('span', {style:{fontSize:'10px',padding:'2px 6px',borderRadius:'4px',background:'#ffedd5',color:'#c2410c'}}, '1234 Pasos'),
+        block.showSeparators && e('span', {style:{fontSize:'10px',padding:'2px 6px',borderRadius:'4px',background:'#f3f4f6',color:'#6b7280'}}, '— Separadores')
+      )
+    );
   } else {
     body = e('p', {className:'fixed-msg'}, 'Bloque predefinido');
   }
@@ -1550,6 +1608,7 @@ function BlockEditor(props) {
         e('span', {className:'block-type-label'}, info.label)
       ),
       e('div', {className:'block-actions'},
+        block.type === 'composed' && e('button', {onClick:props.onUnlink, title:'Desvincular bloque', style:{fontSize:'12px',padding:'2px 4px'}}, '🔓'),
         e('button', {onClick:props.onMoveUp, disabled:props.isFirst, title:'Subir'}, e(ArrowUp)),
         e('button', {onClick:props.onMoveDown, disabled:props.isLast, title:'Bajar'}, e(ArrowDown)),
         e('button', {onClick:props.onDelete, className:'del-btn', title:'Eliminar'}, e(XIcon))
@@ -1775,35 +1834,47 @@ function EmailComposer() {
     });
   }
 
+  function unlinkComposedBlock(blockId) {
+    setBlocks(function(prev) {
+      var result = [];
+      prev.forEach(function(b) {
+        if (b.id === blockId && b.type === 'composed') {
+          if (b.introText) result.push({id: ++blockIdCounter, type:'text', text: b.introText});
+          if (b.brandStrip && b.brandStrip !== 'none') result.push({id: ++blockIdCounter, type:'brand_' + b.brandStrip, brand: b.brandStrip});
+          if (b.includeHero) result.push({id: ++blockIdCounter, type:'pimpam_hero'});
+          var prods = b.products || [];
+          if (b.blockType === 'product_trio' && prods.length >= 3) {
+            result.push({id: ++blockIdCounter, type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
+          } else if (b.blockType === 'product_pair' && prods.length >= 2) {
+            result.push({id: ++blockIdCounter, type:'product_pair', product1:prods[0], product2:prods[1]});
+          } else if (b.blockType === 'product_single' && prods.length >= 1) {
+            result.push({id: ++blockIdCounter, type:'product_single', product1:prods[0]});
+          }
+          if (b.includeSteps) result.push({id: ++blockIdCounter, type:'pimpam_steps'});
+        } else {
+          result.push(b);
+        }
+      });
+      return result;
+    });
+  }
+
   function addComposedBlock(composedBlock) {
-    var newBlocks = [];
-    // Add intro text block (localized)
     var introText = getLocalizedText(composedBlock, 'introText', lang);
-    if (introText) {
-      newBlocks.push({id: ++blockIdCounter, type:'text', text: introText});
-    }
-    // Add brand strip if specified
-    if (composedBlock.brandStrip && composedBlock.brandStrip !== 'none') {
-      newBlocks.push({id: ++blockIdCounter, type:'brand_' + composedBlock.brandStrip, brand: composedBlock.brandStrip});
-    }
-    // Add hero if PimPam
-    if (composedBlock.includeHero) {
-      newBlocks.push({id: ++blockIdCounter, type:'pimpam_hero'});
-    }
-    // Add products
-    var prods = composedBlock.products || [];
-    if (composedBlock.blockType === 'product_trio' && prods.length >= 3) {
-      newBlocks.push({id: ++blockIdCounter, type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
-    } else if (composedBlock.blockType === 'product_pair' && prods.length >= 2) {
-      newBlocks.push({id: ++blockIdCounter, type:'product_pair', product1:prods[0], product2:prods[1]});
-    } else if (composedBlock.blockType === 'product_single' && prods.length >= 1) {
-      newBlocks.push({id: ++blockIdCounter, type:'product_single', product1:prods[0]});
-    }
-    // Add steps if specified
-    if (composedBlock.includeSteps) {
-      newBlocks.push({id: ++blockIdCounter, type:'pimpam_steps'});
-    }
-    setBlocks(function(prev){ return prev.concat(newBlocks); });
+    var newBlock = {
+      id: ++blockIdCounter,
+      type: 'composed',
+      composedRef: composedBlock.id,
+      title: composedBlock.title,
+      introText: introText || '',
+      brandStrip: composedBlock.brandStrip || 'none',
+      products: composedBlock.products || [],
+      blockType: composedBlock.blockType || 'product_pair',
+      includeHero: composedBlock.includeHero || false,
+      includeSteps: composedBlock.includeSteps || false,
+      showSeparators: composedBlock.showSeparators || false
+    };
+    setBlocks(function(prev){ return prev.concat([newBlock]); });
   }
 
   function addPrewrittenText(textObj) {
@@ -1832,15 +1903,20 @@ function EmailComposer() {
     template.blocks.forEach(function(refId) {
       var composed = appState.composedBlocks.find(function(b){return b.id===refId});
       if (composed) {
-        var cIntro = getLocalizedText(composed, 'introText', lang);
-        if (cIntro) newBlocks.push({id: ++blockIdCounter, type:'text', text: cIntro});
-        if (composed.brandStrip && composed.brandStrip !== 'none') newBlocks.push({id: ++blockIdCounter, type:'brand_' + composed.brandStrip, brand: composed.brandStrip});
-        if (composed.includeHero) newBlocks.push({id: ++blockIdCounter, type:'pimpam_hero'});
-        var prods = composed.products || [];
-        if (composed.blockType === 'product_trio' && prods.length >= 3) newBlocks.push({id: ++blockIdCounter, type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
-        else if (composed.blockType === 'product_pair' && prods.length >= 2) newBlocks.push({id: ++blockIdCounter, type:'product_pair', product1:prods[0], product2:prods[1]});
-        else if (composed.blockType === 'product_single' && prods.length >= 1) newBlocks.push({id: ++blockIdCounter, type:'product_single', product1:prods[0]});
-        if (composed.includeSteps) newBlocks.push({id: ++blockIdCounter, type:'pimpam_steps'});
+        var introText = getLocalizedText(composed, 'introText', lang);
+        newBlocks.push({
+          id: ++blockIdCounter,
+          type: 'composed',
+          composedRef: composed.id,
+          title: composed.title,
+          introText: introText || '',
+          brandStrip: composed.brandStrip || 'none',
+          products: composed.products || [],
+          blockType: composed.blockType || 'product_pair',
+          includeHero: composed.includeHero || false,
+          includeSteps: composed.includeSteps || false,
+          showSeparators: composed.showSeparators || false
+        });
       } else {
         var textObj = appState.prewrittenTexts.find(function(t){return t.id===refId});
         if (textObj) newBlocks.push({id: ++blockIdCounter, type:'text', text: getLocalizedText(textObj, 'text', lang)});
@@ -2218,7 +2294,8 @@ function EmailComposer() {
                       setAiPromptOpen({target:'compositor', blockId:blockId, existingText:existingText});
                       setAiPromptText(existingText);
                       setAiResult('');
-                    }
+                    },
+                    onUnlink: function(){ unlinkComposedBlock(block.id); }
                   });
                 })
           )
