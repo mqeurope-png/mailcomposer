@@ -569,14 +569,15 @@ function freebirdHtml(config, lang) {
 
 function pimpamHeroHtml(config, lang) {
   var cfg = config || {};
-  var imgUrl = cfg.heroImage || 'https://pimpam-vending.com/wp-content/uploads/2026/01/ChatGPT-Image-22-ene-2026-16_17_36.png';
-  var title = cfg.heroTitle || 'Personaliza, imprime y vende… sin operario';
-  var subtitle = cfg.heroSubtitle || 'Impresión UV-LED directa sobre fundas de móvil en autoservicio completo.';
-  var bullets = cfg.heroBullets || ['Autoservicio 100% — sin personal','Pago con tarjeta, móvil o QR','Funda impresa en HD en 30 segundos','Compatible con +600 modelos de móvil'];
-  var imgLink = cfg.heroImageLink || '';
-  var ctaText = cfg.heroCtaText || '';
-  var ctaUrl = cfg.heroCtaUrl || '';
-  var bgColor = cfg.heroBgColor || '#fff';
+  var hi = (lang && cfg.i18n && cfg.i18n[lang]) ? cfg.i18n[lang] : null;
+  var imgUrl = (hi && hi.heroImage) || cfg.heroImage || 'https://pimpam-vending.com/wp-content/uploads/2026/01/ChatGPT-Image-22-ene-2026-16_17_36.png';
+  var title = (hi && hi.heroTitle) || cfg.heroTitle || 'Personaliza, imprime y vende… sin operario';
+  var subtitle = (hi && hi.heroSubtitle) || cfg.heroSubtitle || 'Impresión UV-LED directa sobre fundas de móvil en autoservicio completo.';
+  var bullets = (hi && hi.heroBullets) || cfg.heroBullets || ['Autoservicio 100% — sin personal','Pago con tarjeta, móvil o QR','Funda impresa en HD en 30 segundos','Compatible con +600 modelos de móvil'];
+  var imgLink = (hi && hi.heroImageLink) || cfg.heroImageLink || '';
+  var ctaText = (hi && hi.heroCtaText) || cfg.heroCtaText || '';
+  var ctaUrl = (hi && hi.heroCtaUrl) || cfg.heroCtaUrl || '';
+  var bgColor = (hi && hi.heroBgColor) || cfg.heroBgColor || '#fff';
 
   // Detect dark background: parse hex and check luminance
   var isDark = false;
@@ -2275,7 +2276,11 @@ function EmailComposer() {
 
   function addPrewrittenText(textObj) {
     var localizedText = getLocalizedText(textObj, 'text', lang);
-    setBlocks(function(prev){ return prev.concat([{id: ++blockIdCounter, type:'text', text: localizedText}]); });
+    var block = {id: ++blockIdCounter, type:'text', text: localizedText};
+    // Preserve i18n + original ES text for multi-language templates
+    if (textObj.i18n) block.i18n = textObj.i18n;
+    if (textObj.text) block._textEs = textObj.text;
+    setBlocks(function(prev){ return prev.concat([block]); });
   }
 
   function addStandaloneBlock(sb) {
@@ -2287,7 +2292,7 @@ function EmailComposer() {
       case 'product_single': newBlock = {id: ++blockIdCounter, type:'product_single', product1: cfg.defaultProduct || 'young'}; break;
       case 'product_pair': newBlock = {id: ++blockIdCounter, type:'product_pair', product1: cfg.defaultProduct1 || 'young', product2: cfg.defaultProduct2 || '3000pro'}; break;
       case 'product_trio': newBlock = {id: ++blockIdCounter, type:'product_trio', product1: cfg.defaultProduct1 || 'uv1612g', product2: cfg.defaultProduct2 || 'uv1812', product3: cfg.defaultProduct3 || 'uv2513'}; break;
-      case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'pimpam_hero', heroImage: cfg.heroImage||'', heroTitle: cfg.heroTitle||'', heroSubtitle: cfg.heroSubtitle||'', heroBullets: cfg.heroBullets||[], heroImageLink: cfg.heroImageLink||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#fff'}; break;
+      case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'pimpam_hero', heroImage: cfg.heroImage||'', heroTitle: cfg.heroTitle||'', heroSubtitle: cfg.heroSubtitle||'', heroBullets: cfg.heroBullets||[], heroImageLink: cfg.heroImageLink||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#fff'}; if(cfg.i18n) newBlock.i18n = cfg.i18n; break;
       case 'pimpam_steps': newBlock = {id: ++blockIdCounter, type:'pimpam_steps', steps: cfg.steps||[], stepsBgColor: cfg.stepsBgColor||'#fff7ed', stepsBorderColor: cfg.stepsBorderColor||'#fed7aa'}; break;
       default: newBlock = {id: ++blockIdCounter, type: sb.blockType}; break;
     }
@@ -2295,10 +2300,35 @@ function EmailComposer() {
   }
 
   function loadTemplate(template) {
-    // New format: compositorBlocks stores blocks directly
+    // New format: compositorBlocks stores blocks with i18n
     if (template.compositorBlocks && template.compositorBlocks.length > 0) {
       var newBlocks = template.compositorBlocks.map(function(b) {
-        return Object.assign({}, b, {id: ++blockIdCounter});
+        var clone = Object.assign({}, b, {id: ++blockIdCounter});
+        // Localize text to current language
+        if (clone.type === 'text') {
+          clone.text = getLocalizedText(clone, 'text', lang);
+        }
+        // Localize composed innerBlocks texts
+        if (clone.type === 'composed' && clone.innerBlocks) {
+          clone.innerBlocks = clone.innerBlocks.map(function(ib) {
+            var nib = Object.assign({}, ib);
+            if (nib.type === 'text') nib.text = getLocalizedText(nib, 'text', lang);
+            return nib;
+          });
+        }
+        // Localize hero
+        if (clone.type === 'pimpam_hero' && clone.i18n && clone.i18n[lang]) {
+          var hi = clone.i18n[lang];
+          if (hi.heroImage) clone.heroImage = hi.heroImage;
+          if (hi.heroTitle) clone.heroTitle = hi.heroTitle;
+          if (hi.heroSubtitle) clone.heroSubtitle = hi.heroSubtitle;
+          if (hi.heroBullets) clone.heroBullets = hi.heroBullets;
+          if (hi.heroImageLink) clone.heroImageLink = hi.heroImageLink;
+          if (hi.heroCtaText) clone.heroCtaText = hi.heroCtaText;
+          if (hi.heroCtaUrl) clone.heroCtaUrl = hi.heroCtaUrl;
+          if (hi.heroBgColor) clone.heroBgColor = hi.heroBgColor;
+        }
+        return clone;
       });
       setBlocks(newBlocks);
       return;
@@ -2344,10 +2374,44 @@ function EmailComposer() {
     var brand = (brandIdx >= 0 && brandIdx < brandOptions.length) ? brandOptions[brandIdx] : 'mix';
     var colorClassMap = {artisjet:'blue', mbo:'purple', pimpam:'orange', flux:'cyan', mix:'gray'};
 
-    // Save blocks as-is (strip only the id which will be regenerated on load)
+    // Save blocks enriched with i18n data from sources
     var compositorBlocks = blocks.map(function(b) {
       var clone = Object.assign({}, b);
       delete clone.id; // will get new id on load
+
+      // Enrich text blocks: restore ES text + i18n from source if missing
+      if (clone.type === 'text' && !clone.i18n) {
+        // Try to find matching prewritten text by current text content
+        var matchedText = appState.prewrittenTexts.find(function(t) {
+          return t.text === clone.text || (clone._textEs && t.text === clone._textEs) ||
+            (t.i18n && Object.keys(t.i18n).some(function(l){ return t.i18n[l] && t.i18n[l].text === clone.text; }));
+        });
+        if (matchedText) {
+          clone.text = matchedText.text; // ES version
+          if (matchedText.i18n) clone.i18n = matchedText.i18n;
+        }
+      }
+      delete clone._textEs;
+
+      // Enrich composed blocks: grab full innerBlocks with i18n from source
+      if (clone.type === 'composed' && clone.composedRef) {
+        var srcComposed = appState.composedBlocks.find(function(cb){return cb.id===clone.composedRef});
+        if (srcComposed && srcComposed.innerBlocks) {
+          clone.innerBlocks = srcComposed.innerBlocks;
+        }
+      }
+
+      // Enrich hero blocks: grab i18n from standalone source
+      if (clone.type === 'pimpam_hero' && !clone.i18n) {
+        var matchedHero = appState.standaloneBlocks.find(function(sb) {
+          return sb.blockType === 'pimpam_hero' && sb.config &&
+            (sb.config.heroImage === clone.heroImage || sb.config.heroTitle === clone.heroTitle);
+        });
+        if (matchedHero && matchedHero.config && matchedHero.config.i18n) {
+          clone.i18n = matchedHero.config.i18n;
+        }
+      }
+
       return clone;
     });
 
