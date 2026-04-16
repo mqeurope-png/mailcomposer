@@ -2388,9 +2388,25 @@ function EmailComposer() {
     }
   }
 
+  function toggleLangVisible(item, lang) {
+    // If lang is 'all' or not set, toggle global visible
+    if (!lang || lang === 'all') return Object.assign({}, item, {visible: item.visible === false ? true : false});
+    // Toggle specific language in langs array
+    var langs = item.langs && item.langs.length > 0 ? item.langs.slice() : LANGS.slice();
+    var idx = langs.indexOf(lang);
+    if (idx >= 0) { langs.splice(idx, 1); } else { langs.push(lang); }
+    return Object.assign({}, item, {langs: langs});
+  }
+
+  function isVisibleForLang(item, lang) {
+    if (!lang || lang === 'all') return item.visible !== false;
+    var langs = item.langs && item.langs.length > 0 ? item.langs : LANGS;
+    return langs.indexOf(lang) >= 0 && item.visible !== false;
+  }
+
   function toggleProductVisible(id) {
     var products = appState.products.map(function(p) {
-      if (p.id === id) return Object.assign({}, p, {visible: !p.visible});
+      if (p.id === id) return toggleLangVisible(p, boLangFilter);
       return p;
     });
     persistState(Object.assign({}, appState, {products: products}));
@@ -2418,7 +2434,7 @@ function EmailComposer() {
 
   function toggleBrandVisible(id) {
     var brands = appState.brands.map(function(b) {
-      if (b.id === id) return Object.assign({}, b, {visible: !b.visible});
+      if (b.id === id) return Object.assign({}, b, {visible: b.visible === false ? true : false});
       return b;
     });
     persistState(Object.assign({}, appState, {brands: brands}));
@@ -2446,7 +2462,7 @@ function EmailComposer() {
 
   function toggleComposedBlockVisible(id) {
     var blocks = appState.composedBlocks.map(function(b) {
-      if (b.id === id) return Object.assign({}, b, {visible: !b.visible});
+      if (b.id === id) return toggleLangVisible(b, boLangFilter);
       return b;
     });
     persistState(Object.assign({}, appState, {composedBlocks: blocks}));
@@ -2474,7 +2490,7 @@ function EmailComposer() {
 
   function toggleTextVisible(id) {
     var texts = appState.prewrittenTexts.map(function(t) {
-      if (t.id === id) return Object.assign({}, t, {visible: !t.visible});
+      if (t.id === id) return toggleLangVisible(t, boLangFilter);
       return t;
     });
     persistState(Object.assign({}, appState, {prewrittenTexts: texts}));
@@ -2502,7 +2518,7 @@ function EmailComposer() {
 
   function toggleTemplateVisible(id) {
     var templates = appState.templates.map(function(t) {
-      if (t.id === id) return Object.assign({}, t, {visible: !t.visible});
+      if (t.id === id) return toggleLangVisible(t, boLangFilter);
       return t;
     });
     persistState(Object.assign({}, appState, {templates: templates}));
@@ -2530,7 +2546,7 @@ function EmailComposer() {
 
   function toggleStandaloneBlockVisible(id) {
     var blocks = appState.standaloneBlocks.map(function(b) {
-      if (b.id === id) return Object.assign({}, b, {visible: !b.visible});
+      if (b.id === id) return toggleLangVisible(b, boLangFilter);
       return b;
     });
     persistState(Object.assign({}, appState, {standaloneBlocks: blocks}));
@@ -2870,13 +2886,16 @@ function EmailComposer() {
             ),
             e('tbody', null,
               appState.products.filter(function(p){ return (brandFilter==='all' || p.brand===brandFilter) && (boLangFilter==='all' || isAvailableInLang(p, boLangFilter)); }).map(function(p){
+                var pVis = isVisibleForLang(p, boLangFilter);
+                var pName = boLangFilter !== 'all' && p.i18n && p.i18n[boLangFilter] && p.i18n[boLangFilter].name ? p.i18n[boLangFilter].name : p.name;
+                var pPrice = boLangFilter !== 'all' && p.i18n && p.i18n[boLangFilter] && p.i18n[boLangFilter].price ? p.i18n[boLangFilter].price : p.price;
                 return e('tr', {key:p.id},
-                  e('td', null, p.img && e('img', {src:p.img, className:'product-thumb', alt:p.name, onError:function(ev){ev.target.style.display='none'}})),
-                  e('td', null, p.name),
+                  e('td', null, p.img && e('img', {src:p.img, className:'product-thumb', alt:pName, onError:function(ev){ev.target.style.display='none'}})),
+                  e('td', null, pName),
                   e('td', null, p.brand),
-                  e('td', null, p.price),
+                  e('td', null, pPrice),
                   e('td', null,
-                    e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:p.visible !== false?'#dcfce7':'#f3f4f6',color:p.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleProductVisible(p.id)}, title:p.visible !== false?'Visible':'Oculto'}, p.visible !== false?'👁':'👁‍🗨'),
+                    e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:pVis?'#dcfce7':'#f3f4f6',color:pVis?'#16a34a':'#9ca3af'}, onClick:function(){toggleProductVisible(p.id)}, title:pVis?'Visible':'Oculto'}, pVis?'👁':'👁‍🗨'),
                     e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingProduct(p)}}, 'Editar'),
                     e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteProduct(p.id)}, style:{marginLeft:'4px'}}, 'Borrar')
                   )
@@ -2931,7 +2950,8 @@ function EmailComposer() {
           ),
           e('div', null,
             appState.composedBlocks.filter(function(b){ var bBrand = b.brandStrip === 'none' ? 'mix' : (b.brandStrip||'mix'); return (brandFilter==='all' || bBrand===brandFilter) && (boLangFilter==='all' || isAvailableInLang(b, boLangFilter)); }).map(function(b){
-              return e('div', {key:b.id, className:'block-list-item', style:{opacity:b.visible !== false?1:0.5}},
+              var bVis = isVisibleForLang(b, boLangFilter);
+              return e('div', {key:b.id, className:'block-list-item', style:{opacity:bVis?1:0.5}},
                 e('div', {className:'block-list-content'},
                   e('div', {className:'block-list-title'},
                     e('span', {className:'color-tag ' + b.colorTag}),
@@ -2940,7 +2960,7 @@ function EmailComposer() {
                   e('div', {className:'block-list-desc'}, b.desc)
                 ),
                 e('div', {className:'list-item-actions'},
-                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:b.visible !== false?'#dcfce7':'#f3f4f6',color:b.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleComposedBlockVisible(b.id)}, title:b.visible !== false?'Visible':'Oculto'}, b.visible !== false?'👁':'👁‍🗨'),
+                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:bVis?'#dcfce7':'#f3f4f6',color:bVis?'#16a34a':'#9ca3af'}, onClick:function(){toggleComposedBlockVisible(b.id)}, title:bVis?'Visible':'Oculto'}, bVis?'👁':'👁‍🗨'),
                   e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingBlock(b)}}, 'Editar'),
                   e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteComposedBlock(b.id)}}, 'Borrar')
                 )
@@ -2961,13 +2981,15 @@ function EmailComposer() {
           ),
           e('div', null,
             appState.prewrittenTexts.filter(function(t){ return (brandFilter==='all' || (t.brand||'mix')===brandFilter) && (boLangFilter==='all' || isAvailableInLang(t, boLangFilter)); }).map(function(t){
-              return e('div', {key:t.id, className:'list-item', style:{opacity:t.visible !== false?1:0.5}},
+              var tVis = isVisibleForLang(t, boLangFilter);
+              var tText = boLangFilter !== 'all' && t.i18n && t.i18n[boLangFilter] && t.i18n[boLangFilter].text ? t.i18n[boLangFilter].text : t.text;
+              return e('div', {key:t.id, className:'list-item', style:{opacity:tVis?1:0.5}},
                 e('div', {className:'list-item-info'},
                   e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.icon + ' ' + t.name, t.brand && t.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, t.brand) : null),
-                  e('div', {style:{fontSize:'11px',color:'#6b7280'}}, t.text.substring(0,60) + '...')
+                  e('div', {style:{fontSize:'11px',color:'#6b7280'}}, tText.substring(0,80) + '...')
                 ),
                 e('div', {className:'list-item-actions'},
-                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:t.visible !== false?'#dcfce7':'#f3f4f6',color:t.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleTextVisible(t.id)}, title:t.visible !== false?'Visible':'Oculto'}, t.visible !== false?'👁':'👁‍🗨'),
+                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:tVis?'#dcfce7':'#f3f4f6',color:tVis?'#16a34a':'#9ca3af'}, onClick:function(){toggleTextVisible(t.id)}, title:tVis?'Visible':'Oculto'}, tVis?'👁':'👁‍🗨'),
                   e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingText(t)}}, 'Editar'),
                   e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteText(t.id)}}, 'Borrar')
                 )
@@ -2988,13 +3010,14 @@ function EmailComposer() {
           ),
           e('div', null,
             appState.templates.filter(function(t){ return brandFilter==='all' || (t.brand||'mix')===brandFilter; }).map(function(t){
-              return e('div', {key:t.id, className:'list-item', style:{opacity:t.visible !== false?1:0.5}},
+              var tVis = isVisibleForLang(t, boLangFilter);
+              return e('div', {key:t.id, className:'list-item', style:{opacity:tVis?1:0.5}},
                 e('div', {className:'list-item-info'},
                   e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.name, t.brand && t.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, t.brand) : null),
                   e('div', {style:{fontSize:'11px',color:'#6b7280'}}, t.blocks.length + ' bloque(s)')
                 ),
                 e('div', {className:'list-item-actions'},
-                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:t.visible !== false?'#dcfce7':'#f3f4f6',color:t.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleTemplateVisible(t.id)}, title:t.visible !== false?'Visible':'Oculto'}, t.visible !== false?'👁':'👁‍🗨'),
+                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:tVis?'#dcfce7':'#f3f4f6',color:tVis?'#16a34a':'#9ca3af'}, onClick:function(){toggleTemplateVisible(t.id)}, title:tVis?'Visible':'Oculto'}, tVis?'👁':'👁‍🗨'),
                   e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingTemplate(t)}}, 'Editar'),
                   e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteTemplate(t.id)}}, 'Borrar')
                 )
@@ -3015,13 +3038,14 @@ function EmailComposer() {
           ),
           e('div', null,
             appState.standaloneBlocks.filter(function(sb){ return brandFilter==='all' || (sb.brand||'mix')===brandFilter; }).map(function(sb){
-              return e('div', {key:sb.id, className:'list-item', style:{opacity:sb.visible !== false?1:0.5}},
+              var sbVis = isVisibleForLang(sb, boLangFilter);
+              return e('div', {key:sb.id, className:'list-item', style:{opacity:sbVis?1:0.5}},
                 e('div', {className:'list-item-info'},
                   e('div', {style:{fontWeight:600,marginBottom:'4px'}}, sb.icon + ' ' + sb.title, sb.brand && sb.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, sb.brand) : null),
                   e('div', {style:{fontSize:'11px',color:'#6b7280'}}, sb.desc + ' · ' + sb.section)
                 ),
                 e('div', {className:'list-item-actions'},
-                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:sb.visible !== false?'#dcfce7':'#f3f4f6',color:sb.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleStandaloneBlockVisible(sb.id)}, title:sb.visible !== false?'Visible':'Oculto'}, sb.visible !== false?'👁':'👁‍🗨'),
+                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:sbVis?'#dcfce7':'#f3f4f6',color:sbVis?'#16a34a':'#9ca3af'}, onClick:function(){toggleStandaloneBlockVisible(sb.id)}, title:sbVis?'Visible':'Oculto'}, sbVis?'👁':'👁‍🗨'),
                   e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingStandaloneBlock(sb)}}, 'Editar'),
                   e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteStandaloneBlock(sb.id)}}, 'Borrar')
                 )
