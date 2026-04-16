@@ -255,6 +255,11 @@ function getLocalizedText(obj, field, lang) {
   return obj.i18n[lang][field];
 }
 
+function isAvailableInLang(item, lang) {
+  if (!lang || !item.langs || item.langs.length === 0) return true;
+  return item.langs.indexOf(lang) >= 0;
+}
+
 // Brands moved to appState.brands in getDefaultState()
 
 // Merge i18n translations from defaults into loaded data (so Supabase/localStorage data gets translations)
@@ -770,7 +775,7 @@ function BrandEditorModal(props) {
 
 // ─── PRODUCT EDITOR MODAL ────────────────────────────────────
 function ProductEditorModal(props) {
-  var product = props.product || {id:'',brand:'artisjet',name:'',badge:'',badgeBg:'#dcfce7',badgeColor:'#15803d',img:'',desc:'',area:'-',alt:'-',feat1:'',feat2:'',price:'',link:'',accent:'#1d4ed8',gradient:'linear-gradient(90deg,#1d4ed8,#3b82f6)',i18n:{}};
+  var product = props.product || {id:'',brand:'artisjet',name:'',badge:'',badgeBg:'#dcfce7',badgeColor:'#15803d',img:'',desc:'',area:'-',alt:'-',feat1:'',feat2:'',price:'',link:'',accent:'#1d4ed8',gradient:'linear-gradient(90deg,#1d4ed8,#3b82f6)',i18n:{},langs:['es','fr','de','en','nl']};
   var _form = useState(Object.assign({i18n:{}}, product));
   var form = _form[0], setForm = _form[1];
   var _editLang = useState('es');
@@ -841,6 +846,23 @@ function ProductEditorModal(props) {
           e('div', {className:'form-group'},
             e('label', {className:'form-label'}, 'Color acentuado'),
             e('input', {className:'form-color', type:'color', value:form.accent, onChange:function(ev){updateForm('accent', ev.target.value)}})
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Idiomas disponibles'),
+            e('div', {style:{display:'flex',gap:'12px',flexWrap:'wrap',paddingTop:'4px'}},
+              LANGS.map(function(l){
+                var checked = !form.langs || form.langs.length === 0 || form.langs.indexOf(l) >= 0;
+                return e('label', {key:l, style:{fontSize:'12px',display:'flex',alignItems:'center',gap:'4px',cursor:'pointer'}},
+                  e('input', {type:'checkbox', checked:checked, onChange:function(ev){
+                    var current = form.langs && form.langs.length > 0 ? form.langs.slice() : LANGS.slice();
+                    if(ev.target.checked){ if(current.indexOf(l)<0) current.push(l); }
+                    else { current = current.filter(function(x){return x!==l}); }
+                    updateForm('langs', current);
+                  }}),
+                  LANG_LABELS[l]
+                );
+              })
+            )
           )
         ),
 
@@ -895,7 +917,7 @@ function ProductEditorModal(props) {
 
 // ─── BLOCK EDITOR MODAL ──────────────────────────────────────
 function BlockEditorModal(props) {
-  var block = props.block || {id:'',title:'',desc:'',priceRange:'',colorTag:'blue',introText:'',brandStrip:'none',blockType:'product_pair',products:[],includeHero:false,includeSteps:false,i18n:{}};
+  var block = props.block || {id:'',title:'',desc:'',priceRange:'',colorTag:'blue',introText:'',brandStrip:'none',blockType:'product_pair',products:[],includeHero:false,includeSteps:false,i18n:{},langs:['es','fr','de','en','nl']};
   var _form = useState(Object.assign({i18n:{}}, block));
   var form = _form[0], setForm = _form[1];
   var _editLang = useState('es');
@@ -978,6 +1000,23 @@ function BlockEditorModal(props) {
                 'Incluir pasos'
               )
             )
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Idiomas disponibles'),
+            e('div', {style:{display:'flex',gap:'12px',flexWrap:'wrap',paddingTop:'4px'}},
+              LANGS.map(function(l){
+                var checked = !form.langs || form.langs.length === 0 || form.langs.indexOf(l) >= 0;
+                return e('label', {key:l, style:{fontSize:'12px',display:'flex',alignItems:'center',gap:'4px',cursor:'pointer'}},
+                  e('input', {type:'checkbox', checked:checked, onChange:function(ev){
+                    var current = form.langs && form.langs.length > 0 ? form.langs.slice() : LANGS.slice();
+                    if(ev.target.checked){ if(current.indexOf(l)<0) current.push(l); }
+                    else { current = current.filter(function(x){return x!==l}); }
+                    updateForm('langs', current);
+                  }}),
+                  LANG_LABELS[l]
+                );
+              })
+            )
           )
         ),
 
@@ -1009,7 +1048,7 @@ function BlockEditorModal(props) {
 
 // ─── TEXT EDITOR MODAL ───────────────────────────────────────
 function TextEditorModal(props) {
-  var text = props.text || {id:'',name:'',icon:'',text:'',i18n:{}};
+  var text = props.text || {id:'',name:'',icon:'',text:'',i18n:{},langs:['es','fr','de','en','nl']};
   var _form = useState(Object.assign({i18n:{}}, text));
   var form = _form[0], setForm = _form[1];
   var _editLang = useState('es');
@@ -1049,6 +1088,23 @@ function TextEditorModal(props) {
           e('div', {className:'form-group form-group-full'},
             e('label', {className:'form-label'}, 'Nombre'),
             e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Idiomas disponibles'),
+            e('div', {style:{display:'flex',gap:'12px',flexWrap:'wrap',paddingTop:'4px'}},
+              LANGS.map(function(l){
+                var checked = !form.langs || form.langs.length === 0 || form.langs.indexOf(l) >= 0;
+                return e('label', {key:l, style:{fontSize:'12px',display:'flex',alignItems:'center',gap:'4px',cursor:'pointer'}},
+                  e('input', {type:'checkbox', checked:checked, onChange:function(ev){
+                    var current = form.langs && form.langs.length > 0 ? form.langs.slice() : LANGS.slice();
+                    if(ev.target.checked){ if(current.indexOf(l)<0) current.push(l); }
+                    else { current = current.filter(function(x){return x!==l}); }
+                    updateForm('langs', current);
+                  }}),
+                  LANG_LABELS[l]
+                );
+              })
+            )
           )
         ),
 
@@ -1619,6 +1675,9 @@ function EmailComposer() {
   var _backofficeTab = useState('products');
   var backofficeTab = _backofficeTab[0], setBackofficeTab = _backofficeTab[1];
 
+  var _boLangFilter = useState('all');
+  var boLangFilter = _boLangFilter[0], setBoLangFilter = _boLangFilter[1];
+
   var _editingProduct = useState(null);
   var editingProduct = _editingProduct[0], setEditingProduct = _editingProduct[1];
 
@@ -2069,7 +2128,7 @@ function EmailComposer() {
 
           // PLANTILLAS RÁPIDAS
           e(SidebarSection, {title:'PLANTILLAS RÁPIDAS'},
-            appState.templates.filter(function(tpl){return tpl.visible !== false}).map(function(tpl) {
+            appState.templates.filter(function(tpl){return tpl.visible !== false && isAvailableInLang(tpl, lang)}).map(function(tpl) {
               var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
               return e('button', {key:tpl.id, className:'add-btn', onClick:function(){loadTemplate(tpl)}},
                 e('span', {className:'add-btn-icon', style:{background:colorMap[tpl.colorClass]||'#f3f4f6'}}, '⚡'),
@@ -2090,7 +2149,7 @@ function EmailComposer() {
                 e('div', {className:'add-btn-desc'}, 'Bloque vacío editable')
               )
             ),
-            appState.prewrittenTexts.filter(function(txt){return txt.visible !== false}).map(function(txt) {
+            appState.prewrittenTexts.filter(function(txt){return txt.visible !== false && isAvailableInLang(txt, lang)}).map(function(txt) {
               return e('button', {key:txt.id, className:'add-btn', onClick:function(){addPrewrittenText(txt)}},
                 e('span', {className:'add-btn-icon', style:{background:"#f0fdf4"}}, txt.icon || '📝'),
                 e('div', null,
@@ -2108,7 +2167,7 @@ function EmailComposer() {
               (appState.brands||[]).filter(function(br){return br.visible !== false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (sidebarBrandFilter===br.id?' active':''), onClick:function(){setSidebarBrandFilter(br.id)}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
               e('button', {className:'brand-filter-btn' + (sidebarBrandFilter==='none'?' active':''), onClick:function(){setSidebarBrandFilter('none')}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
             ),
-            appState.composedBlocks.filter(function(cb){return cb.visible !== false && (sidebarBrandFilter==='all' || cb.brandStrip===sidebarBrandFilter)}).map(function(cb) {
+            appState.composedBlocks.filter(function(cb){return cb.visible !== false && isAvailableInLang(cb, lang) && (sidebarBrandFilter==='all' || cb.brandStrip===sidebarBrandFilter)}).map(function(cb) {
               var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
               var iconMap = {blue:'aJ',purple:'MBO',orange:'🧃',gray:'Mix'};
               return e('button', {key:cb.id, className:'add-btn', onClick:function(){addComposedBlock(cb)}},
@@ -2123,7 +2182,7 @@ function EmailComposer() {
 
           // OTROS BLOQUES (standalone, data-driven)
           e(SidebarSection, {title:'OTROS BLOQUES'},
-            appState.standaloneBlocks.filter(function(sb){return sb.section==='otros' && sb.visible !== false}).map(function(sb) {
+            appState.standaloneBlocks.filter(function(sb){return sb.section==='otros' && sb.visible !== false && isAvailableInLang(sb, lang)}).map(function(sb) {
               return e('button', {key:sb.id, className:'add-btn', onClick:function(){addStandaloneBlock(sb)}},
                 e('span', {className:'add-btn-icon', style:{background:sb.iconBg, color:sb.iconColor||'#000'}}, sb.icon),
                 e('div', null,
@@ -2293,6 +2352,11 @@ function EmailComposer() {
         e('button', {className:'backoffice-tab ' + (backofficeTab==='settings'?'active':''), onClick:function(){setBackofficeTab('settings')}, style:{marginLeft:'auto'}}, '⚙ Ajustes')
       ),
 
+      (backofficeTab === 'products' || backofficeTab === 'blocks' || backofficeTab === 'texts') && e('div', {className:'brand-filter-bar', style:{marginBottom:'8px',padding:'0 16px'}},
+        e('button', {className:'brand-filter-btn' + (boLangFilter==='all'?' active':''), onClick:function(){setBoLangFilter('all')}}, 'Todos'),
+        LANGS.map(function(l){ return e('button', {key:l, className:'brand-filter-btn' + (boLangFilter===l?' active':''), onClick:function(){setBoLangFilter(l)}}, LANG_LABELS[l]); })
+      ),
+
       e('div', {className:'backoffice-content'},
         // PRODUCTOS
         backofficeTab === 'products' && e('div', null,
@@ -2314,7 +2378,7 @@ function EmailComposer() {
               )
             ),
             e('tbody', null,
-              appState.products.filter(function(p){ return brandFilter==='all' || p.brand===brandFilter; }).map(function(p){
+              appState.products.filter(function(p){ return (brandFilter==='all' || p.brand===brandFilter) && (boLangFilter==='all' || isAvailableInLang(p, boLangFilter)); }).map(function(p){
                 return e('tr', {key:p.id},
                   e('td', null, p.img && e('img', {src:p.img, className:'product-thumb', alt:p.name, onError:function(ev){ev.target.style.display='none'}})),
                   e('td', null, p.name),
@@ -2375,7 +2439,7 @@ function EmailComposer() {
             e('button', {className:'brand-filter-btn' + (brandFilter==='none'?' active':''), onClick:function(){setBrandFilter('none')}}, 'Mix')
           ),
           e('div', null,
-            appState.composedBlocks.filter(function(b){ return brandFilter==='all' || b.brandStrip===brandFilter; }).map(function(b){
+            appState.composedBlocks.filter(function(b){ return (brandFilter==='all' || b.brandStrip===brandFilter) && (boLangFilter==='all' || isAvailableInLang(b, boLangFilter)); }).map(function(b){
               return e('div', {key:b.id, className:'block-list-item', style:{opacity:b.visible !== false?1:0.5}},
                 e('div', {className:'block-list-content'},
                   e('div', {className:'block-list-title'},
@@ -2400,7 +2464,7 @@ function EmailComposer() {
             e('button', {className:'btn btn-primary', onClick:function(){setEditingText({})}}, '+ Añadir texto')
           ),
           e('div', null,
-            appState.prewrittenTexts.map(function(t){
+            appState.prewrittenTexts.filter(function(t){ return boLangFilter==='all' || isAvailableInLang(t, boLangFilter); }).map(function(t){
               return e('div', {key:t.id, className:'list-item', style:{opacity:t.visible !== false?1:0.5}},
                 e('div', {className:'list-item-info'},
                   e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.icon + ' ' + t.name),
