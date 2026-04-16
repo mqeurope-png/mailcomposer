@@ -570,6 +570,19 @@ function pimpamHeroHtml(config, lang) {
   var ctaUrl = cfg.heroCtaUrl || '';
   var bgColor = cfg.heroBgColor || '#fff';
 
+  // Detect dark background: parse hex and check luminance
+  var isDark = false;
+  var hexMatch = bgColor.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if (hexMatch) {
+    var r = parseInt(hexMatch[1],16), g = parseInt(hexMatch[2],16), bv = parseInt(hexMatch[3],16);
+    isDark = (r*0.299 + g*0.587 + bv*0.114) < 128;
+  }
+  var titleColor = isDark ? '#ffffff' : '#0f172a';
+  var subColor = isDark ? '#94a3b8' : '#64748b';
+  var bulletColor = isDark ? '#cbd5e1' : '#475569';
+  var ctaBg = isDark ? (cfg.heroCtaColor || '#00d4ff') : '#ea580c';
+  var ctaTextColor = isDark ? '#0f172a' : '#fff';
+
   // Build image cell
   var imgHtml = '<img src="' + imgUrl + '" width="260" alt="Hero" style="width:100%;height:auto;max-height:220px;border-radius:10px;object-fit:cover">';
   if (imgLink) {
@@ -579,20 +592,20 @@ function pimpamHeroHtml(config, lang) {
   // Build bullets
   var bulletsHtml = '';
   for (var i = 0; i < bullets.length; i++) {
-    bulletsHtml += '<p style="font-size:10px;color:#475569;margin:0 0 3px">✓ ' + bullets[i] + '</p>';
+    bulletsHtml += '<p style="font-size:10px;color:' + bulletColor + ';margin:0 0 3px">✓ ' + bullets[i] + '</p>';
   }
 
   // Build CTA
   var ctaHtml = '';
   if (ctaText && ctaUrl) {
-    ctaHtml = '<table cellpadding="0" cellspacing="0" border="0" style="margin-top:10px"><tr><td style="background:#ea580c;border-radius:6px;padding:8px 18px"><a href="' + ctaUrl + '" target="_blank" style="color:#fff;font-size:11px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">' + ctaText + '</a></td></tr></table>';
+    ctaHtml = '<table cellpadding="0" cellspacing="0" border="0" style="margin-top:10px"><tr><td style="background:' + ctaBg + ';border-radius:6px;padding:8px 18px"><a href="' + ctaUrl + '" target="_blank" style="color:' + ctaTextColor + ';font-size:11px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">' + ctaText + '</a></td></tr></table>';
   }
 
-  return '<tr><td style="padding:12px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + bgColor + '"><tr>' +
+  return '<tr><td style="padding:12px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + bgColor + ';border-radius:10px;padding:12px"><tr>' +
     '<td class="pp-img-cell" width="45%" valign="top" style="padding:0 12px 0 0">' + imgHtml + '</td>' +
     '<td class="pp-body-cell" valign="top" style="padding:0">' +
-    '<p style="font-size:14px;font-weight:900;color:#0f172a;margin:0 0 8px">' + title + '</p>' +
-    '<p style="font-size:11px;color:#64748b;margin:0 0 10px;line-height:1.5">' + subtitle + '</p>' +
+    '<p style="font-size:14px;font-weight:900;color:' + titleColor + ';margin:0 0 8px">' + title + '</p>' +
+    '<p style="font-size:11px;color:' + subColor + ';margin:0 0 10px;line-height:1.5">' + subtitle + '</p>' +
     bulletsHtml +
     ctaHtml +
     '</td></tr></table></td></tr>';
