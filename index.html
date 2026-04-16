@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bomedia Email Composer v3</title>
+<title>Bomedia Email Composer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -116,6 +116,20 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 .btn-sm{padding:4px 10px;font-size:10px}
 .btn-danger{background:#fecaca;color:#991b1b}.btn-danger:hover{background:#fca5a5}
 
+.lang-tabs{display:flex;gap:0;border-bottom:1px solid #e5e7eb;margin-bottom:16px}
+.lang-tab{padding:8px 14px;border:none;background:transparent;cursor:pointer;font-size:11px;font-weight:700;color:#6b7280;border-bottom:2px solid transparent;transition:all .15s}
+.lang-tab:hover{color:#374151}
+.lang-tab.active{color:#2563eb;border-bottom-color:#2563eb}
+
+.lang-selector{display:flex;gap:2px;margin-right:12px;padding-right:12px;border-right:1px solid #e5e7eb}
+.brand-filter-bar{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.brand-filter-btn{padding:4px 12px;border-radius:16px;border:1px solid #e5e7eb;background:#fff;font-size:12px;cursor:pointer;transition:all .15s;color:#6b7280}
+.brand-filter-btn:hover{background:#f3f4f6}
+.brand-filter-btn.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+.lang-btn{border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;background:#f3f4f6;color:#6b7280}
+.lang-btn.active{background:#2563eb;color:#fff}
+.lang-btn:hover:not(.active){background:#e5e7eb}
+
 /* BACKOFFICE STYLES */
 .backoffice-container{display:flex;flex-direction:column;flex:1;width:100%;overflow:hidden}
 .backoffice-tabs{display:flex;gap:0;border-bottom:1px solid #e5e7eb;background:#fff;padding:0 16px;flex-shrink:0}
@@ -192,27 +206,44 @@ const { useState, useEffect, useRef, useCallback } = React;
 
 // ─── DEFAULT DATA STATE ──────────────────────────────────────
 const DEFAULT_PRODUCTS = [
-  { id:"young", brand:"artisjet", name:"artisJet Young", badge:"A4", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://artisjet-printers.eu/wp-content/uploads/2020/10/Imagen-102.png", desc:"Compacta para personalización en punto de venta, stands y start-ups.", area:"20 × 30 cm", alt:"5 cm", feat1:"Sensor de altura automático", feat2:"CMYK + Blanco", price:"9.300 €", link:"https://boprint.net/producto/artis-young-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
-  { id:"3000pro", brand:"artisjet", name:"artisJet 3000Pro Freebird", badge:"Freebird", badgeBg:"#dbeafe", badgeColor:"#1d4ed8", img:"https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png", desc:"Flatbed pro con Freebird. Velocidad 2,5× y certificación Braille/ADA.", area:"35 × 50 cm", alt:"17 cm", feat1:"Módulo Freebird integrado", feat2:"Mesa de vacío", price:"13.900 €", link:"https://boprint.net/producto/3000-pro-freebird/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
-  { id:"proud", brand:"artisjet", name:"artisJet Proud", badge:"Tarjetas", badgeBg:"#fef3c7", badgeColor:"#92400e", img:"https://artisjet-printers.eu/wp-content/uploads/2024/05/artisJet-proud-card-printer-left-side-view.jpeg", desc:"Especialista en tarjetas, carnets y artículos promocionales.", area:"-", alt:"-", feat1:"Alta precisión piezas pequeñas", feat2:"CR80 y tarjetas grandes", price:"21.500 €", link:"https://boprint.net/producto/artisjet-proud/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
-  { id:"5000u", brand:"artisjet", name:"artisJet 5000U", badge:"A3+ Freebird", badgeBg:"#e0e7ff", badgeColor:"#4338ca", img:"https://artisjet-printers.eu/wp-content/uploads/2017/11/artis5000Uimg1.jpg", desc:"Formato medio para volúmenes crecientes y objetos 3D.", area:"A3+", alt:"-", feat1:"Velocidad profesional", feat2:"CMYK + Blanco", price:"18.900 €", link:"https://boprint.net/producto/5000-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
-  { id:"6090trust", brand:"artisjet", name:"artisJet 6090 Trust", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#991b1b", img:"https://artisjet-printers.eu/wp-content/uploads/2024/08/trust-freebird.png", desc:"Producción industrial: señalización, placas, paneles decorativos.", area:"59 × 89 cm", alt:"10 cm", feat1:"Freebird integrado", feat2:"Alta productividad", price:"20.900 €", link:"https://boprint.net/producto/artisjet-6090-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
-  { id:"mbo3050", brand:"mbo", name:"MBO 3050", badge:"Nuevo", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://mboprinters.com/wp-content/uploads/2026/02/mbo3050.png", desc:"Compacta multifuncional, la más reciente de MBO.", area:"30 × 50 cm", alt:"10 cm", feat1:"Sensor 1-3 mm", feat2:"Tanques 250 cc", price:"6.495 €", link:"https://mboprinters.com/product/mbo-3050-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
-  { id:"mbo4060", brand:"mbo", name:"MBO 4060", badge:"Top ventas", badgeBg:"#ede9fe", badgeColor:"#6d28d9", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo4060-1.jpg", desc:"El mejor ratio calidad-precio del mercado.", area:"33 × 55 cm", alt:"20 cm", feat1:"Pantalla táctil", feat2:"Control inteligente", price:"7.995 €", link:"https://mboprinters.com/product/mbo-4060-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
-  { id:"mbo6090", brand:"mbo", name:"MBO 6090", badge:"Semiformato", badgeBg:"#ede9fe", badgeColor:"#6d28d9", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo6090.jpg", desc:"Producción profesional multicolor. 3 cabezales.", area:"60 × 90 cm", alt:"20 cm", feat1:"CMYK LC LM+W+Barniz", feat2:"Servomotor", price:"14.500 €", link:"https://mboprinters.com/product/mbo-6090-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
-  { id:"mbo1015", brand:"mbo", name:"MBO 1015", badge:"Industrial", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo1015.jpg", desc:"Gran formato para tiradas grandes.", area:"100 × 150 cm", alt:"10 cm", feat1:"Epson i3200", feat2:"CMYK+WWWW+Barniz", price:"desde 21.500 €", link:"https://mboprinters.com/product/mbo-1015-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
-  { id:"uv1612g", brand:"mbo", name:"MBO UV1612G", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo1612g.jpg", desc:"Industrial de alta velocidad. Acero reforzado.", area:"160 × 120 cm", alt:"20 cm", feat1:"Múltiples cabezales", feat2:"Alta velocidad", price:"desde 26.500 €", link:"https://mboprinters.com/product/mbo-uv1612g", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
-  { id:"uv1812", brand:"mbo", name:"MBO UV1812", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo1812.jpg", desc:"Displays y publicidad. 180×120cm.", area:"180 × 120 cm", alt:"20 cm", feat1:"CMYK+W+Barniz", feat2:"PVC, madera, metal, vidrio", price:"desde 27.500 €", link:"https://mboprinters.com/product/mbo-uv1812", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
-  { id:"uv2513", brand:"mbo", name:"MBO UV2513", badge:"Súper Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo2513.jpg", desc:"Producción masiva. 250×130cm.", area:"250 × 130 cm", alt:"20 cm", feat1:"Cabezales alta velocidad", feat2:"Rígidos y flexibles", price:"desde 34.000 €", link:"https://mboprinters.com/product/mbo-uv2513", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
-  { id:"casebox", brand:"pimpam", name:"PimPam CaseBox", badge:"Interior · Retail", badgeBg:"#ffedd5", badgeColor:"#9a3412", img:"https://pimpam-vending.com/wp-content/uploads/2026/01/pimpam-aeropuerto.png", desc:"Máquina compacta de interior para centros comerciales y aeropuertos.", area:"-", alt:"-", feat1:"UV en TPU/Silicona/PC", feat2:"Múltiples formas de pago", price:"Consultar", link:"https://pimpam-vending.com/casebox-vending/", accent:"#ea580c", gradient:"linear-gradient(90deg,#ea580c,#f97316)", visible:true },
-  { id:"custom", brand:"pimpam", name:"PimPam Custom", badge:"Tu marca", badgeBg:"#ffedd5", badgeColor:"#9a3412", img:"https://pimpam-vending.com/wp-content/uploads/2026/01/custom-pimpam-851x1024.png", desc:"Branding completo: vinilos, pantalla y campañas con tu marca.", area:"-", alt:"-", feat1:"Vinilos personalizados", feat2:"Campañas temporales", price:"Consultar", link:"https://pimpam-vending.com/custom/", accent:"#ea580c", gradient:"linear-gradient(90deg,#ea580c,#f97316)", visible:true },
+  { id:"young", brand:"artisjet", name:"artisJet Young", badge:"A4", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://artisjet-printers.eu/wp-content/uploads/2020/10/Imagen-102.png", desc:"Compacta para personalización en punto de venta, stands y start-ups.", area:"20 × 30 cm", alt:"5 cm", feat1:"Sensor de altura automático", feat2:"CMYK + Blanco", price:"9.300 €", link:"https://boprint.net/producto/artis-young-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true, i18n:{fr:{desc:"Compacte pour la personnalisation au point de vente, stands et start-ups.",feat1:"Capteur de hauteur automatique",feat2:"CMYK + Blanc",price:"9 300 €",link:"https://artisjet-printers.eu/shop/artisjet-young/",badge:"A4"},de:{desc:"Kompakt für Anpassung am Point of Sale, Stands und Start-ups.",feat1:"Automatische Höhenerkennung",feat2:"CMYK + Weiß",price:"9.500 €",link:"https://artisjet-printers.eu/de/shop/artisjet-young/",badge:"A4"},en:{desc:"Compact for point-of-sale customization, stands and start-ups.",feat1:"Automatic height sensor",feat2:"CMYK + White",price:"€9,500",link:"https://www.mqeurope.com/product/artisjet-young/",badge:"A4"},nl:{desc:"Compact voor aanpassingen op het verkooppunt, stands en start-ups.",feat1:"Automatische hoogtesensor",feat2:"CMYK + Wit",price:"€9.500",link:"https://www.mqeurope.com/nl/product/artisjet-young/",badge:"A4"}} },
+  { id:"3000pro", brand:"artisjet", name:"artisJet 3000Pro Freebird", badge:"Freebird", badgeBg:"#dbeafe", badgeColor:"#1d4ed8", img:"https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png", desc:"Flatbed pro con Freebird. Velocidad 2,5× y certificación Braille/ADA.", area:"35 × 50 cm", alt:"17 cm", feat1:"Módulo Freebird integrado", feat2:"Mesa de vacío", price:"13.900 €", link:"https://boprint.net/producto/3000-pro-freebird/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true, i18n:{fr:{desc:"Flatbed pro avec Freebird. Vitesse 2,5× et certification Braille/ADA.",feat1:"Module Freebird intégré",feat2:"Table de vide",price:"14 500 €",link:"https://artisjet-printers.eu/shop/artisjet-3000pro-freebird-led-uv/",badge:"Freebird"},de:{desc:"Flatbed Pro mit Freebird. 2,5× Geschwindigkeit und Braille/ADA-Zertifizierung.",feat1:"Integriertes Freebird-Modul",feat2:"Vakuumtisch",price:"13.900 €",link:"https://artisjet-printers.eu/de/shop/artisjet-3000pro-freebird-led-uv/",badge:"Freebird"},en:{desc:"Pro flatbed with Freebird. 2.5x speed and Braille/ADA certification.",feat1:"Integrated Freebird module",feat2:"Vacuum table",price:"€14,500",link:"https://www.mqeurope.com/product/artisjet-3000pro-freebird-led-uv/",badge:"Freebird"},nl:{desc:"Pro flatbed met Freebird. 2,5× snelheid en Braille/ADA-certificering.",feat1:"Geïntegreerde Freebird-module",feat2:"Vacuümtafel",price:"€14.500",link:"https://www.mqeurope.com/nl/product/artisjet-3000pro-freebird-led-uv/",badge:"Freebird"}} },
+  { id:"proud", brand:"artisjet", name:"artisJet Proud", badge:"Tarjetas", badgeBg:"#fef3c7", badgeColor:"#92400e", img:"https://artisjet-printers.eu/wp-content/uploads/2024/05/artisJet-proud-card-printer-left-side-view.jpeg", desc:"Especialista en tarjetas, carnets y artículos promocionales.", area:"-", alt:"-", feat1:"Alta precisión piezas pequeñas", feat2:"CR80 y tarjetas grandes", price:"21.500 €", link:"https://boprint.net/producto/artisjet-proud/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true, i18n:{fr:{desc:"Spécialiste des cartes, carnets et articles promotionnels.",feat1:"Haute précision petites pièces",feat2:"CR80 et grandes cartes",price:"21 500 €",link:"https://artisjet-printers.eu/shop/artisjet-proud/",badge:"Cartes"},de:{desc:"Spezialist für Karten, Ausweise und Werbeartikel.",feat1:"Hochpräzision kleine Teile",feat2:"CR80 und große Karten",price:"21.500 €",link:"https://artisjet-printers.eu/de/shop/artisjet-proud/",badge:"Karten"},en:{desc:"Specialist in cards, badges and promotional items.",feat1:"High precision small parts",feat2:"CR80 and large cards",price:"€21,500",link:"https://www.mqeurope.com/product/artisjet-proud/",badge:"Cards"},nl:{desc:"Specialist in kaarten, badges en promotiebijdragen.",feat1:"Hoge precisie kleine onderdelen",feat2:"CR80 en grote kaarten",price:"€21.500",link:"https://www.mqeurope.com/nl/product/artisjet-proud/",badge:"Kaarten"}} },
+  { id:"5000u", brand:"artisjet", name:"artisJet 5000U", badge:"A3+ Freebird", badgeBg:"#e0e7ff", badgeColor:"#4338ca", img:"https://artisjet-printers.eu/wp-content/uploads/2017/11/artis5000Uimg1.jpg", desc:"Formato medio para volúmenes crecientes y objetos 3D.", area:"A3+", alt:"-", feat1:"Velocidad profesional", feat2:"CMYK + Blanco", price:"18.900 €", link:"https://boprint.net/producto/5000-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true, i18n:{fr:{desc:"Format moyen pour les volumes croissants et les objets 3D.",feat1:"Vitesse professionnelle",feat2:"CMYK + Blanc",price:"18 500 €",link:"https://artisjet-printers.eu/shop/artis-5000u-uv-led/",badge:"A3+ Freebird"},de:{desc:"Mittleres Format für wachsende Volumen und 3D-Objekte.",feat1:"Professionelle Geschwindigkeit",feat2:"CMYK + Weiß",price:"17.500 €",link:"https://artisjet-printers.eu/de/shop/artis-5000u-uv-led/",badge:"A3+ Freebird"},en:{desc:"Medium format for growing volumes and 3D objects.",feat1:"Professional speed",feat2:"CMYK + White",price:"€19,500",link:"https://www.mqeurope.com/product/artis-5000-uv-led-a2/",badge:"A3+ Freebird"},nl:{desc:"Middenformaat voor groeiende volumes en 3D-objecten.",feat1:"Professionele snelheid",feat2:"CMYK + Wit",price:"€19.500",link:"https://www.mqeurope.com/nl/product/artis-5000-uv-led-a2/",badge:"A3+ Freebird"}} },
+  { id:"6090trust", brand:"artisjet", name:"artisJet 6090 Trust", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#991b1b", img:"https://artisjet-printers.eu/wp-content/uploads/2024/08/trust-freebird.png", desc:"Producción industrial: señalización, placas, paneles decorativos.", area:"59 × 89 cm", alt:"10 cm", feat1:"Freebird integrado", feat2:"Alta productividad", price:"20.900 €", link:"https://boprint.net/producto/artisjet-6090-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true, i18n:{fr:{desc:"Production industrielle: signalétique, plaques, panneaux décoratifs.",feat1:"Freebird intégré",feat2:"Haute productivité",price:"19 900 €",link:"https://artisjet-printers.eu/shop/artisjet-6090-led-uv/",badge:"Grand Format"},de:{desc:"Industrielle Produktion: Beschilderung, Platten, Dekorpaneele.",feat1:"Integrierter Freebird",feat2:"Hohe Produktivität",price:"19.900 €",link:"https://artisjet-printers.eu/de/shop/artisjet-6090-led-uv/",badge:"Großformat"},en:{desc:"Industrial production: signage, plaques, decorative panels.",feat1:"Integrated Freebird",feat2:"High productivity",price:"€20,900",link:"https://www.mqeurope.com/product/artisjet-6090-led-uv/",badge:"Large Format"},nl:{desc:"Industriële productie: bewegwijzering, platen, decoratieve panelen.",feat1:"Geïntegreerde Freebird",feat2:"Hoge productiviteit",price:"€20.900",link:"https://www.mqeurope.com/nl/product/artisjet-6090-led-uv/",badge:"Groot Formaat"}} },
+  { id:"mbo3050", brand:"mbo", name:"MBO 3050", badge:"Nuevo", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://mboprinters.com/wp-content/uploads/2026/02/mbo3050.png", desc:"Compacta multifuncional, la más reciente de MBO.", area:"30 × 50 cm", alt:"10 cm", feat1:"Sensor 1-3 mm", feat2:"Tanques 250 cc", price:"6.495 €", link:"https://mboprinters.com/product/mbo-3050-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true, i18n:{fr:{desc:"Compacte multifonction, la plus récente de MBO.",feat1:"Capteur 1-3 mm",feat2:"Réservoirs 250 cc",price:"6 495 €",link:"https://mboprinters.com/fr/product/mbo-3050-uv-led",badge:"Nouveau"},de:{desc:"Multifunktionales Kompaktmodell, das neueste von MBO.",feat1:"Sensor 1-3 mm",feat2:"Tanks 250 cc",price:"6.495 €",link:"https://mboprinters.com/de/product/mbo-3050-uv-led",badge:"Neu"},en:{desc:"Multifunctional compact, the latest from MBO.",feat1:"1-3 mm sensor",feat2:"250 cc tanks",price:"€6,495",link:"https://www.mqeurope.com/product/mbo-3050-uv-led/",badge:"New"},nl:{desc:"Multifunctioneel compact, het nieuwste van MBO.",feat1:"1-3 mm sensor",feat2:"250 cc tanks",price:"€6.495",link:"https://www.mqeurope.com/nl/product/mbo-3050-uv-led/",badge:"Nieuw"}} },
+  { id:"mbo4060", brand:"mbo", name:"MBO 4060", badge:"Top ventas", badgeBg:"#ede9fe", badgeColor:"#6d28d9", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo4060-1.jpg", desc:"El mejor ratio calidad-precio del mercado.", area:"33 × 55 cm", alt:"20 cm", feat1:"Pantalla táctil", feat2:"Control inteligente", price:"7.995 €", link:"https://mboprinters.com/product/mbo-4060-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true, i18n:{fr:{desc:"Le meilleur rapport qualité-prix du marché.",feat1:"Écran tactile",feat2:"Contrôle intelligent",price:"7 995 €",link:"https://mboprinters.com/fr/product/mbo-4060-uv-led",badge:"Top ventes"},de:{desc:"Das beste Preis-Leistungs-Verhältnis auf dem Markt.",feat1:"Touchscreen",feat2:"Intelligente Kontrolle",price:"7.995 €",link:"https://mboprinters.com/de/product/mbo-4060-uv-led",badge:"Top Verkauf"},en:{desc:"Best quality-to-price ratio on the market.",feat1:"Touchscreen",feat2:"Intelligent control",price:"€7,995",link:"https://www.mqeurope.com/product/mbo-4060-uv-led/",badge:"Best seller"},nl:{desc:"Beste kwaliteit-prijs verhouding op de markt.",feat1:"Touchscreen",feat2:"Intelligent control",price:"€7.995",link:"https://www.mqeurope.com/nl/product/mbo-4060-uv-led/",badge:"Best seller"}} },
+  { id:"mbo6090", brand:"mbo", name:"MBO 6090", badge:"Semiformato", badgeBg:"#ede9fe", badgeColor:"#6d28d9", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo6090.jpg", desc:"Producción profesional multicolor. 3 cabezales.", area:"60 × 90 cm", alt:"20 cm", feat1:"CMYK LC LM+W+Barniz", feat2:"Servomotor", price:"14.500 €", link:"https://mboprinters.com/product/mbo-6090-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true, i18n:{fr:{desc:"Production professionnelle multicolore. 3 têtes.",feat1:"CMYK LC LM+W+Vernis",feat2:"Servomoteur",price:"14 500 €",link:"https://mboprinters.com/fr/product/mbo-6090-uv-led",badge:"Demi-format"},de:{desc:"Professionelle Mehrfarbenproduktion. 3 Köpfe.",feat1:"CMYK LC LM+W+Lack",feat2:"Servomotor",price:"14.500 €",link:"https://mboprinters.com/de/product/mbo-6090-uv-led",badge:"Halbformat"},en:{desc:"Professional multicolor production. 3 heads.",feat1:"CMYK LC LM+W+Varnish",feat2:"Servomotor",price:"€14,500",link:"https://www.mqeurope.com/product/mbo-6090-uv-led/",badge:"Mid-format"},nl:{desc:"Professionele meerkleurenproductie. 3 koppen.",feat1:"CMYK LC LM+W+Vernis",feat2:"Servomotor",price:"€14.500",link:"https://www.mqeurope.com/nl/product/mbo-6090-uv-led/",badge:"Halfformaat"}} },
+  { id:"mbo1015", brand:"mbo", name:"MBO 1015", badge:"Industrial", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo1015.jpg", desc:"Gran formato para tiradas grandes.", area:"100 × 150 cm", alt:"10 cm", feat1:"Epson i3200", feat2:"CMYK+WWWW+Barniz", price:"desde 21.500 €", link:"https://mboprinters.com/product/mbo-1015-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true, i18n:{fr:{desc:"Grand format pour les grands tirages.",feat1:"Epson i3200",feat2:"CMYK+WWWW+Vernis",price:"ab 21 500 €",link:"https://mboprinters.com/fr/product/mbo-1015-uv-led",badge:"Industriel"},de:{desc:"Großformat für Großauflagen.",feat1:"Epson i3200",feat2:"CMYK+WWWW+Lack",price:"ab 21.500 €",link:"https://mboprinters.com/de/product/mbo-1015-uv-led",badge:"Industrie"},en:{desc:"Large format for large print runs.",feat1:"Epson i3200",feat2:"CMYK+WWWW+Varnish",price:"from €21,500",link:"https://www.mqeurope.com/product/mbo-1015-uv-led/",badge:"Industrial"},nl:{desc:"Groot formaat voor grote oplagen.",feat1:"Epson i3200",feat2:"CMYK+WWWW+Vernis",price:"vanaf €21.500",link:"https://www.mqeurope.com/nl/product/mbo-1015-uv-led/",badge:"Industrieel"}} },
+  { id:"uv1612g", brand:"mbo", name:"MBO UV1612G", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo1612g.jpg", desc:"Industrial de alta velocidad. Acero reforzado.", area:"160 × 120 cm", alt:"20 cm", feat1:"Múltiples cabezales", feat2:"Alta velocidad", price:"desde 26.500 €", link:"https://mboprinters.com/product/mbo-uv1612g", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true, i18n:{fr:{desc:"Industriel haute vitesse. Acier renforcé.",feat1:"Plusieurs têtes",feat2:"Haute vitesse",price:"à partir de 26 500 €",link:"https://mboprinters.com/fr/product/mbo-uv1612g",badge:"Grand Format"},de:{desc:"Hochgeschwindigkeits-Industrie. Verstärkter Stahl.",feat1:"Mehrere Köpfe",feat2:"Hohe Geschwindigkeit",price:"ab 26.500 €",link:"https://mboprinters.com/de/product/mbo-uv1612g",badge:"Großformat"},en:{desc:"High-speed industrial. Reinforced steel.",feat1:"Multiple heads",feat2:"High speed",price:"from €26,500",link:"https://www.mqeurope.com/product/mbo-uv1612g/",badge:"Large Format"},nl:{desc:"Industrieel hoge snelheid. Versterkt staal.",feat1:"Meerdere koppen",feat2:"Hoge snelheid",price:"vanaf €26.500",link:"https://www.mqeurope.com/nl/product/mbo-uv1612g/",badge:"Groot Formaat"}} },
+  { id:"uv1812", brand:"mbo", name:"MBO UV1812", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo1812.jpg", desc:"Displays y publicidad. 180×120cm.", area:"180 × 120 cm", alt:"20 cm", feat1:"CMYK+W+Barniz", feat2:"PVC, madera, metal, vidrio", price:"desde 27.500 €", link:"https://mboprinters.com/product/mbo-uv1812", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true, i18n:{fr:{desc:"Affichages et publicité. 180×120cm.",feat1:"CMYK+W+Vernis",feat2:"PVC, bois, métal, verre",price:"à partir de 27 500 €",link:"https://mboprinters.com/fr/product/mbo-uv1812",badge:"Grand Format"},de:{desc:"Displays und Werbung. 180×120cm.",feat1:"CMYK+W+Lack",feat2:"PVC, Holz, Metall, Glas",price:"ab 27.500 €",link:"https://mboprinters.com/de/product/mbo-uv1812",badge:"Großformat"},en:{desc:"Displays and advertising. 180×120cm.",feat1:"CMYK+W+Varnish",feat2:"PVC, wood, metal, glass",price:"from €27,500",link:"https://www.mqeurope.com/product/mbo-uv1812/",badge:"Large Format"},nl:{desc:"Displays en advertenties. 180×120cm.",feat1:"CMYK+W+Vernis",feat2:"PVC, hout, metaal, glas",price:"vanaf €27.500",link:"https://www.mqeurope.com/nl/product/mbo-uv1812/",badge:"Groot Formaat"}} },
+  { id:"uv2513", brand:"mbo", name:"MBO UV2513", badge:"Súper Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo2513.jpg", desc:"Producción masiva. 250×130cm.", area:"250 × 130 cm", alt:"20 cm", feat1:"Cabezales alta velocidad", feat2:"Rígidos y flexibles", price:"desde 34.000 €", link:"https://mboprinters.com/product/mbo-uv2513", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true, i18n:{fr:{desc:"Production massive. 250×130cm.",feat1:"Têtes haute vitesse",feat2:"Rigides et flexibles",price:"à partir de 34 000 €",link:"https://mboprinters.com/fr/product/mbo-uv2513",badge:"Super Grand Format"},de:{desc:"Massenproduktion. 250×130cm.",feat1:"Hochgeschwindigkeitsköpfe",feat2:"Starr und flexibel",price:"ab 34.000 €",link:"https://mboprinters.com/de/product/mbo-uv2513",badge:"Super Großformat"},en:{desc:"Mass production. 250×130cm.",feat1:"High-speed heads",feat2:"Rigid and flexible",price:"from €34,000",link:"https://www.mqeurope.com/product/mbo-uv2513/",badge:"Super Large Format"},nl:{desc:"Massaproductie. 250×130cm.",feat1:"Snelle koppen",feat2:"Stijf en flexibel",price:"vanaf €34.000",link:"https://www.mqeurope.com/nl/product/mbo-uv2513/",badge:"Super Groot Formaat"}} },
+  { id:"casebox", brand:"pimpam", name:"PimPam CaseBox", badge:"Interior · Retail", badgeBg:"#ffedd5", badgeColor:"#9a3412", img:"https://pimpam-vending.com/wp-content/uploads/2026/01/pimpam-aeropuerto.png", desc:"Máquina compacta de interior para centros comerciales y aeropuertos.", area:"-", alt:"-", feat1:"UV en TPU/Silicona/PC", feat2:"Múltiples formas de pago", price:"Consultar", link:"https://pimpam-vending.com/casebox-vending/", accent:"#ea580c", gradient:"linear-gradient(90deg,#ea580c,#f97316)", visible:true, i18n:{fr:{desc:"Machine compacte intérieure pour les centres commerciaux et les aéroports.",feat1:"UV en TPU/Silicone/PC",feat2:"Plusieurs modes de paiement",price:"Sur demande",link:"https://pimpam-vending.com/casebox-vending/",badge:"Intérieur · Retail"},de:{desc:"Kompakte Innenmaschine für Einkaufszentren und Flughäfen.",feat1:"UV auf TPU/Silikon/PC",feat2:"Mehrere Zahlungsmethoden",price:"Auf Anfrage",link:"https://pimpam-vending.com/casebox-vending/",badge:"Innen · Einzelhandel"},en:{desc:"Compact indoor machine for shopping centers and airports.",feat1:"UV on TPU/Silicone/PC",feat2:"Multiple payment methods",price:"On request",link:"https://pimpam-vending.com/casebox-vending/",badge:"Interior · Retail"},nl:{desc:"Compacte binnenmaschine voor winkelcentra en luchthavens.",feat1:"UV op TPU/Silicone/PC",feat2:"Meerdere betaalmethoden",price:"Op aanvraag",link:"https://pimpam-vending.com/casebox-vending/",badge:"Binnen · Retail"}} },
+  { id:"custom", brand:"pimpam", name:"PimPam Custom", badge:"Tu marca", badgeBg:"#ffedd5", badgeColor:"#9a3412", img:"https://pimpam-vending.com/wp-content/uploads/2026/01/custom-pimpam-851x1024.png", desc:"Branding completo: vinilos, pantalla y campañas con tu marca.", area:"-", alt:"-", feat1:"Vinilos personalizados", feat2:"Campañas temporales", price:"Consultar", link:"https://pimpam-vending.com/custom/", accent:"#ea580c", gradient:"linear-gradient(90deg,#ea580c,#f97316)", visible:true, i18n:{fr:{desc:"Branding complet: vinyls, écran et campagnes avec votre marque.",feat1:"Vinyls personnalisés",feat2:"Campagnes temporelles",price:"Sur demande",link:"https://pimpam-vending.com/custom/",badge:"Votre marque"},de:{desc:"Vollständiges Branding: Vinyls, Bildschirm und Kampagnen mit Ihrer Marke.",feat1:"Personalisierte Vinyls",feat2:"Zeitliche Kampagnen",price:"Auf Anfrage",link:"https://pimpam-vending.com/custom/",badge:"Ihre Marke"},en:{desc:"Complete branding: vinyls, screen and campaigns with your brand.",feat1:"Custom vinyls",feat2:"Temporary campaigns",price:"On request",link:"https://pimpam-vending.com/custom/",badge:"Your brand"},nl:{desc:"Compleet branding: vinyls, scherm en campagnes met uw merk.",feat1:"Aangepaste vinyls",feat2:"Tijdelijke campagnes",price:"Op aanvraag",link:"https://pimpam-vending.com/custom/",badge:"Uw merk"}} },
 ];
 
-const BRAND_STRIPS = {
-  artisjet: { logo:"https://artisjet-printers.eu/wp-content/uploads/2017/12/logoartisjet.jpg", label:"artisJet", url:"https://boprint.net", urlLabel:"boprint.net →", color:"#2563eb", divider:"#e2e8f0", h:"18" },
-  mbo: { logo:"https://mboprinters.com/wp-content/uploads/2022/10/logomboprinterslongb.png", label:"MBO Printers", url:"https://mboprinters.com", urlLabel:"mboprinters.com →", color:"#7c3aed", divider:"#e2e8f0", h:"18" },
-  pimpam: { logo:"https://pimpam-vending.com/wp-content/uploads/2025/11/WhatsApp_Image_2025-11-14_at_10.12.57-removebg-preview-e1763541822221.png", label:"PimPam Vending", url:"https://pimpam-vending.com", urlLabel:"pimpam-vending.com →", color:"#ea580c", divider:"#fed7aa", h:"22" },
-};
+// ─── MULTILINGUAL SUPPORT ───────────────────────────────
+var LANGS = ['es','fr','de','en','nl'];
+var LANG_LABELS = {es:'ES 🇪🇸',fr:'FR 🇫🇷',de:'DE 🇩🇪',en:'EN 🇬🇧',nl:'NL 🇳🇱'};
+
+function getLocalizedProduct(product, lang) {
+  if (!lang || lang === 'es' || !product.i18n || !product.i18n[lang]) return product;
+  var localized = Object.assign({}, product);
+  var overrides = product.i18n[lang];
+  for (var key in overrides) {
+    if (overrides[key]) localized[key] = overrides[key];
+  }
+  return localized;
+}
+
+function getLocalizedText(obj, field, lang) {
+  if (!lang || lang === 'es' || !obj.i18n || !obj.i18n[lang] || !obj.i18n[lang][field]) {
+    return obj[field];
+  }
+  return obj.i18n[lang][field];
+}
+
+// Brands moved to appState.brands in getDefaultState()
 
 // ─── HELPERS ────────────────────────────────────────────────────
 // ─── SUPABASE CONFIG ─────────────────────────────────────────
@@ -285,26 +316,31 @@ function saveStorageData(data) {
 
 function getDefaultState() {
   return {
+    brands: [
+      {id:'artisjet', label:'artisJet', logo:'https://artisjet-printers.eu/wp-content/uploads/2017/12/logoartisjet.jpg', url:{es:'https://boprint.net',fr:'https://artisjet-printers.eu',de:'https://artisjet-printers.eu/de',en:'https://www.mqeurope.com',nl:'https://www.mqeurope.com/nl'}, urlLabel:{es:'boprint.net →',fr:'artisjet-printers.eu →',de:'artisjet-printers.eu →',en:'mqeurope.com →',nl:'mqeurope.com →'}, color:'#2563eb', divider:'#e2e8f0', logoHeight:'18', visible:true},
+      {id:'mbo', label:'MBO Printers', logo:'https://mboprinters.com/wp-content/uploads/2022/10/logomboprinterslongb.png', url:{es:'https://mboprinters.com',fr:'https://mboprinters.com/fr',de:'https://mboprinters.com/de',en:'https://www.mqeurope.com',nl:'https://www.mqeurope.com/nl'}, urlLabel:{es:'mboprinters.com →',fr:'mboprinters.com →',de:'mboprinters.com →',en:'mqeurope.com →',nl:'mqeurope.com →'}, color:'#7c3aed', divider:'#e2e8f0', logoHeight:'18', visible:true},
+      {id:'pimpam', label:'PimPam Vending', logo:'https://pimpam-vending.com/wp-content/uploads/2025/11/WhatsApp_Image_2025-11-14_at_10.12.57-removebg-preview-e1763541822221.png', url:{es:'https://pimpam-vending.com',fr:'https://pimpam-vending.com',de:'https://pimpam-vending.com',en:'https://pimpam-vending.com',nl:'https://pimpam-vending.com'}, urlLabel:{es:'pimpam-vending.com →',fr:'pimpam-vending.com →',de:'pimpam-vending.com →',en:'pimpam-vending.com →',nl:'pimpam-vending.com →'}, color:'#ea580c', divider:'#fed7aa', logoHeight:'22', visible:true}
+    ],
     products: DEFAULT_PRODUCTS.map(function(p){ return Object.assign({}, p); }),
     composedBlocks: [
-      {id:'block-001',title:'Entry Level MBO 3050+4060',desc:'Compactas MBO con mejor precio',priceRange:'desde 6.495 € + 7.995 €',colorTag:'purple',introText:'Si buscas empezar con impresión UV-LED sin una inversión inicial grande, estas dos compactas de nuestra marca MBO son la mejor opción del mercado. Ideales para negocios que quieren probar la tecnología o complementar su producción:',brandStrip:'mbo',blockType:'product_pair',products:['mbo3050','mbo4060'],includeHero:false,includeSteps:false,visible:true},
-      {id:'block-002',title:'artisJet Compactas Young+3000Pro',desc:'Personalización a producción pro',priceRange:'9.300 € + 13.900 €',colorTag:'blue',introText:'Nuestra gama compacta de artisJet cubre desde la personalización en punto de venta (Young) hasta la producción profesional con Freebird para objetos 3D (3000Pro). Ambas ocupan poco espacio y son fáciles de integrar en cualquier entorno de trabajo:',brandStrip:'artisjet',blockType:'product_pair',products:['young','3000pro'],includeHero:false,includeSteps:false,visible:true},
-      {id:'block-003',title:'artisJet Producción Proud+5000U',desc:'Tarjetas y formato A3+',priceRange:'21.500 € + 18.900 €',colorTag:'blue',introText:'Para entornos que requieren producción continua o especialización: la Proud está diseñada para tarjetas, carnets y artículos promocionales en volúmenes industriales, y la 5000U es el salto a formato A3+ para negocios en crecimiento:',brandStrip:'artisjet',blockType:'product_pair',products:['proud','5000u'],includeHero:false,includeSteps:false,visible:true},
-      {id:'block-004',title:'artisJet Medio+Gran Formato 5000U+6090Trust',desc:'Formato A3+ e industrial',priceRange:'18.900 € + 20.900 €',colorTag:'blue',introText:'Cuando necesitas saltar a formatos mayores sin perder versatilidad. La 5000U es perfecta para personalización A3+ y la 6090 Trust para producción industrial de señalización, placas y paneles decorativos. Velocidad, precisión y productividad industrial:',brandStrip:'artisjet',blockType:'product_pair',products:['5000u','6090trust'],includeHero:false,includeSteps:false,visible:true},
-      {id:'block-005',title:'MBO Semiformato+Industrial 6090+1015',desc:'Producción profesional multicolor',priceRange:'14.500 € + desde 21.500 €',colorTag:'purple',introText:'La pareja de MBO para producción a escala profesional. La 6090 es el punto de entrada a formato grande con 3 cabezales, y la 1015 es el caballo de batalla para tiradas industriales de gran formato. CMYK+W+Barniz disponibles:',brandStrip:'mbo',blockType:'product_pair',products:['mbo6090','mbo1015'],includeHero:false,includeSteps:false,visible:true},
-      {id:'block-006',title:'Mix Formato Medio 3000Pro+MBO6090',desc:'Cross-brand: versatilidad artisJet + potencia MBO',priceRange:'13.900 € + 14.500 €',colorTag:'gray',introText:'Una combinación híbrida perfecta para estudios que necesitan versatilidad (la 3000Pro con Freebird) + producción en volumen (la MBO 6090). Dos filosofías de impresión complementarias, diferente software pero máxima cobertura de mercado:',brandStrip:'none',blockType:'product_pair',products:['3000pro','mbo6090'],includeHero:false,includeSteps:false,visible:true},
-      {id:'block-007',title:'Mix Gran Formato 6090Trust+MBO1015',desc:'industrial: artisJet premium + MBO heavy duty',priceRange:'20.900 € + desde 21.500 €',colorTag:'gray',introText:'La élite del gran formato: la 6090 Trust de artisJet (con Freebird integrado) para máxima precisión + la MBO 1015 para volumen bruto. Dos máquinas de la liga de 100 × 150 cm, filosofías complementarias, presupuesto robusto:',brandStrip:'none',blockType:'product_pair',products:['6090trust','mbo1015'],includeHero:false,includeSteps:false,visible:true},
-      {id:'block-008',title:'MBO Gran Formato Industrial UV1612G+UV1812+UV2513',desc:'Línea de producción masiva',priceRange:'desde 26.500 € + 27.500 € + 34.000 €',colorTag:'purple',introText:'Cuando necesitas línea de producción real: el dúo UV1612G+UV1812 para volumen medio-alto, o el salto a la UV2513 para producción masiva (250×130 cm). Cabezales de alta velocidad, rígidos y flexibles, CMYK+W+Barniz. Esto es factorización industrial:',brandStrip:'mbo',blockType:'product_trio',products:['uv1612g','uv1812','uv2513'],includeHero:false,includeSteps:false,visible:true},
-      {id:'block-009',title:'PimPam Vending CaseBox+Custom',desc:'Autoservicio impreso 24/7',priceRange:'Consultar',colorTag:'orange',introText:'PimPam es el vending con personalización UV-LED integrada. Sin operario. El cliente elige, personaliza su funda, paga y se la lleva en 30 segundos. CaseBox para retail/interiores, Custom para branding completo con tus vinilos y campañas temporales:',brandStrip:'pimpam',blockType:'product_pair',products:['casebox','custom'],includeHero:true,includeSteps:false,visible:true},
-      {id:'block-010',title:'Complemento Vending artisJet Young',desc:'Impresión manual + autoservicio híbrido',priceRange:'9.300 €',colorTag:'orange',introText:'Para negocios que quieren combinar: una Young en mostrador (operario imprime en el acto) + una PimPam en zona común (autoservicio). Máxima flexibilidad, dos modelos de negocio en paralelo, tiempos rápidos, márgenes altos:',brandStrip:'none',blockType:'product_single',products:['young'],includeHero:false,includeSteps:false,visible:true},
-      {id:'block-011',title:'Proceso PimPam 4 Pasos',desc:'El viaje del cliente en 30 segundos',priceRange:'-',colorTag:'orange',introText:'Esto es lo que ve el cliente: selecciona diseño, personaliza, paga, y se va con su funda. Sin esperas, sin complicaciones, sin personal. El "por qué" de PimPam. Aquí se convierte en negocio rentable.',brandStrip:'pimpam',blockType:'product_single',products:['young'],includeHero:false,includeSteps:true,visible:true},
+      {id:'block-001',title:'Entry Level MBO 3050+4060',desc:'Compactas MBO con mejor precio',priceRange:'desde 6.495 € + 7.995 €',colorTag:'purple',introText:'Si buscas empezar con impresión UV-LED sin una inversión inicial grande, estas dos compactas de nuestra marca MBO son la mejor opción del mercado. Ideales para negocios que quieren probar la tecnología o complementar su producción:',brandStrip:'mbo',blockType:'product_pair',products:['mbo3050','mbo4060'],includeHero:false,includeSteps:false,visible:true,i18n:{fr:{introText:'Pour démarrer l\'impression UV-LED sans gros investissement, ces deux compactes de notre marque MBO offrent le meilleur rapport qualité-prix du marché. Idéales pour tester la technologie ou compléter votre production :'},de:{introText:'Wenn Sie mit UV-LED-Druck starten möchten, ohne viel zu investieren: Diese beiden Kompaktmodelle unserer Marke MBO bieten das beste Preis-Leistungs-Verhältnis am Markt. Ideal zum Einstieg oder als Ergänzung:'},en:{introText:'Looking to get started with UV-LED printing without a large upfront investment? These two compact machines from our MBO brand offer the best value on the market. Ideal for testing the technology or complementing your production:'},nl:{introText:'Wilt u starten met UV-LED-printen zonder grote investering? Deze twee compacte machines van ons merk MBO bieden de beste prijs-kwaliteitverhouding op de markt. Ideaal om de technologie te testen of uw productie aan te vullen:'}}},
+      {id:'block-002',title:'artisJet Compactas Young+3000Pro',desc:'Personalización a producción pro',priceRange:'9.300 € + 13.900 €',colorTag:'blue',introText:'Nuestra gama compacta de artisJet cubre desde la personalización en punto de venta (Young) hasta la producción profesional con Freebird para objetos 3D (3000Pro). Ambas ocupan poco espacio y son fáciles de integrar en cualquier entorno de trabajo:',brandStrip:'artisjet',blockType:'product_pair',products:['young','3000pro'],includeHero:false,includeSteps:false,visible:true,i18n:{fr:{introText:'Notre gamme compacte artisJet couvre de la personnalisation en point de vente (Young) à la production professionnelle avec Freebird pour objets 3D (3000Pro). Peu encombrantes et faciles à intégrer dans tout environnement :'},de:{introText:'Unsere kompakte artisJet-Reihe deckt alles ab — von der Personalisierung am Point of Sale (Young) bis zur professionellen Produktion mit Freebird für 3D-Objekte (3000Pro). Platzsparend und einfach zu integrieren:'},en:{introText:'Our compact artisJet range covers everything from point-of-sale customization (Young) to professional production with Freebird for 3D objects (3000Pro). Both are compact and easy to integrate into any workspace:'},nl:{introText:'Ons compacte artisJet-assortiment dekt alles — van personalisatie op het verkooppunt (Young) tot professionele productie met Freebird voor 3D-objecten (3000Pro). Compact en makkelijk te integreren:'}}},
+      {id:'block-003',title:'artisJet Producción Proud+5000U',desc:'Tarjetas y formato A3+',priceRange:'21.500 € + 18.900 €',colorTag:'blue',introText:'Para entornos que requieren producción continua o especialización: la Proud está diseñada para tarjetas, carnets y artículos promocionales en volúmenes industriales, y la 5000U es el salto a formato A3+ para negocios en crecimiento:',brandStrip:'artisjet',blockType:'product_pair',products:['proud','5000u'],includeHero:false,includeSteps:false,visible:true,i18n:{fr:{introText:'Pour les environnements nécessitant une production continue ou spécialisée : la Proud est conçue pour les cartes, badges et articles promotionnels en volumes industriels, et la 5000U passe au format A3+ pour les entreprises en croissance :'},de:{introText:'Für Umgebungen mit kontinuierlicher oder spezialisierter Produktion: Die Proud ist auf Karten, Ausweise und Werbeartikel in industriellen Mengen ausgelegt, und die 5000U bietet den Sprung zum A3+-Format für wachsende Unternehmen:'},en:{introText:'For environments that need continuous or specialized production: the Proud is designed for cards, badges and promotional items at industrial volumes, while the 5000U is the step up to A3+ format for growing businesses:'},nl:{introText:'Voor omgevingen die continue of gespecialiseerde productie vereisen: de Proud is ontworpen voor kaarten, badges en promotieartikelen op industrieel volume, en de 5000U is de stap naar A3+-formaat voor groeiende bedrijven:'}}},
+      {id:'block-004',title:'artisJet Medio+Gran Formato 5000U+6090Trust',desc:'Formato A3+ e industrial',priceRange:'18.900 € + 20.900 €',colorTag:'blue',introText:'Cuando necesitas saltar a formatos mayores sin perder versatilidad. La 5000U es perfecta para personalización A3+ y la 6090 Trust para producción industrial de señalización, placas y paneles decorativos. Velocidad, precisión y productividad industrial:',brandStrip:'artisjet',blockType:'product_pair',products:['5000u','6090trust'],includeHero:false,includeSteps:false,visible:true,i18n:{fr:{introText:'Quand il faut passer aux grands formats sans perdre en polyvalence. La 5000U est parfaite pour la personnalisation A3+ et la 6090 Trust pour la production industrielle de signalétique, plaques et panneaux décoratifs :'},de:{introText:'Wenn Sie auf größere Formate umsteigen möchten, ohne auf Vielseitigkeit zu verzichten. Die 5000U eignet sich perfekt für A3+-Personalisierung und die 6090 Trust für industrielle Beschilderung, Schilder und Dekorplatten:'},en:{introText:'When you need to move to larger formats without losing versatility. The 5000U is perfect for A3+ customization and the 6090 Trust for industrial signage, plaques and decorative panels:'},nl:{introText:'Wanneer u naar grotere formaten wilt zonder veelzijdigheid te verliezen. De 5000U is perfect voor A3+-personalisatie en de 6090 Trust voor industriële bewegwijzering, platen en decoratieve panelen:'}}},
+      {id:'block-005',title:'MBO Semiformato+Industrial 6090+1015',desc:'Producción profesional multicolor',priceRange:'14.500 € + desde 21.500 €',colorTag:'purple',introText:'La pareja de MBO para producción a escala profesional. La 6090 es el punto de entrada a formato grande con 3 cabezales, y la 1015 es el caballo de batalla para tiradas industriales de gran formato. CMYK+W+Barniz disponibles:',brandStrip:'mbo',blockType:'product_pair',products:['mbo6090','mbo1015'],includeHero:false,includeSteps:false,visible:true,i18n:{fr:{introText:'Le duo MBO pour la production à l\'échelle professionnelle. La 6090 est l\'entrée de gamme grand format avec 3 têtes d\'impression, et la 1015 est la machine de production pour les tirages industriels. CMYK+W+Vernis disponibles :'},de:{introText:'Das MBO-Duo für professionelle Produktion. Die 6090 ist der Einstieg ins Großformat mit 3 Druckköpfen, und die 1015 ist das Arbeitstier für industrielle Großformatauflagen. CMYK+W+Lack verfügbar:'},en:{introText:'The MBO duo for professional-scale production. The 6090 is the entry point for large format with 3 printheads, and the 1015 is the workhorse for industrial large-format runs. CMYK+W+Varnish available:'},nl:{introText:'Het MBO-duo voor productie op professioneel niveau. De 6090 is de instap in groot formaat met 3 printkoppen, en de 1015 is het werkpaard voor industriële grootformaatoplages. CMYK+W+Lak beschikbaar:'}}},
+      {id:'block-006',title:'Mix Formato Medio 3000Pro+MBO6090',desc:'Cross-brand: versatilidad artisJet + potencia MBO',priceRange:'13.900 € + 14.500 €',colorTag:'gray',introText:'Una combinación híbrida perfecta para estudios que necesitan versatilidad (la 3000Pro con Freebird) + producción en volumen (la MBO 6090). Dos filosofías de impresión complementarias, diferente software pero máxima cobertura de mercado:',brandStrip:'none',blockType:'product_pair',products:['3000pro','mbo6090'],includeHero:false,includeSteps:false,visible:true,i18n:{fr:{introText:'Une combinaison hybride parfaite pour les ateliers qui ont besoin de polyvalence (la 3000Pro avec Freebird) + de production en volume (la MBO 6090). Deux philosophies d\'impression complémentaires, couverture maximale du marché :'},de:{introText:'Eine perfekte Hybrid-Kombination für Studios, die Vielseitigkeit (3000Pro mit Freebird) + Volumenproduktion (MBO 6090) brauchen. Zwei sich ergänzende Druckphilosophien für maximale Marktabdeckung:'},en:{introText:'A perfect hybrid combination for studios that need versatility (the 3000Pro with Freebird) + volume production (the MBO 6090). Two complementary printing philosophies for maximum market coverage:'},nl:{introText:'Een perfecte hybride combinatie voor studio\'s die veelzijdigheid (de 3000Pro met Freebird) + volumeproductie (de MBO 6090) nodig hebben. Twee complementaire printfilosofieën voor maximale marktdekking:'}}},
+      {id:'block-007',title:'Mix Gran Formato 6090Trust+MBO1015',desc:'industrial: artisJet premium + MBO heavy duty',priceRange:'20.900 € + desde 21.500 €',colorTag:'gray',introText:'La élite del gran formato: la 6090 Trust de artisJet (con Freebird integrado) para máxima precisión + la MBO 1015 para volumen bruto. Dos máquinas de la liga de 100 × 150 cm, filosofías complementarias, presupuesto robusto:',brandStrip:'none',blockType:'product_pair',products:['6090trust','mbo1015'],includeHero:false,includeSteps:false,visible:true,i18n:{fr:{introText:'L\'élite du grand format : la 6090 Trust d\'artisJet (avec Freebird intégré) pour une précision maximale + la MBO 1015 pour le volume brut. Deux machines de la classe 100 × 150 cm, approches complémentaires :'},de:{introText:'Die Elite im Großformat: Die 6090 Trust von artisJet (mit integriertem Freebird) für maximale Präzision + die MBO 1015 für reines Volumen. Zwei Maschinen der 100 × 150 cm-Klasse, sich ergänzende Ansätze:'},en:{introText:'The large format elite: the artisJet 6090 Trust (with integrated Freebird) for maximum precision + the MBO 1015 for raw volume. Two machines in the 100 × 150 cm league, complementary approaches:'},nl:{introText:'De elite van het groot formaat: de artisJet 6090 Trust (met geïntegreerde Freebird) voor maximale precisie + de MBO 1015 voor puur volume. Twee machines in de 100 × 150 cm-klasse, complementaire benaderingen:'}}},
+      {id:'block-008',title:'MBO Gran Formato Industrial UV1612G+UV1812+UV2513',desc:'Línea de producción masiva',priceRange:'desde 26.500 € + 27.500 € + 34.000 €',colorTag:'purple',introText:'Cuando necesitas línea de producción real: el dúo UV1612G+UV1812 para volumen medio-alto, o el salto a la UV2513 para producción masiva (250×130 cm). Cabezales de alta velocidad, rígidos y flexibles, CMYK+W+Barniz. Esto es factorización industrial:',brandStrip:'mbo',blockType:'product_trio',products:['uv1612g','uv1812','uv2513'],includeHero:false,includeSteps:false,visible:true,i18n:{fr:{introText:'Quand il vous faut une vraie ligne de production : le duo UV1612G+UV1812 pour le volume moyen-haut, ou le passage à la UV2513 pour la production massive (250×130 cm). Têtes haute vitesse, rigides et souples, CMYK+W+Vernis :'},de:{introText:'Wenn Sie eine echte Produktionslinie brauchen: Das Duo UV1612G+UV1812 für mittleres bis hohes Volumen, oder der Sprung zur UV2513 für Massenproduktion (250×130 cm). Hochgeschwindigkeits-Druckköpfe, starre und flexible Materialien, CMYK+W+Lack:'},en:{introText:'When you need a real production line: the UV1612G+UV1812 duo for medium-to-high volume, or the step up to the UV2513 for mass production (250×130 cm). High-speed printheads, rigid and flexible materials, CMYK+W+Varnish:'},nl:{introText:'Wanneer u een echte productielijn nodig heeft: het UV1612G+UV1812-duo voor middelhoog volume, of de stap naar de UV2513 voor massaproductie (250×130 cm). Hogesnelheidsprintkoppen, stijve en flexibele materialen, CMYK+W+Lak:'}}},
+      {id:'block-009',title:'PimPam Vending CaseBox+Custom',desc:'Autoservicio impreso 24/7',priceRange:'Consultar',colorTag:'orange',introText:'PimPam es el vending con personalización UV-LED integrada. Sin operario. El cliente elige, personaliza su funda, paga y se la lleva en 30 segundos. CaseBox para retail/interiores, Custom para branding completo con tus vinilos y campañas temporales:',brandStrip:'pimpam',blockType:'product_pair',products:['casebox','custom'],includeHero:true,includeSteps:false,visible:true,i18n:{fr:{introText:'PimPam, c\'est le vending avec personnalisation UV-LED intégrée. Sans opérateur. Le client choisit, personnalise sa coque, paie et repart en 30 secondes. CaseBox pour le retail/intérieur, Custom pour un branding complet avec vos visuels :'},de:{introText:'PimPam ist Vending mit integrierter UV-LED-Personalisierung. Ohne Personal. Der Kunde wählt, personalisiert seine Hülle, bezahlt und nimmt sie in 30 Sekunden mit. CaseBox für Retail/Innenräume, Custom für komplettes Branding mit Ihren Designs:'},en:{introText:'PimPam is vending with integrated UV-LED customization. No operator needed. The customer picks a design, personalizes their case, pays and takes it away in 30 seconds. CaseBox for retail/indoors, Custom for full branding with your visuals:'},nl:{introText:'PimPam is vending met geïntegreerde UV-LED-personalisatie. Geen personeel nodig. De klant kiest een ontwerp, personaliseert het hoesje, betaalt en neemt het mee in 30 seconden. CaseBox voor retail/binnen, Custom voor volledig branding met uw visuals:'}}},
+      {id:'block-010',title:'Complemento Vending artisJet Young',desc:'Impresión manual + autoservicio híbrido',priceRange:'9.300 €',colorTag:'orange',introText:'Para negocios que quieren combinar: una Young en mostrador (operario imprime en el acto) + una PimPam en zona común (autoservicio). Máxima flexibilidad, dos modelos de negocio en paralelo, tiempos rápidos, márgenes altos:',brandStrip:'none',blockType:'product_single',products:['young'],includeHero:false,includeSteps:false,visible:true,i18n:{fr:{introText:'Pour les commerces qui veulent combiner : une Young au comptoir (un opérateur imprime sur place) + une PimPam en zone publique (libre-service). Flexibilité maximale, deux modèles d\'affaires en parallèle, délais rapides, marges élevées :'},de:{introText:'Für Unternehmen, die kombinieren möchten: Eine Young an der Theke (Bediener druckt sofort) + eine PimPam im öffentlichen Bereich (Selbstbedienung). Maximale Flexibilität, zwei Geschäftsmodelle parallel, kurze Zeiten, hohe Margen:'},en:{introText:'For businesses that want to combine: a Young at the counter (operator prints on the spot) + a PimPam in a public area (self-service). Maximum flexibility, two business models in parallel, fast turnaround, high margins:'},nl:{introText:'Voor bedrijven die willen combineren: een Young aan de balie (operator print ter plekke) + een PimPam in een openbare ruimte (zelfbediening). Maximale flexibiliteit, twee businessmodellen parallel, snelle doorlooptijd, hoge marges:'}}},
+      {id:'block-011',title:'Proceso PimPam 4 Pasos',desc:'El viaje del cliente en 30 segundos',priceRange:'-',colorTag:'orange',introText:'Esto es lo que ve el cliente: selecciona diseño, personaliza, paga, y se va con su funda. Sin esperas, sin complicaciones, sin personal. El "por qué" de PimPam. Aquí se convierte en negocio rentable.',brandStrip:'pimpam',blockType:'product_single',products:['young'],includeHero:false,includeSteps:true,visible:true,i18n:{fr:{introText:'Voici ce que voit le client : il choisit un design, le personnalise, paie, et repart avec sa coque. Sans attente, sans complication, sans personnel. Le « pourquoi » de PimPam — et ce qui en fait un business rentable.'},de:{introText:'Das sieht der Kunde: Design auswählen, personalisieren, bezahlen — und die Hülle mitnehmen. Keine Wartezeit, keine Komplikationen, kein Personal. Das ist das „Warum" von PimPam — und das macht es zum profitablen Geschäft.'},en:{introText:'This is what the customer sees: pick a design, customize it, pay, and walk away with their case. No waiting, no hassle, no staff needed. The "why" of PimPam — and what makes it a profitable business.'},nl:{introText:'Dit is wat de klant ziet: ontwerp kiezen, personaliseren, betalen en weglopen met het hoesje. Geen wachttijd, geen gedoe, geen personeel nodig. Het "waarom" van PimPam — en wat het een winstgevend bedrijf maakt.'}}},
     ],
     prewrittenTexts: [
-      {id:'text-001',name:'Intro UV-LED',icon:'💡',text:'Hola,\n\nTras nuestra conversación, te envío información sobre algunas de nuestras impresoras UV-LED que creo que encajan con lo que necesitas.\n\nLa tecnología UV-LED permite imprimir directamente sobre casi cualquier material (plástico, madera, metal, vidrio, cerámica…) con secado instantáneo y calidad fotorrealista en CMYK + blanco.',visible:true},
-      {id:'text-002',name:'Transición a MBO',icon:'▶',text:'En nuestra línea MBO (marca propia, excelente relación calidad-precio) también tenemos opciones interesantes:',visible:true},
-      {id:'text-003',name:'Transición a PimPam',icon:'🔹',text:'Y si te interesa el concepto de vending con personalización automática, tenemos PimPam — máquinas que imprimen fundas de móvil al momento, sin operario:',visible:true},
-      {id:'text-004',name:'Mención Freebird',icon:'✨',text:'Por cierto, varios de estos equipos incluyen tecnología Freebird — un sensor láser que ajusta automáticamente la altura del cabezal para imprimir sobre objetos 3D irregulares:',visible:true},
-      {id:'text-005',name:'Cierre comercial',icon:'👋',text:'Si quieres, podemos organizar una demo (presencial o videollamada) para que veas cualquiera de estos equipos en funcionamiento. También te puedo enviar muestras impresas sin compromiso.\n\n¡Quedo a tu disposición!\nUn saludo,',visible:true},
+      {id:'text-001',name:'Intro UV-LED',icon:'💡',text:'Hola,\n\nTras nuestra conversación, te envío información sobre algunas de nuestras impresoras UV-LED que creo que encajan con lo que necesitas.\n\nLa tecnología UV-LED permite imprimir directamente sobre casi cualquier material (plástico, madera, metal, vidrio, cerámica…) con secado instantáneo y calidad fotorrealista en CMYK + blanco.',visible:true,i18n:{fr:{text:'Bonjour,\n\nSuite à notre échange, je vous envoie les informations sur quelques-unes de nos imprimantes UV-LED qui correspondent à vos besoins.\n\nLa technologie UV-LED permet d\'imprimer directement sur presque tous les matériaux (plastique, bois, métal, verre, céramique…) avec un séchage instantané et une qualité photoréaliste en CMYK + blanc.'},de:{text:'Hallo,\n\nnach unserem Gespräch sende ich Ihnen Informationen zu einigen unserer UV-LED-Drucker, die gut zu Ihren Anforderungen passen.\n\nMit UV-LED-Technologie drucken Sie direkt auf nahezu jedes Material (Kunststoff, Holz, Metall, Glas, Keramik…) — mit sofortiger Trocknung und fotorealistischer Qualität in CMYK + Weiß.'},en:{text:'Hi,\n\nFollowing our conversation, here\'s some information on a few of our UV-LED printers that I think match what you\'re looking for.\n\nUV-LED technology lets you print directly onto almost any material (plastic, wood, metal, glass, ceramics…) with instant curing and photorealistic quality in CMYK + white.'},nl:{text:'Hallo,\n\nNaar aanleiding van ons gesprek stuur ik u informatie over een aantal van onze UV-LED-printers die goed bij uw wensen passen.\n\nUV-LED-technologie maakt het mogelijk om rechtstreeks op vrijwel elk materiaal te printen (kunststof, hout, metaal, glas, keramiek…) met directe droging en fotorealistische kwaliteit in CMYK + wit.'}}},
+      {id:'text-002',name:'Transición a MBO',icon:'▶',text:'En nuestra línea MBO (marca propia, excelente relación calidad-precio) también tenemos opciones interesantes:',visible:true,i18n:{fr:{text:'Dans notre gamme MBO (marque propre, excellent rapport qualité-prix), nous avons également des options intéressantes :'},de:{text:'In unserer MBO-Reihe (Eigenmarke, hervorragendes Preis-Leistungs-Verhältnis) haben wir ebenfalls interessante Optionen:'},en:{text:'In our MBO range (own brand, excellent value for money), we also have some interesting options:'},nl:{text:'In ons MBO-assortiment (eigen merk, uitstekende prijs-kwaliteitverhouding) hebben we ook interessante opties:'}}},
+      {id:'text-003',name:'Transición a PimPam',icon:'🔹',text:'Y si te interesa el concepto de vending con personalización automática, tenemos PimPam — máquinas que imprimen fundas de móvil al momento, sin operario:',visible:true,i18n:{fr:{text:'Et si le concept de vending avec personnalisation automatique vous intéresse, nous avons PimPam — des machines qui impriment des coques de téléphone à la demande, sans opérateur :'},de:{text:'Falls Sie das Konzept von Vending mit automatischer Personalisierung interessiert: Wir haben PimPam — Automaten, die Handyhüllen sofort bedrucken, ganz ohne Personal:'},en:{text:'And if you\'re interested in the concept of vending with automatic customization, we have PimPam — machines that print phone cases on the spot, with no operator needed:'},nl:{text:'En als u geïnteresseerd bent in vending met automatische personalisatie, dan hebben we PimPam — machines die telefoonhoesjes ter plekke bedrukken, zonder personeel:'}}},
+      {id:'text-004',name:'Mención Freebird',icon:'✨',text:'Por cierto, varios de estos equipos incluyen tecnología Freebird — un sensor láser que ajusta automáticamente la altura del cabezal para imprimir sobre objetos 3D irregulares:',visible:true,i18n:{fr:{text:'À noter : plusieurs de ces machines intègrent la technologie Freebird — un capteur laser qui ajuste automatiquement la hauteur de la tête d\'impression pour imprimer sur des objets 3D irréguliers :'},de:{text:'Übrigens: Mehrere dieser Geräte verfügen über die Freebird-Technologie — ein Lasersensor, der die Druckkopfhöhe automatisch anpasst, um auf unregelmäßigen 3D-Objekten zu drucken:'},en:{text:'By the way, several of these machines include Freebird technology — a laser sensor that automatically adjusts the printhead height to print on irregular 3D objects:'},nl:{text:'Overigens: meerdere van deze machines beschikken over Freebird-technologie — een lasersensor die automatisch de printkophoogte aanpast om op onregelmatige 3D-objecten te printen:'}}},
+      {id:'text-005',name:'Cierre comercial',icon:'👋',text:'Si quieres, podemos organizar una demo (presencial o videollamada) para que veas cualquiera de estos equipos en funcionamiento. También te puedo enviar muestras impresas sin compromiso.\n\n¡Quedo a tu disposición!\nUn saludo,',visible:true,i18n:{fr:{text:'Si vous le souhaitez, nous pouvons organiser une démonstration (sur place ou en visioconférence) pour voir ces machines en action. Je peux également vous envoyer des échantillons imprimés sans engagement.\n\nÀ votre disposition !\nCordialement,'},de:{text:'Gerne können wir eine Demo organisieren (vor Ort oder per Videocall), damit Sie die Geräte in Aktion sehen. Ich kann Ihnen auch gerne gedruckte Muster unverbindlich zusenden.\n\nIch stehe Ihnen jederzeit zur Verfügung!\nMit freundlichen Grüßen,'},en:{text:'If you\'d like, we can arrange a demo (on-site or video call) so you can see any of these machines in action. I can also send you printed samples with no obligation.\n\nLooking forward to hearing from you!\nBest regards,'},nl:{text:'Als u wilt, kunnen we een demo organiseren (op locatie of via videocall) zodat u deze machines in actie kunt zien. Ik kan u ook vrijblijvend gedrukte samples sturen.\n\nIk sta tot uw beschikking!\nMet vriendelijke groet,'}}},
     ],
     templates: [
       {id:'tpl-001',name:'Compactas UV-LED',colorClass:'blue',blocks:['text-001','block-001','text-002','block-002','text-005'],visible:true},
@@ -345,7 +381,7 @@ function createBlock(type) {
 }
 
 // ─── HTML GENERATORS ─────────────────────────────────────────
-function productCardHtml(p) {
+function productCardHtml(p, lang) {
   var areaBlock = '';
   if (p.area !== '-') {
     areaBlock = '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0">' +
@@ -353,8 +389,8 @@ function productCardHtml(p) {
       (p.alt !== '-' ? '<tr><td style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">Alt. máx.</td><td style="font-size:10px;font-weight:700;color:#334155">' + p.alt + '</td></tr>' : '') +
       '</table>';
   }
-  var priceExtra = p.price !== 'Consultar' ? ' <span style="font-size:10px;font-weight:500;color:#475569">+ IVA</span>' : '';
-  var ctaLabel = p.brand === 'pimpam' ? 'Detalles' : 'Más info';
+  var priceExtra = p.price !== 'Consultar' && p.price !== 'Sur demande' && p.price !== 'Auf Anfrage' && p.price !== 'On request' && p.price !== 'Op aanvraag' ? ' <span style="font-size:10px;font-weight:500;color:#475569">' + (lang==='fr'?'+ TVA':lang==='de'?'+ MwSt':lang==='en'?'+ VAT':lang==='nl'?'+ BTW':'+ IVA') + '</span>' : '';
+  var ctaLabel = p.brand === 'pimpam' ? (lang==='fr'?'Détails':lang==='de'?'Details':lang==='en'?'Details':lang==='nl'?'Details':'Detalles') : (lang==='fr'?'Plus d\'infos':lang==='de'?'Mehr Infos':lang==='en'?'More info':lang==='nl'?'Meer info':'Más info');
   var bgExtra = p.brand === 'pimpam' ? ';background:#fff7ed' : '';
   return '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1.5px solid ' + (p.brand==='pimpam'?'#fed7aa':'#e2e8f0') + ';border-radius:12px;overflow:hidden;background:#fff">' +
     '<tr><td style="background:#fff;padding:16px 12px 8px;border-bottom:1px solid ' + (p.brand==='pimpam'?'#ffedd5':'#f1f5f9') + ';text-align:center">' +
@@ -372,7 +408,7 @@ function productCardHtml(p) {
     '</td></tr></table>';
 }
 
-function productCardCompactHtml(p) {
+function productCardCompactHtml(p, lang) {
   var areaBlock = '';
   if (p.area !== '-') {
     areaBlock = '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0">' +
@@ -380,8 +416,8 @@ function productCardCompactHtml(p) {
       (p.alt !== '-' ? '<tr><td style="font-size:7px;font-weight:700;color:#94a3b8;text-transform:uppercase">Alt: ' + p.alt + '</td></tr>' : '') +
       '</table>';
   }
-  var priceExtra = p.price !== 'Consultar' ? ' <span style="font-size:8px;font-weight:500;color:#475569">(+IVA)</span>' : '';
-  var ctaLabel = p.brand === 'pimpam' ? 'Detalles' : 'Info';
+  var priceExtra = p.price !== 'Consultar' && p.price !== 'Sur demande' && p.price !== 'Auf Anfrage' && p.price !== 'On request' && p.price !== 'Op aanvraag' ? ' <span style="font-size:8px;font-weight:500;color:#475569">(' + (lang==='fr'?'+ TVA':lang==='de'?'+ MwSt':lang==='en'?'+ VAT':lang==='nl'?'+ BTW':'+ IVA') + ')</span>' : '';
+  var ctaLabel = p.brand === 'pimpam' ? (lang==='fr'?'Détails':lang==='de'?'Details':lang==='en'?'Details':lang==='nl'?'Details':'Detalles') : (lang==='fr'?'Info':lang==='de'?'Info':lang==='en'?'Info':lang==='nl'?'Info':'Info');
   var bgExtra = p.brand === 'pimpam' ? ';background:#fff7ed' : '';
   return '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ' + (p.brand==='pimpam'?'#fed7aa':'#e2e8f0') + ';border-radius:8px;overflow:hidden;background:#fff">' +
     '<tr><td style="background:#fff;padding:8px 8px 6px;border-bottom:1px solid ' + (p.brand==='pimpam'?'#ffedd5':'#f1f5f9') + ';text-align:center">' +
@@ -399,11 +435,14 @@ function productCardCompactHtml(p) {
     '</td></tr></table>';
 }
 
-function brandStripHtml(key) {
-  var b = BRAND_STRIPS[key];
+function brandStripHtml(key, lang, brands) {
+  var b = brands.find(function(br){return br.id===key});
+  if(!b) return '';
+  var url = (typeof b.url === 'object') ? (b.url[lang] || b.url.es) : b.url;
+  var urlLabel = (typeof b.urlLabel === 'object') ? (b.urlLabel[lang] || b.urlLabel.es) : b.urlLabel;
   return '<tr><td style="padding:16px 8px 8px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
-    '<td valign="middle"><img src="' + b.logo + '" height="' + b.h + '" alt="' + b.label + '" style="max-width:140px;width:auto"></td>' +
-    '<td valign="middle" align="right"><a href="' + b.url + '" style="font-size:11px;font-weight:700;color:' + b.color + ';text-decoration:none">' + b.urlLabel + '</a></td>' +
+    '<td valign="middle"><img src="' + b.logo + '" height="' + b.logoHeight + '" alt="' + b.label + '" style="max-width:140px;width:auto"></td>' +
+    '<td valign="middle" align="right"><a href="' + url + '" style="font-size:11px;font-weight:700;color:' + b.color + ';text-decoration:none">' + urlLabel + '</a></td>' +
     '</tr></table><div style="height:1px;background:' + b.divider + ';margin-top:8px"></div></td></tr>';
 }
 
@@ -416,27 +455,27 @@ function textBlockHtml(text) {
   return '<tr><td style="padding:16px 8px;font-size:14px;color:#1e293b;line-height:1.65">\n' + html + '</td></tr>';
 }
 
-function productSingleHtml(p) {
+function productSingleHtml(p, lang) {
   return '<tr><td style="padding:8px 8px 16px"><table width="320" cellpadding="0" cellspacing="0" border="0" style="margin:0"><tr><td>' +
-    productCardHtml(p) + '</td></tr></table></td></tr>';
+    productCardHtml(p, lang) + '</td></tr></table></td></tr>';
 }
 
-function productPairHtml(p1, p2) {
+function productPairHtml(p1, p2, lang) {
   return '<tr><td style="padding:8px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr class="prod-row">' +
-    '<td class="col-half prod-cell" width="50%" valign="top" style="padding:0 5px 0 0">' + productCardHtml(p1) + '</td>' +
-    '<td class="col-half prod-cell" width="50%" valign="top" style="padding:0 0 0 5px">' + productCardHtml(p2) + '</td>' +
+    '<td class="col-half prod-cell" width="50%" valign="top" style="padding:0 5px 0 0">' + productCardHtml(p1, lang) + '</td>' +
+    '<td class="col-half prod-cell" width="50%" valign="top" style="padding:0 0 0 5px">' + productCardHtml(p2, lang) + '</td>' +
     '</tr></table></td></tr>';
 }
 
-function productTrioHtml(p1, p2, p3) {
+function productTrioHtml(p1, p2, p3, lang) {
   return '<tr><td style="padding:8px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr class="prod-row">' +
-    '<td class="col-third prod-cell" width="33%" valign="top" style="padding:0 4px 0 0">' + productCardCompactHtml(p1) + '</td>' +
-    '<td class="col-third prod-cell" width="33%" valign="top" style="padding:0 4px">' + productCardCompactHtml(p2) + '</td>' +
-    '<td class="col-third prod-cell" width="33%" valign="top" style="padding:0 0 0 4px">' + productCardCompactHtml(p3) + '</td>' +
+    '<td class="col-third prod-cell" width="33%" valign="top" style="padding:0 4px 0 0">' + productCardCompactHtml(p1, lang) + '</td>' +
+    '<td class="col-third prod-cell" width="33%" valign="top" style="padding:0 4px">' + productCardCompactHtml(p2, lang) + '</td>' +
+    '<td class="col-third prod-cell" width="33%" valign="top" style="padding:0 0 0 4px">' + productCardCompactHtml(p3, lang) + '</td>' +
     '</tr></table></td></tr>';
 }
 
-function freebirdHtml(config) {
+function freebirdHtml(config, lang) {
   config = config || {};
   var youtubeUrl = config.youtubeUrl || 'https://www.youtube.com/watch?v=gp-x_jRBRcE';
   var thumbnailUrl = config.thumbnailOverride;
@@ -450,6 +489,7 @@ function freebirdHtml(config) {
   if (!thumbnailUrl) {
     thumbnailUrl = 'https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png';
   }
+  var videoLabel = lang==='fr'?'Voir la vidéo':lang==='de'?'Video ansehen':lang==='en'?'Watch video':lang==='nl'?'Video bekijken':'Ver vídeo';
   return '<tr><td style="padding:8px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:12px;overflow:hidden;background:#0f172a">' +
     '<tr><td style="text-align:center;padding:0">' +
     '<a href="' + youtubeUrl + '" target="_blank" style="text-decoration:none">' +
@@ -457,12 +497,12 @@ function freebirdHtml(config) {
     '</a>' +
     '</td></tr>' +
     '<tr><td style="text-align:center;padding:12px 16px;background:#0f172a">' +
-    '<a href="' + youtubeUrl + '" target="_blank" style="color:#93c5fd;font-size:14px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">▶ Ver vídeo</a>' +
+    '<a href="' + youtubeUrl + '" target="_blank" style="color:#93c5fd;font-size:14px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">▶ ' + videoLabel + '</a>' +
     '</td></tr>' +
     '</table></td></tr>';
 }
 
-function pimpamHeroHtml(config) {
+function pimpamHeroHtml(config, lang) {
   var cfg = config || {};
   var imgUrl = cfg.heroImage || 'https://pimpam-vending.com/wp-content/uploads/2026/01/ChatGPT-Image-22-ene-2026-16_17_36.png';
   var title = cfg.heroTitle || 'Personaliza, imprime y vende… sin operario';
@@ -501,7 +541,7 @@ function pimpamHeroHtml(config) {
     '</td></tr></table></td></tr>';
 }
 
-function pimpamStepsHtml(config) {
+function pimpamStepsHtml(config, lang) {
   var cfg = config || {};
   var steps = cfg.steps || [
     {n:"1️⃣",t:"Elige diseño",s:"Pantalla táctil"},
@@ -538,33 +578,34 @@ var CSS_BLOCK = '<style>' +
   '}' +
   '</style>';
 
-function generateFullHtml(blocks, products) {
+function generateFullHtml(blocks, products, lang, brands) {
+  lang = lang || 'es';
   var rows = '';
   for (var i = 0; i < blocks.length; i++) {
     var b = blocks[i];
     switch(b.type) {
       case 'text': rows += textBlockHtml(b.text); break;
-      case 'brand_artisjet': rows += brandStripHtml('artisjet'); break;
-      case 'brand_mbo': rows += brandStripHtml('mbo'); break;
-      case 'brand_pimpam': rows += brandStripHtml('pimpam'); break;
+      case 'brand_artisjet': rows += brandStripHtml('artisjet', lang, brands); break;
+      case 'brand_mbo': rows += brandStripHtml('mbo', lang, brands); break;
+      case 'brand_pimpam': rows += brandStripHtml('pimpam', lang, brands); break;
       case 'product_single':
         var ps = products.find(function(p){return p.id===b.product1});
-        if(ps) rows += productSingleHtml(ps);
+        if(ps) { ps = getLocalizedProduct(ps, lang); rows += productSingleHtml(ps, lang); }
         break;
       case 'product_pair':
         var p1 = products.find(function(p){return p.id===b.product1});
         var p2 = products.find(function(p){return p.id===b.product2});
-        if(p1&&p2) rows += productPairHtml(p1,p2);
+        if(p1&&p2) { p1 = getLocalizedProduct(p1, lang); p2 = getLocalizedProduct(p2, lang); rows += productPairHtml(p1,p2,lang); }
         break;
       case 'product_trio':
         var pt1 = products.find(function(p){return p.id===b.product1});
         var pt2 = products.find(function(p){return p.id===b.product2});
         var pt3 = products.find(function(p){return p.id===b.product3});
-        if(pt1&&pt2&&pt3) rows += productTrioHtml(pt1,pt2,pt3);
+        if(pt1&&pt2&&pt3) { pt1 = getLocalizedProduct(pt1, lang); pt2 = getLocalizedProduct(pt2, lang); pt3 = getLocalizedProduct(pt3, lang); rows += productTrioHtml(pt1,pt2,pt3,lang); }
         break;
-      case 'freebird': rows += freebirdHtml(b); break;
-      case 'pimpam_hero': rows += pimpamHeroHtml(b); break;
-      case 'pimpam_steps': rows += pimpamStepsHtml(b); break;
+      case 'freebird': rows += freebirdHtml(b, lang); break;
+      case 'pimpam_hero': rows += pimpamHeroHtml(b, lang); break;
+      case 'pimpam_steps': rows += pimpamStepsHtml(b, lang); break;
     }
   }
   return '<html><head>'+CSS_BLOCK+'</head><body style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;margin:0;padding:0;background:#ffffff;color:#1e293b">' +
@@ -586,20 +627,126 @@ function ProductSelect(props) {
   );
 }
 
-// ─── PRODUCT EDITOR MODAL ────────────────────────────────────
-function ProductEditorModal(props) {
-  var product = props.product || {id:'',brand:'artisjet',name:'',badge:'',badgeBg:'#dcfce7',badgeColor:'#15803d',img:'',desc:'',area:'-',alt:'-',feat1:'',feat2:'',price:'',link:'',accent:'#1d4ed8',gradient:'linear-gradient(90deg,#1d4ed8,#3b82f6)'};
-  var _form = useState(product);
+// ─── BRAND EDITOR MODAL ──────────────────────────────────────
+function BrandEditorModal(props) {
+  var brand = props.brand || {id:'',label:'',logo:'',url:{es:'',fr:'',de:'',en:'',nl:''},urlLabel:{es:'',fr:'',de:'',en:'',nl:''},color:'#000000',divider:'#e2e8f0',logoHeight:'18',visible:true};
+  var _form = useState(Object.assign({}, brand));
   var form = _form[0], setForm = _form[1];
+  var _editLang = useState('es');
+  var editLang = _editLang[0], setEditLang = _editLang[1];
 
   var updateForm = function(key, value) {
-    var newForm = Object.assign({}, form, {});
+    var newForm = Object.assign({}, form);
+    newForm[key] = value;
+    setForm(newForm);
+  };
+
+  var updateUrl = function(lng, value) {
+    var newForm = Object.assign({}, form);
+    newForm.url = Object.assign({}, newForm.url || {});
+    newForm.url[lng] = value;
+    setForm(newForm);
+  };
+
+  var updateUrlLabel = function(lng, value) {
+    var newForm = Object.assign({}, form);
+    newForm.urlLabel = Object.assign({}, newForm.urlLabel || {});
+    newForm.urlLabel[lng] = value;
+    setForm(newForm);
+  };
+
+  return e('div', {className:'modal-overlay', onClick:props.onClose},
+    e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}},
+      e('div', {className:'modal-header'},
+        e('span', null, props.isNew ? 'Nueva marca' : 'Editar marca'),
+        e('button', {className:'modal-close', onClick:props.onClose}, '✕')
+      ),
+
+      e('div', {className:'modal-body'},
+        // Non-translatable fields
+        e('div', {className:'modal-grid'},
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'ID (único)'),
+            e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Label'),
+            e('input', {className:'form-input', value:form.label, onChange:function(ev){updateForm('label', ev.target.value)}})
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'Logo URL'),
+            e('input', {className:'form-input', value:form.logo, onChange:function(ev){updateForm('logo', ev.target.value)}}),
+            form.logo && e('img', {src:form.logo, alt:'preview', className:'image-preview', style:{maxHeight:'60px'}, onError:function(ev){ev.target.style.display='none'}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Altura del logo (px)'),
+            e('input', {className:'form-input', type:'number', value:form.logoHeight, onChange:function(ev){updateForm('logoHeight', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Color principal'),
+            e('input', {className:'form-color', type:'color', value:form.color, onChange:function(ev){updateForm('color', ev.target.value)}})
+          ),
+          e('div', {className:'form-group'},
+            e('label', {className:'form-label'}, 'Color divisor'),
+            e('input', {className:'form-color', type:'color', value:form.divider, onChange:function(ev){updateForm('divider', ev.target.value)}})
+          )
+        ),
+
+        // Language tabs
+        e('div', {className:'lang-tabs', style:{marginTop:'16px'}},
+          LANGS.map(function(l){
+            return e('button', {key:l, className:'lang-tab' + (editLang===l?' active':''), onClick:function(){setEditLang(l)}}, LANG_LABELS[l]);
+          })
+        ),
+
+        // URL fields per language
+        e('div', {className:'modal-grid'},
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'URL (' + editLang.toUpperCase() + ')'),
+            e('input', {className:'form-input', value:form.url[editLang]||'', onChange:function(ev){updateUrl(editLang, ev.target.value)}})
+          ),
+          e('div', {className:'form-group form-group-full'},
+            e('label', {className:'form-label'}, 'URL Label (' + editLang.toUpperCase() + ')'),
+            e('input', {className:'form-input', value:form.urlLabel[editLang]||'', onChange:function(ev){updateUrlLabel(editLang, ev.target.value)}, placeholder:'e.g. "artisjet-printers.eu →"'})
+          )
+        )
+      ),
+
+      e('div', {className:'modal-footer'},
+        e('button', {className:'btn btn-ghost', onClick:props.onClose}, 'Cancelar'),
+        e('button', {className:'btn btn-primary', onClick:function(){props.onSave(form)}}, 'Guardar')
+      )
+    )
+  );
+}
+
+// ─── PRODUCT EDITOR MODAL ────────────────────────────────────
+function ProductEditorModal(props) {
+  var product = props.product || {id:'',brand:'artisjet',name:'',badge:'',badgeBg:'#dcfce7',badgeColor:'#15803d',img:'',desc:'',area:'-',alt:'-',feat1:'',feat2:'',price:'',link:'',accent:'#1d4ed8',gradient:'linear-gradient(90deg,#1d4ed8,#3b82f6)',i18n:{}};
+  var _form = useState(Object.assign({i18n:{}}, product));
+  var form = _form[0], setForm = _form[1];
+  var _editLang = useState('es');
+  var editLang = _editLang[0], setEditLang = _editLang[1];
+
+  var updateForm = function(key, value) {
+    var newForm = Object.assign({}, form);
     newForm[key] = value;
     if(key === 'accent') {
       newForm.gradient = 'linear-gradient(90deg,' + value + ',' + value.replace('#', '#').slice(0, 7) + ')';
     }
     setForm(newForm);
   };
+
+  var updateI18n = function(lng, key, value) {
+    var newForm = Object.assign({}, form);
+    newForm.i18n = Object.assign({}, newForm.i18n || {});
+    newForm.i18n[lng] = Object.assign({}, newForm.i18n[lng] || {});
+    newForm.i18n[lng][key] = value;
+    setForm(newForm);
+  };
+
+  var i18nFields = ['name','desc','badge','feat1','feat2','price','link'];
+  var i18nLabels = {name:'Nombre',desc:'Descripción',badge:'Badge',feat1:'Feature 1',feat2:'Feature 2',price:'Precio',link:'Link'};
 
   return e('div', {className:'modal-overlay', onClick:props.onClose},
     e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}},
@@ -609,6 +756,7 @@ function ProductEditorModal(props) {
       ),
 
       e('div', {className:'modal-body'},
+        // Non-translatable fields always visible
         e('div', {className:'modal-grid'},
           e('div', {className:'form-group'},
             e('label', {className:'form-label'}, 'ID (único)'),
@@ -617,34 +765,15 @@ function ProductEditorModal(props) {
           e('div', {className:'form-group'},
             e('label', {className:'form-label'}, 'Marca'),
             e('select', {className:'form-select', value:form.brand, onChange:function(ev){updateForm('brand', ev.target.value)}},
-              e('option', {value:'artisjet'}, 'artisJet'),
-              e('option', {value:'mbo'}, 'MBO'),
-              e('option', {value:'pimpam'}, 'PimPam')
-            )
-          ),
-          e('div', {className:'form-group form-group-full'},
-            e('label', {className:'form-label'}, 'Nombre'),
-            e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
-          ),
-          e('div', {className:'form-group'},
-            e('label', {className:'form-label'}, 'Badge'),
-            e('input', {className:'form-input', value:form.badge, onChange:function(ev){updateForm('badge', ev.target.value)}})
-          ),
-          e('div', {className:'form-group'},
-            e('label', {className:'form-label'}, 'Badge BG / Color'),
-            e('div', {style:{display:'flex',gap:'8px'}},
-              e('input', {className:'form-color', type:'color', value:form.badgeBg, onChange:function(ev){updateForm('badgeBg', ev.target.value)}}),
-              e('input', {className:'form-color', type:'color', value:form.badgeColor, onChange:function(ev){updateForm('badgeColor', ev.target.value)}})
+              props.brands && props.brands.map(function(b){
+                return e('option', {key:b.id, value:b.id}, b.label);
+              })
             )
           ),
           e('div', {className:'form-group form-group-full'},
             e('label', {className:'form-label'}, 'URL de imagen'),
             e('input', {className:'form-input', value:form.img, onChange:function(ev){updateForm('img', ev.target.value)}}),
             form.img && e('img', {src:form.img, alt:'preview', className:'image-preview', onError:function(ev){ev.target.style.display='none'}})
-          ),
-          e('div', {className:'form-group form-group-full'},
-            e('label', {className:'form-label'}, 'Descripción'),
-            e('textarea', {className:'form-textarea', value:form.desc, onChange:function(ev){updateForm('desc', ev.target.value)}})
           ),
           e('div', {className:'form-group'},
             e('label', {className:'form-label'}, 'Área'),
@@ -655,25 +784,56 @@ function ProductEditorModal(props) {
             e('input', {className:'form-input', value:form.alt, onChange:function(ev){updateForm('alt', ev.target.value)}})
           ),
           e('div', {className:'form-group'},
-            e('label', {className:'form-label'}, 'Feature 1'),
-            e('input', {className:'form-input', value:form.feat1, onChange:function(ev){updateForm('feat1', ev.target.value)}})
-          ),
-          e('div', {className:'form-group'},
-            e('label', {className:'form-label'}, 'Feature 2'),
-            e('input', {className:'form-input', value:form.feat2, onChange:function(ev){updateForm('feat2', ev.target.value)}})
-          ),
-          e('div', {className:'form-group'},
-            e('label', {className:'form-label'}, 'Precio'),
-            e('input', {className:'form-input', value:form.price, onChange:function(ev){updateForm('price', ev.target.value)}})
+            e('label', {className:'form-label'}, 'Badge BG / Color'),
+            e('div', {style:{display:'flex',gap:'8px'}},
+              e('input', {className:'form-color', type:'color', value:form.badgeBg, onChange:function(ev){updateForm('badgeBg', ev.target.value)}}),
+              e('input', {className:'form-color', type:'color', value:form.badgeColor, onChange:function(ev){updateForm('badgeColor', ev.target.value)}})
+            )
           ),
           e('div', {className:'form-group'},
             e('label', {className:'form-label'}, 'Color acentuado'),
             e('input', {className:'form-color', type:'color', value:form.accent, onChange:function(ev){updateForm('accent', ev.target.value)}})
-          ),
-          e('div', {className:'form-group form-group-full'},
-            e('label', {className:'form-label'}, 'Link'),
-            e('input', {className:'form-input', value:form.link, onChange:function(ev){updateForm('link', ev.target.value)}})
           )
+        ),
+
+        // Language tabs
+        e('div', {className:'lang-tabs', style:{marginTop:'16px'}},
+          LANGS.map(function(l){
+            return e('button', {key:l, className:'lang-tab' + (editLang===l?' active':''), onClick:function(){setEditLang(l)}}, LANG_LABELS[l]);
+          })
+        ),
+
+        // ES tab: edit top-level fields directly
+        editLang === 'es' && e('div', {className:'modal-grid'},
+          i18nFields.map(function(field){
+            if (field === 'desc') {
+              return e('div', {key:field, className:'form-group form-group-full'},
+                e('label', {className:'form-label'}, i18nLabels[field] + ' (ES)'),
+                e('textarea', {className:'form-textarea', value:form[field]||'', onChange:function(ev){updateForm(field, ev.target.value)}})
+              );
+            }
+            return e('div', {key:field, className:'form-group' + (field==='link'?' form-group-full':'')},
+              e('label', {className:'form-label'}, i18nLabels[field] + ' (ES)'),
+              e('input', {className:'form-input', value:form[field]||'', onChange:function(ev){updateForm(field, ev.target.value)}})
+            );
+          })
+        ),
+
+        // Other language tabs: edit i18n[lang] fields
+        editLang !== 'es' && e('div', {className:'modal-grid'},
+          i18nFields.map(function(field){
+            var i18nVal = (form.i18n && form.i18n[editLang] && form.i18n[editLang][field]) || '';
+            if (field === 'desc') {
+              return e('div', {key:field, className:'form-group form-group-full'},
+                e('label', {className:'form-label'}, i18nLabels[field] + ' (' + editLang.toUpperCase() + ')'),
+                e('textarea', {className:'form-textarea', value:i18nVal, onChange:function(ev){updateI18n(editLang, field, ev.target.value)}, placeholder:form[field]||''})
+              );
+            }
+            return e('div', {key:field, className:'form-group' + (field==='link'?' form-group-full':'')},
+              e('label', {className:'form-label'}, i18nLabels[field] + ' (' + editLang.toUpperCase() + ')'),
+              e('input', {className:'form-input', value:i18nVal, onChange:function(ev){updateI18n(editLang, field, ev.target.value)}, placeholder:form[field]||''})
+            );
+          })
         )
       ),
 
@@ -687,13 +847,23 @@ function ProductEditorModal(props) {
 
 // ─── BLOCK EDITOR MODAL ──────────────────────────────────────
 function BlockEditorModal(props) {
-  var block = props.block || {id:'',title:'',desc:'',priceRange:'',colorTag:'blue',introText:'',brandStrip:'none',blockType:'product_pair',products:[],includeHero:false,includeSteps:false};
-  var _form = useState(block);
+  var block = props.block || {id:'',title:'',desc:'',priceRange:'',colorTag:'blue',introText:'',brandStrip:'none',blockType:'product_pair',products:[],includeHero:false,includeSteps:false,i18n:{}};
+  var _form = useState(Object.assign({i18n:{}}, block));
   var form = _form[0], setForm = _form[1];
+  var _editLang = useState('es');
+  var editLang = _editLang[0], setEditLang = _editLang[1];
 
   var updateForm = function(key, value) {
-    var newForm = Object.assign({}, form, {});
+    var newForm = Object.assign({}, form);
     newForm[key] = value;
+    setForm(newForm);
+  };
+
+  var updateI18n = function(lng, key, value) {
+    var newForm = Object.assign({}, form);
+    newForm.i18n = Object.assign({}, newForm.i18n || {});
+    newForm.i18n[lng] = Object.assign({}, newForm.i18n[lng] || {});
+    newForm.i18n[lng][key] = value;
     setForm(newForm);
   };
 
@@ -743,9 +913,9 @@ function BlockEditorModal(props) {
             e('label', {className:'form-label'}, 'Brand strip'),
             e('select', {className:'form-select', value:form.brandStrip, onChange:function(ev){updateForm('brandStrip', ev.target.value)}},
               e('option', {value:'none'}, 'Ninguno'),
-              e('option', {value:'artisjet'}, 'artisJet'),
-              e('option', {value:'mbo'}, 'MBO'),
-              e('option', {value:'pimpam'}, 'PimPam')
+              props.brands && props.brands.map(function(b){
+                return e('option', {key:b.id, value:b.id}, b.label);
+              })
             )
           ),
           e('div', {className:'form-group'},
@@ -760,12 +930,25 @@ function BlockEditorModal(props) {
                 'Incluir pasos'
               )
             )
-          ),
-          e('div', {className:'form-group form-group-full'},
-            e('label', {className:'form-label'}, 'Texto de introducción'),
-            e('textarea', {className:'form-textarea', value:form.introText, onChange:function(ev){updateForm('introText', ev.target.value)}, style:{minHeight:'100px'}})
           )
-        )
+        ),
+
+        // Language tabs for introText
+        e('div', {className:'lang-tabs', style:{marginTop:'16px'}},
+          LANGS.map(function(l){
+            return e('button', {key:l, className:'lang-tab' + (editLang===l?' active':''), onClick:function(){setEditLang(l)}}, LANG_LABELS[l]);
+          })
+        ),
+
+        editLang === 'es'
+          ? e('div', {className:'form-group'},
+              e('label', {className:'form-label'}, 'Texto de introducción (ES)'),
+              e('textarea', {className:'form-textarea', value:form.introText||'', onChange:function(ev){updateForm('introText', ev.target.value)}, style:{minHeight:'100px'}})
+            )
+          : e('div', {className:'form-group'},
+              e('label', {className:'form-label'}, 'Texto de introducción (' + editLang.toUpperCase() + ')'),
+              e('textarea', {className:'form-textarea', value:(form.i18n && form.i18n[editLang] && form.i18n[editLang].introText)||'', onChange:function(ev){updateI18n(editLang, 'introText', ev.target.value)}, placeholder:form.introText||'', style:{minHeight:'100px'}})
+            )
       ),
 
       e('div', {className:'modal-footer'},
@@ -778,13 +961,23 @@ function BlockEditorModal(props) {
 
 // ─── TEXT EDITOR MODAL ───────────────────────────────────────
 function TextEditorModal(props) {
-  var text = props.text || {id:'',name:'',icon:'',text:''};
-  var _form = useState(text);
+  var text = props.text || {id:'',name:'',icon:'',text:'',i18n:{}};
+  var _form = useState(Object.assign({i18n:{}}, text));
   var form = _form[0], setForm = _form[1];
+  var _editLang = useState('es');
+  var editLang = _editLang[0], setEditLang = _editLang[1];
 
   var updateForm = function(key, value) {
-    var newForm = Object.assign({}, form, {});
+    var newForm = Object.assign({}, form);
     newForm[key] = value;
+    setForm(newForm);
+  };
+
+  var updateI18n = function(lng, key, value) {
+    var newForm = Object.assign({}, form);
+    newForm.i18n = Object.assign({}, newForm.i18n || {});
+    newForm.i18n[lng] = Object.assign({}, newForm.i18n[lng] || {});
+    newForm.i18n[lng][key] = value;
     setForm(newForm);
   };
 
@@ -808,12 +1001,25 @@ function TextEditorModal(props) {
           e('div', {className:'form-group form-group-full'},
             e('label', {className:'form-label'}, 'Nombre'),
             e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
-          ),
-          e('div', {className:'form-group form-group-full'},
-            e('label', {className:'form-label'}, 'Texto'),
-            e('textarea', {className:'form-textarea', value:form.text, onChange:function(ev){updateForm('text', ev.target.value)}, style:{minHeight:'180px'}})
           )
-        )
+        ),
+
+        // Language tabs for text content
+        e('div', {className:'lang-tabs'},
+          LANGS.map(function(l){
+            return e('button', {key:l, className:'lang-tab' + (editLang===l?' active':''), onClick:function(){setEditLang(l)}}, LANG_LABELS[l]);
+          })
+        ),
+
+        editLang === 'es'
+          ? e('div', {className:'form-group'},
+              e('label', {className:'form-label'}, 'Texto (ES)'),
+              e('textarea', {className:'form-textarea', value:form.text||'', onChange:function(ev){updateForm('text', ev.target.value)}, style:{minHeight:'180px'}})
+            )
+          : e('div', {className:'form-group'},
+              e('label', {className:'form-label'}, 'Texto (' + editLang.toUpperCase() + ')'),
+              e('textarea', {className:'form-textarea', value:(form.i18n && form.i18n[editLang] && form.i18n[editLang].text)||'', onChange:function(ev){updateI18n(editLang, 'text', ev.target.value)}, placeholder:form.text||'', style:{minHeight:'180px'}})
+            )
       ),
 
       e('div', {className:'modal-footer'},
@@ -1020,9 +1226,9 @@ function StandaloneBlockEditorModal(props) {
           form.blockType === 'brand_strip' && e('div', {className:'form-group'},
             e('label', {className:'form-label'}, 'Marca'),
             e('select', {className:'form-select', value:cfg.brand||'artisjet', onChange:function(ev){updateConfig('brand', ev.target.value)}},
-              e('option', {value:'artisjet'}, 'artisJet'),
-              e('option', {value:'mbo'}, 'MBO'),
-              e('option', {value:'pimpam'}, 'PimPam')
+              props.brands && props.brands.map(function(b){
+                return e('option', {key:b.id, value:b.id}, b.label);
+              })
             )
           ),
 
@@ -1243,6 +1449,9 @@ function BlockEditor(props) {
 // ─── MAIN APP ────────────────────────────────────────────────
 function EmailComposer() {
   // State
+  var _lang = useState('es');
+  var lang = _lang[0], setLang = _lang[1];
+
   var _appMode = useState('compositor');
   var appMode = _appMode[0], setAppMode = _appMode[1];
 
@@ -1355,6 +1564,15 @@ function EmailComposer() {
   var _editingStandaloneBlock = useState(null);
   var editingStandaloneBlock = _editingStandaloneBlock[0], setEditingStandaloneBlock = _editingStandaloneBlock[1];
 
+  var _editingBrand = useState(null);
+  var editingBrand = _editingBrand[0], setEditingBrand = _editingBrand[1];
+
+  var _brandFilter = useState('all');
+  var brandFilter = _brandFilter[0], setBrandFilter = _brandFilter[1];
+
+  var _sidebarBrandFilter = useState('all');
+  var sidebarBrandFilter = _sidebarBrandFilter[0], setSidebarBrandFilter = _sidebarBrandFilter[1];
+
   // Compositor handlers
   function addBlock(type) { setBlocks(function(prev){return prev.concat([createBlock(type)])}); }
   function updateBlock(id, updated) { setBlocks(function(prev){return prev.map(function(b){return b.id===id?updated:b})}); }
@@ -1371,9 +1589,10 @@ function EmailComposer() {
 
   function addComposedBlock(composedBlock) {
     var newBlocks = [];
-    // Add intro text block
-    if (composedBlock.introText) {
-      newBlocks.push({id: ++blockIdCounter, type:'text', text: composedBlock.introText});
+    // Add intro text block (localized)
+    var introText = getLocalizedText(composedBlock, 'introText', lang);
+    if (introText) {
+      newBlocks.push({id: ++blockIdCounter, type:'text', text: introText});
     }
     // Add brand strip if specified
     if (composedBlock.brandStrip && composedBlock.brandStrip !== 'none') {
@@ -1400,7 +1619,8 @@ function EmailComposer() {
   }
 
   function addPrewrittenText(textObj) {
-    setBlocks(function(prev){ return prev.concat([{id: ++blockIdCounter, type:'text', text: textObj.text}]); });
+    var localizedText = getLocalizedText(textObj, 'text', lang);
+    setBlocks(function(prev){ return prev.concat([{id: ++blockIdCounter, type:'text', text: localizedText}]); });
   }
 
   function addStandaloneBlock(sb) {
@@ -1424,7 +1644,8 @@ function EmailComposer() {
     template.blocks.forEach(function(refId) {
       var composed = appState.composedBlocks.find(function(b){return b.id===refId});
       if (composed) {
-        if (composed.introText) newBlocks.push({id: ++blockIdCounter, type:'text', text: composed.introText});
+        var cIntro = getLocalizedText(composed, 'introText', lang);
+        if (cIntro) newBlocks.push({id: ++blockIdCounter, type:'text', text: cIntro});
         if (composed.brandStrip && composed.brandStrip !== 'none') newBlocks.push({id: ++blockIdCounter, type:'brand_' + composed.brandStrip, brand: composed.brandStrip});
         if (composed.includeHero) newBlocks.push({id: ++blockIdCounter, type:'pimpam_hero'});
         var prods = composed.products || [];
@@ -1434,14 +1655,14 @@ function EmailComposer() {
         if (composed.includeSteps) newBlocks.push({id: ++blockIdCounter, type:'pimpam_steps'});
       } else {
         var textObj = appState.prewrittenTexts.find(function(t){return t.id===refId});
-        if (textObj) newBlocks.push({id: ++blockIdCounter, type:'text', text: textObj.text});
+        if (textObj) newBlocks.push({id: ++blockIdCounter, type:'text', text: getLocalizedText(textObj, 'text', lang)});
       }
     });
     setBlocks(newBlocks);
   }
 
   function copyHtml() {
-    var html = generateFullHtml(blocks, appState.products);
+    var html = generateFullHtml(blocks, appState.products, lang, appState.brands);
     try {
       navigator.clipboard.write([
         new ClipboardItem({
@@ -1538,6 +1759,34 @@ function EmailComposer() {
       return p;
     });
     persistState(Object.assign({}, appState, {products: products}));
+  }
+
+  // Brand management
+  function saveBrand(brand) {
+    var brands = appState.brands.slice();
+    var idx = brands.findIndex(function(b){return b.id===brand.id});
+    if(idx >= 0) {
+      brands[idx] = brand;
+    } else {
+      brands.push(brand);
+    }
+    updateAppState('brands', brands);
+    setEditingBrand(null);
+  }
+
+  function deleteBrand(id) {
+    if(window.confirm('¿Eliminar esta marca?')) {
+      var brands = appState.brands.filter(function(b){return b.id!==id});
+      updateAppState('brands', brands);
+    }
+  }
+
+  function toggleBrandVisible(id) {
+    var brands = appState.brands.map(function(b) {
+      if (b.id === id) return Object.assign({}, b, {visible: !b.visible});
+      return b;
+    });
+    persistState(Object.assign({}, appState, {brands: brands}));
   }
 
   // Block management
@@ -1652,7 +1901,7 @@ function EmailComposer() {
     persistState(Object.assign({}, appState, {standaloneBlocks: blocks}));
   }
 
-  var fullHtml = generateFullHtml(blocks, appState.products);
+  var fullHtml = generateFullHtml(blocks, appState.products, lang, appState.brands);
   var sizeKb = (new Blob([fullHtml]).size / 1024).toFixed(1);
 
   // COMPOSITOR MODE RENDER
@@ -1662,11 +1911,16 @@ function EmailComposer() {
         e('div', {className:'header-left'},
           e('div', {className:'logo'}, 'B'),
           e('div', null,
-            e('div', {className:'header-title'}, 'Bomedia Email Composer V3'),
+            e('div', {className:'header-title'}, 'Bomedia Email Composer'),
             e('div', {className:'header-sub'}, 'Compón emails con bloques de producto UV-LED')
           )
         ),
         e('div', {className:'header-right'},
+          e('div', {className:'lang-selector'},
+            LANGS.map(function(l){
+              return e('button', {key:l, className:'lang-btn' + (lang===l?' active':''), onClick:function(){setLang(l)}, title:LANG_LABELS[l]}, l.toUpperCase());
+            })
+          ),
           e('div', {className:'header-mode-toggle'},
             e('button', {className:'mode-btn active', onClick:function(){setAppMode('compositor')}}, 'Compositor'),
             e('button', {className:'mode-btn', onClick:tryOpenBackoffice}, 'Backoffice')
@@ -1720,7 +1974,12 @@ function EmailComposer() {
 
           // BLOQUES DE PRODUCTO (composed blocks from backoffice)
           e(SidebarSection, {title:'BLOQUES DE PRODUCTO'},
-            appState.composedBlocks.filter(function(cb){return cb.visible !== false}).map(function(cb) {
+            e('div', {className:'brand-filter-bar', style:{marginBottom:'8px'}},
+              e('button', {className:'brand-filter-btn' + (sidebarBrandFilter==='all'?' active':''), onClick:function(){setSidebarBrandFilter('all')}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Todos'),
+              appState.brands.filter(function(br){return br.visible !== false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (sidebarBrandFilter===br.id?' active':''), onClick:function(){setSidebarBrandFilter(br.id)}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
+              e('button', {className:'brand-filter-btn' + (sidebarBrandFilter==='none'?' active':''), onClick:function(){setSidebarBrandFilter('none')}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
+            ),
+            appState.composedBlocks.filter(function(cb){return cb.visible !== false && (sidebarBrandFilter==='all' || cb.brandStrip===sidebarBrandFilter)}).map(function(cb) {
               var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
               var iconMap = {blue:'aJ',purple:'MBO',orange:'🧃',gray:'Mix'};
               return e('button', {key:cb.id, className:'add-btn', onClick:function(){addComposedBlock(cb)}},
@@ -1846,6 +2105,7 @@ function EmailComposer() {
     e('div', {className:'backoffice-container'},
       e('div', {className:'backoffice-tabs'},
         e('button', {className:'backoffice-tab ' + (backofficeTab==='products'?'active':''), onClick:function(){setBackofficeTab('products')}}, 'Productos'),
+        e('button', {className:'backoffice-tab ' + (backofficeTab==='brands'?'active':''), onClick:function(){setBackofficeTab('brands')}}, 'Marcas'),
         e('button', {className:'backoffice-tab ' + (backofficeTab==='blocks'?'active':''), onClick:function(){setBackofficeTab('blocks')}}, 'Bloques'),
         e('button', {className:'backoffice-tab ' + (backofficeTab==='texts'?'active':''), onClick:function(){setBackofficeTab('texts')}}, 'Textos'),
         e('button', {className:'backoffice-tab ' + (backofficeTab==='templates'?'active':''), onClick:function(){setBackofficeTab('templates')}}, 'Plantillas'),
@@ -1858,6 +2118,10 @@ function EmailComposer() {
           e('div', {className:'backoffice-actions'},
             e('button', {className:'btn btn-primary', onClick:function(){setEditingProduct({})}}, '+ Añadir producto')
           ),
+          e('div', {className:'brand-filter-bar'},
+            e('button', {className:'brand-filter-btn' + (brandFilter==='all'?' active':''), onClick:function(){setBrandFilter('all')}}, 'Todos'),
+            appState.brands.map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (brandFilter===br.id?' active':''), onClick:function(){setBrandFilter(br.id)}}, br.label); })
+          ),
           e('table', {className:'data-table'},
             e('thead', null,
               e('tr', null,
@@ -1869,7 +2133,7 @@ function EmailComposer() {
               )
             ),
             e('tbody', null,
-              appState.products.map(function(p){
+              appState.products.filter(function(p){ return brandFilter==='all' || p.brand===brandFilter; }).map(function(p){
                 return e('tr', {key:p.id},
                   e('td', null, p.img && e('img', {src:p.img, className:'product-thumb', alt:p.name, onError:function(ev){ev.target.style.display='none'}})),
                   e('td', null, p.name),
@@ -1886,13 +2150,51 @@ function EmailComposer() {
           )
         ),
 
+        // MARCAS
+        backofficeTab === 'brands' && e('div', null,
+          e('div', {className:'backoffice-actions'},
+            e('button', {className:'btn btn-primary', onClick:function(){setEditingBrand({})}}, '+ Añadir marca')
+          ),
+          e('table', {className:'data-table'},
+            e('thead', null,
+              e('tr', null,
+                e('th', null, 'Logo'),
+                e('th', null, 'Label'),
+                e('th', null, 'Color'),
+                e('th', null, 'ID'),
+                e('th', null, 'Acciones')
+              )
+            ),
+            e('tbody', null,
+              appState.brands.map(function(b){
+                return e('tr', {key:b.id},
+                  e('td', null, b.logo && e('img', {src:b.logo, className:'product-thumb', alt:b.label, style:{maxHeight:'40px'}, onError:function(ev){ev.target.style.display='none'}})),
+                  e('td', null, b.label),
+                  e('td', null, e('div', {style:{width:'40px',height:'40px',backgroundColor:b.color,borderRadius:'6px',border:'1px solid #e5e7eb'}})),
+                  e('td', null, e('code', {style:{fontSize:'12px'}}, b.id)),
+                  e('td', null,
+                    e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:b.visible !== false?'#dcfce7':'#f3f4f6',color:b.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleBrandVisible(b.id)}, title:b.visible !== false?'Visible':'Oculto'}, b.visible !== false?'👁':'👁‍🗨'),
+                    e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingBrand(b)}}, 'Editar'),
+                    e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteBrand(b.id)}, style:{marginLeft:'4px'}}, 'Borrar')
+                  )
+                );
+              })
+            )
+          )
+        ),
+
         // BLOQUES
         backofficeTab === 'blocks' && e('div', null,
           e('div', {className:'backoffice-actions'},
             e('button', {className:'btn btn-primary', onClick:function(){setEditingBlock({})}}, '+ Añadir bloque')
           ),
+          e('div', {className:'brand-filter-bar'},
+            e('button', {className:'brand-filter-btn' + (brandFilter==='all'?' active':''), onClick:function(){setBrandFilter('all')}}, 'Todos'),
+            appState.brands.map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (brandFilter===br.id?' active':''), onClick:function(){setBrandFilter(br.id)}}, br.label); }),
+            e('button', {className:'brand-filter-btn' + (brandFilter==='none'?' active':''), onClick:function(){setBrandFilter('none')}}, 'Mix')
+          ),
           e('div', null,
-            appState.composedBlocks.map(function(b){
+            appState.composedBlocks.filter(function(b){ return brandFilter==='all' || b.brandStrip===brandFilter; }).map(function(b){
               return e('div', {key:b.id, className:'block-list-item', style:{opacity:b.visible !== false?1:0.5}},
                 e('div', {className:'block-list-content'},
                   e('div', {className:'block-list-title'},
@@ -1979,18 +2281,27 @@ function EmailComposer() {
       )
     ),
 
+    editingBrand !== null && e(BrandEditorModal, {
+      brand: editingBrand.id ? editingBrand : null,
+      isNew: !editingBrand.id,
+      onClose: function(){setEditingBrand(null)},
+      onSave: saveBrand
+    }),
+
     editingProduct !== null && e(ProductEditorModal, {
       product: editingProduct.id ? editingProduct : null,
       isNew: !editingProduct.id,
       onClose: function(){setEditingProduct(null)},
-      onSave: saveProduct
+      onSave: saveProduct,
+      brands: appState.brands
     }),
 
     editingBlock !== null && e(BlockEditorModal, {
       block: editingBlock.id ? editingBlock : null,
       isNew: !editingBlock.id,
       onClose: function(){setEditingBlock(null)},
-      onSave: saveComposedBlock
+      onSave: saveComposedBlock,
+      brands: appState.brands
     }),
 
     editingText !== null && e(TextEditorModal, {
@@ -2013,7 +2324,8 @@ function EmailComposer() {
       standaloneBlock: editingStandaloneBlock.id ? editingStandaloneBlock : null,
       isNew: !editingStandaloneBlock.id,
       onClose: function(){setEditingStandaloneBlock(null)},
-      onSave: saveStandaloneBlock
+      onSave: saveStandaloneBlock,
+      brands: appState.brands
     })
   );
 }
