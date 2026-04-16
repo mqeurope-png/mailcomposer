@@ -1243,6 +1243,7 @@ function BlockEditorModal(props) {
               e('option', {value:'blue'}, 'Azul'),
               e('option', {value:'purple'}, 'Púrpura'),
               e('option', {value:'orange'}, 'Naranja'),
+              e('option', {value:'cyan'}, 'Cian (FLUX)'),
               e('option', {value:'gray'}, 'Gris')
             )
           ),
@@ -1481,6 +1482,7 @@ function TemplateEditorModal(props) {
               e('option', {value:'blue'}, 'Azul'),
               e('option', {value:'purple'}, 'Púrpura'),
               e('option', {value:'orange'}, 'Naranja'),
+              e('option', {value:'cyan'}, 'Cian (FLUX)'),
               e('option', {value:'gray'}, 'Gris')
             )
           ),
@@ -2541,7 +2543,7 @@ function EmailComposer() {
           // PLANTILLAS RÁPIDAS
           e(SidebarSection, {title:'PLANTILLAS RÁPIDAS'},
             appState.templates.filter(function(tpl){return tpl.visible !== false && isAvailableInLang(tpl, lang) && (sidebarBrandFilter.length===0 || sidebarBrandFilter.indexOf(tpl.brand||'mix')>=0 || (sidebarBrandFilter.indexOf('none')>=0 && (!tpl.brand || tpl.brand==='mix')))}).map(function(tpl) {
-              var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
+              var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6',cyan:'#cffafe'};
               return e('button', {key:tpl.id, className:'add-btn', onClick:function(){loadTemplate(tpl)}},
                 e('span', {className:'add-btn-icon', style:{background:colorMap[tpl.colorClass]||'#f3f4f6'}}, '⚡'),
                 e('div', null,
@@ -2582,8 +2584,8 @@ function EmailComposer() {
           // BLOQUES DE PRODUCTO (composed blocks from backoffice)
           e(SidebarSection, {title:'BLOQUES DE PRODUCTO'},
             appState.composedBlocks.filter(function(cb){return cb.visible !== false && isAvailableInLang(cb, lang) && (sidebarBrandFilter.length===0 || sidebarBrandFilter.indexOf(cb.brandStrip)>=0 || (sidebarBrandFilter.indexOf('none')>=0 && (!cb.brandStrip || cb.brandStrip==='none')))}).map(function(cb) {
-              var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
-              var iconMap = {blue:'aJ',purple:'MBO',orange:'🧃',gray:'Mix'};
+              var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6',cyan:'#cffafe'};
+              var iconMap = {blue:'aJ',purple:'MBO',orange:'🧃',gray:'Mix',cyan:'FL'};
               return e('button', {key:cb.id, className:'add-btn', onClick:function(){addComposedBlock(cb)}},
                 e('span', {className:'add-btn-icon', style:{background:colorMap[cb.colorTag]||'#f3f4f6'}}, iconMap[cb.colorTag]||'📦'),
                 e('div', null,
