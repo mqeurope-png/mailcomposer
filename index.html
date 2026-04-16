@@ -19,6 +19,11 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 .header-sub{font-size:11px;color:#9ca3af}
 .header-right{display:flex;gap:8px;align-items:center}
 
+.header-mode-toggle{display:flex;gap:4px;align-items:center;margin-right:12px;padding-right:12px;border-right:1px solid #e5e7eb}
+.mode-btn{border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;background:#f3f4f6;color:#6b7280}
+.mode-btn.active{background:#2563eb;color:#fff}
+.mode-btn:hover:not(.active){background:#e5e7eb}
+
 .main{display:flex;flex:1;overflow:hidden}
 .footer{background:#fff;border-top:1px solid #e5e7eb;padding:5px 16px;display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;flex-shrink:0}
 
@@ -108,11 +113,70 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 .btn-ghost{background:#f3f4f6;color:#6b7280}.btn-ghost:hover{background:#e5e7eb}
 .btn-toggle{background:#eff6ff;color:#2563eb}
 .btn-toggle.off{background:#f3f4f6;color:#9ca3af}
+.btn-sm{padding:4px 10px;font-size:10px}
+.btn-danger{background:#fecaca;color:#991b1b}.btn-danger:hover{background:#fca5a5}
+
+/* BACKOFFICE STYLES */
+.backoffice-container{display:flex;flex-direction:column;flex:1;width:100%;overflow:hidden}
+.backoffice-tabs{display:flex;gap:0;border-bottom:1px solid #e5e7eb;background:#fff;padding:0 16px;flex-shrink:0}
+.backoffice-tab{padding:12px 16px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:600;color:#6b7280;transition:all .2s;border-bottom:2px solid transparent;text-transform:uppercase;letter-spacing:.5px}
+.backoffice-tab:hover{color:#374151}
+.backoffice-tab.active{color:#2563eb;border-bottom-color:#2563eb}
+
+.backoffice-content{flex:1;overflow-y:auto;padding:16px}
+.backoffice-actions{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+
+.data-table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}
+.data-table thead{background:#f9fafb;border-bottom:1px solid #e5e7eb}
+.data-table th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px}
+.data-table td{padding:12px 16px;border-bottom:1px solid #f3f4f6;font-size:12px}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover{background:#f9fafb}
+
+.product-thumb{width:40px;height:40px;border-radius:4px;object-fit:contain;background:#f3f4f6;padding:2px}
+
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:6px}
+.form-input,.form-textarea,.form-select,.form-color{width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-family:inherit;outline:none}
+.form-input:focus,.form-textarea:focus,.form-select:focus,.form-color:focus{border-color:#93c5fd;box-shadow:0 0 0 2px rgba(59,130,246,.15)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-color{cursor:pointer}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal-panel{background:#fff;border-radius:12px;padding:24px;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1)}
+.modal-header{font-size:18px;font-weight:800;color:#0f172a;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:transparent;border:none;color:#9ca3af;cursor:pointer;font-size:20px;padding:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{color:#374151}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #e5e7eb}
+
+.image-preview{max-width:150px;max-height:120px;border:1px solid #e5e7eb;border-radius:6px;margin-top:8px}
+
+.list-item{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.list-item-info{flex:1}
+.list-item-actions{display:flex;gap:4px}
+
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+.color-tag{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px}
+.color-tag.blue{background:#3b82f6}
+.color-tag.purple{background:#8b5cf6}
+.color-tag.orange{background:#f97316}
+.color-tag.gray{background:#64748b}
+
+.block-list-item{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:start}
+.block-list-content{flex:1}
+.block-list-title{font-weight:600;margin-bottom:4px;font-size:12px}
+.block-list-desc{font-size:11px;color:#6b7280;margin-bottom:6px}
 
 /* Responsive */
 @media(max-width:900px){
   .sidebar{width:280px}
   .preview-panel{display:none}
+  .form-row{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -122,8 +186,8 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 const e = React.createElement;
 const { useState, useRef, useCallback } = React;
 
-// ─── PRODUCT DATABASE ────────────────────────────────────────
-const PRODUCTS = [
+// ─── DEFAULT DATA STATE ──────────────────────────────────────
+const DEFAULT_PRODUCTS = [
   { id:"young", brand:"artisjet", name:"artisJet Young", badge:"A4", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://artisjet-printers.eu/wp-content/uploads/2020/10/Imagen-102.png", desc:"Compacta para personalización en punto de venta, stands y start-ups.", area:"20 × 30 cm", alt:"5 cm", feat1:"Sensor de altura automático", feat2:"CMYK + Blanco", price:"9.300 €", link:"https://boprint.net/producto/artis-young-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
   { id:"3000pro", brand:"artisjet", name:"artisJet 3000Pro Freebird", badge:"Freebird", badgeBg:"#dbeafe", badgeColor:"#1d4ed8", img:"https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png", desc:"Flatbed pro con Freebird. Velocidad 2,5× y certificación Braille/ADA.", area:"35 × 50 cm", alt:"17 cm", feat1:"Módulo Freebird integrado", feat2:"Mesa de vacío", price:"13.900 €", link:"https://boprint.net/contacto/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
   { id:"proud", brand:"artisjet", name:"artisJet Proud", badge:"Tarjetas", badgeBg:"#fef3c7", badgeColor:"#92400e", img:"https://artisjet-printers.eu/wp-content/uploads/2024/05/artisJet-proud-card-printer-left-side-view.jpeg", desc:"Especialista en tarjetas, carnets y artículos promocionales.", area:"-", alt:"-", feat1:"Alta precisión piezas pequeñas", feat2:"CR80 y tarjetas grandes", price:"21.500 €", link:"https://boprint.net/?post_type=product&p=3276", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
@@ -146,107 +210,71 @@ const BRAND_STRIPS = {
   pimpam: { logo:"https://pimpam-vending.com/wp-content/uploads/2025/11/WhatsApp_Image_2025-11-14_at_10.12.57-removebg-preview-e1763541822221.png", label:"PimPam Vending", url:"https://pimpam-vending.com", urlLabel:"pimpam-vending.com →", color:"#ea580c", divider:"#fed7aa", h:"22" },
 };
 
-const BLOCK_TYPES = [
-  { type:"text", label:"Texto libre", icon:"Aa", desc:"Párrafo editable para intro, transición o despedida", cardClass:"", previewBg:"#f1f5f9", previewColor:"#475569" },
-  { type:"brand_artisjet", label:"artisJet", icon:"aJ", desc:"Logo + enlace boprint.net con separador", cardClass:"blue", previewBg:"#dbeafe", previewColor:"#1d4ed8" },
-  { type:"brand_mbo", label:"MBO Printers", icon:"M", desc:"Logo + enlace mboprinters.com con separador", cardClass:"purple", previewBg:"#ede9fe", previewColor:"#6d28d9" },
-  { type:"brand_pimpam", label:"PimPam Vending", icon:"PP", desc:"Logo + enlace pimpam-vending.com con separador", cardClass:"orange", previewBg:"#ffedd5", previewColor:"#ea580c" },
-  { type:"product_single", label:"1 Producto", icon:"📦", desc:"Ficha individual con foto, specs y precio", cardClass:"green", previewBg:"#dcfce7", previewColor:"#15803d" },
-  { type:"product_pair", label:"2 Productos", icon:"📦📦", desc:"Dos fichas lado a lado con foto, specs y precio", cardClass:"green", previewBg:"#dcfce7", previewColor:"#15803d" },
-  { type:"product_trio", label:"3 Productos", icon:"📦📦📦", desc:"Tres fichas lado a lado, tamaño compacto", cardClass:"green", previewBg:"#dcfce7", previewColor:"#15803d" },
-  { type:"freebird", label:"Vídeo Freebird", icon:"▶", desc:"Banner azul con CTA al vídeo de tecnología Freebird", cardClass:"blue", previewBg:"#1e3a8a", previewColor:"#ffffff" },
-  { type:"pimpam_hero", label:"Hero PimPam", icon:"📱", desc:"Imagen + texto: personaliza, imprime y vende sin operario", cardClass:"orange", previewBg:"#fff7ed", previewColor:"#ea580c" },
-  { type:"pimpam_steps", label:"4 Pasos PimPam", icon:"1234", desc:"Los 4 pasos del proceso: elige, personaliza, paga, listo", cardClass:"orange", previewBg:"#fff7ed", previewColor:"#ea580c" },
-];
-
-let blockIdCounter = 0;
-function createBlock(type) {
-  const id = ++blockIdCounter;
-  switch(type) {
-    case "text": return { id, type, text:"Hola,\n\nEscribe aquí tu texto personalizado." };
-    case "brand_artisjet": return { id, type, brand:"artisjet" };
-    case "brand_mbo": return { id, type, brand:"mbo" };
-    case "brand_pimpam": return { id, type, brand:"pimpam" };
-    case "product_single": return { id, type, product1:"young" };
-    case "product_pair": return { id, type, product1:"young", product2:"3000pro" };
-    case "product_trio": return { id, type, product1:"uv1612g", product2:"uv1812", product3:"uv2513" };
-    case "freebird": return { id, type };
-    case "pimpam_hero": return { id, type };
-    case "pimpam_steps": return { id, type };
-    default: return { id, type };
+// ─── HELPERS ────────────────────────────────────────────────────
+function getStorageData() {
+  try {
+    var stored = localStorage.getItem('bomedia_composer_data');
+    return stored ? JSON.parse(stored) : null;
+  } catch(e) {
+    return null;
   }
 }
 
-// ─── BLOCK PREVIEW SVGS ──────────────────────────────────────
-function blockPreviewSvg(type) {
+function saveStorageData(data) {
+  try {
+    localStorage.setItem('bomedia_composer_data', JSON.stringify(data));
+  } catch(e) {
+    console.error('Error saving to localStorage:', e);
+  }
+}
+
+function getDefaultState() {
+  return {
+    products: DEFAULT_PRODUCTS.map(function(p){ return Object.assign({}, p); }),
+    composedBlocks: [
+      {id:'block-001',title:'Entry Level MBO 3050+4060',desc:'Compactas MBO con mejor precio',priceRange:'desde 6.495 € + 7.995 €',colorTag:'purple',introText:'Si buscas empezar con impresión UV-LED sin una inversión inicial grande, estas dos compactas de nuestra marca MBO son la mejor opción del mercado. Ideales para negocios que quieren probar la tecnología o complementar su producción:',brandStrip:'mbo',blockType:'product_pair',products:['mbo3050','mbo4060'],includeHero:false,includeSteps:false},
+      {id:'block-002',title:'artisJet Compactas Young+3000Pro',desc:'Personalización a producción pro',priceRange:'9.300 € + 13.900 €',colorTag:'blue',introText:'Nuestra gama compacta de artisJet cubre desde la personalización en punto de venta (Young) hasta la producción profesional con Freebird para objetos 3D (3000Pro). Ambas ocupan poco espacio y son fáciles de integrar en cualquier entorno de trabajo:',brandStrip:'artisjet',blockType:'product_pair',products:['young','3000pro'],includeHero:false,includeSteps:false},
+      {id:'block-003',title:'artisJet Producción Proud+5000U',desc:'Tarjetas y formato A3+',priceRange:'21.500 € + 18.900 €',colorTag:'blue',introText:'Para entornos que requieren producción continua o especialización: la Proud está diseñada para tarjetas, carnets y artículos promocionales en volúmenes industriales, y la 5000U es el salto a formato A3+ para negocios en crecimiento:',brandStrip:'artisjet',blockType:'product_pair',products:['proud','5000u'],includeHero:false,includeSteps:false},
+      {id:'block-004',title:'artisJet Medio+Gran Formato 5000U+6090Trust',desc:'Formato A3+ e industrial',priceRange:'18.900 € + 20.900 €',colorTag:'blue',introText:'Cuando necesitas saltar a formatos mayores sin perder versatilidad. La 5000U es perfecta para personalización A3+ y la 6090 Trust para producción industrial de señalización, placas y paneles decorativos. Velocidad, precisión y productividad industrial:',brandStrip:'artisjet',blockType:'product_pair',products:['5000u','6090trust'],includeHero:false,includeSteps:false},
+      {id:'block-005',title:'MBO Semiformato+Industrial 6090+1015',desc:'Producción profesional multicolor',priceRange:'14.500 € + desde 21.500 €',colorTag:'purple',introText:'La pareja de MBO para producción a escala profesional. La 6090 es el punto de entrada a formato grande con 3 cabezales, y la 1015 es el caballo de batalla para tiradas industriales de gran formato. CMYK+W+Barniz disponibles:',brandStrip:'mbo',blockType:'product_pair',products:['mbo6090','mbo1015'],includeHero:false,includeSteps:false},
+      {id:'block-006',title:'Mix Formato Medio 3000Pro+MBO6090',desc:'Cross-brand: versatilidad artisJet + potencia MBO',priceRange:'13.900 € + 14.500 €',colorTag:'gray',introText:'Una combinación híbrida perfecta para estudios que necesitan versatilidad (la 3000Pro con Freebird) + producción en volumen (la MBO 6090). Dos filosofías de impresión complementarias, diferente software pero máxima cobertura de mercado:',brandStrip:'none',blockType:'product_pair',products:['3000pro','mbo6090'],includeHero:false,includeSteps:false},
+      {id:'block-007',title:'Mix Gran Formato 6090Trust+MBO1015',desc:'industrial: artisJet premium + MBO heavy duty',priceRange:'20.900 € + desde 21.500 €',colorTag:'gray',introText:'La élite del gran formato: la 6090 Trust de artisJet (con Freebird integrado) para máxima precisión + la MBO 1015 para volumen bruto. Dos máquinas de la liga de 100 × 150 cm, filosofías complementarias, presupuesto robusto:',brandStrip:'none',blockType:'product_pair',products:['6090trust','mbo1015'],includeHero:false,includeSteps:false},
+      {id:'block-008',title:'MBO Gran Formato Industrial UV1612G+UV1812+UV2513',desc:'Línea de producción masiva',priceRange:'desde 26.500 € + 27.500 € + 34.000 €',colorTag:'purple',introText:'Cuando necesitas línea de producción real: el dúo UV1612G+UV1812 para volumen medio-alto, o el salto a la UV2513 para producción masiva (250×130 cm). Cabezales de alta velocidad, rígidos y flexibles, CMYK+W+Barniz. Esto es factorización industrial:',brandStrip:'mbo',blockType:'product_trio',products:['uv1612g','uv1812','uv2513'],includeHero:false,includeSteps:false},
+      {id:'block-009',title:'PimPam Vending CaseBox+Custom',desc:'Autoservicio impreso 24/7',priceRange:'Consultar',colorTag:'orange',introText:'PimPam es el vending con personalización UV-LED integrada. Sin operario. El cliente elige, personaliza su funda, paga y se la lleva en 30 segundos. CaseBox para retail/interiores, Custom para branding completo con tus vinilos y campañas temporales:',brandStrip:'pimpam',blockType:'product_pair',products:['casebox','custom'],includeHero:true,includeSteps:false},
+      {id:'block-010',title:'Complemento Vending artisJet Young',desc:'Impresión manual + autoservicio híbrido',priceRange:'9.300 €',colorTag:'orange',introText:'Para negocios que quieren combinar: una Young en mostrador (operario imprime en el acto) + una PimPam en zona común (autoservicio). Máxima flexibilidad, dos modelos de negocio en paralelo, tiempos rápidos, márgenes altos:',brandStrip:'none',blockType:'product_single',products:['young'],includeHero:false,includeSteps:false},
+      {id:'block-011',title:'Proceso PimPam 4 Pasos',desc:'El viaje del cliente en 30 segundos',priceRange:'-',colorTag:'orange',introText:'Esto es lo que ve el cliente: selecciona diseño, personaliza, paga, y se va con su funda. Sin esperas, sin complicaciones, sin personal. El "por qué" de PimPam. Aquí se convierte en negocio rentable.',brandStrip:'pimpam',blockType:'product_single',products:['young'],includeHero:false,includeSteps:true},
+    ],
+    prewrittenTexts: [
+      {id:'text-001',name:'Intro UV-LED',icon:'💡',text:'Hola,\n\nTras nuestra conversación, te envío información sobre algunas de nuestras impresoras UV-LED que creo que encajan con lo que necesitas.\n\nLa tecnología UV-LED permite imprimir directamente sobre casi cualquier material (plástico, madera, metal, vidrio, cerámica…) con secado instantáneo y calidad fotorrealista en CMYK + blanco.'},
+      {id:'text-002',name:'Transición a MBO',icon:'▶',text:'En nuestra línea MBO (marca propia, excelente relación calidad-precio) también tenemos opciones interesantes:'},
+      {id:'text-003',name:'Transición a PimPam',icon:'🔹',text:'Y si te interesa el concepto de vending con personalización automática, tenemos PimPam — máquinas que imprimen fundas de móvil al momento, sin operario:'},
+      {id:'text-004',name:'Mención Freebird',icon:'✨',text:'Por cierto, varios de estos equipos incluyen tecnología Freebird — un sensor láser que ajusta automáticamente la altura del cabezal para imprimir sobre objetos 3D irregulares:'},
+      {id:'text-005',name:'Cierre comercial',icon:'👋',text:'Si quieres, podemos organizar una demo (presencial o videollamada) para que veas cualquiera de estos equipos en funcionamiento. También te puedo enviar muestras impresas sin compromiso.\n\n¡Quedo a tu disposición!\nUn saludo,'},
+    ],
+    templates: [
+      {id:'tpl-001',name:'Compactas UV-LED',colorClass:'blue',blocks:['text-001','block-001','text-002','block-002','text-005']},
+      {id:'tpl-002',name:'PimPam Vending',colorClass:'orange',blocks:['text-003','block-009','block-011','text-005']},
+      {id:'tpl-003',name:'Formatos varios',colorClass:'purple',blocks:['text-001','block-004','text-004','text-002','block-005','text-005']},
+      {id:'tpl-004',name:'Bloques modulares',colorClass:'gray',blocks:['text-001','block-001','block-002','block-003','block-004','block-005','block-006','block-007','block-008','block-009','block-010','block-011','text-005']},
+    ],
+  };
+}
+
+let blockIdCounter = 0;
+function createBlock(type) {
+  var id = ++blockIdCounter;
   switch(type) {
-    case "text":
-      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
-        e('rect', {x:2, y:2, width:40, height:4, rx:1, fill:"#cbd5e1"}),
-        e('rect', {x:2, y:8, width:40, height:4, rx:1, fill:"#cbd5e1"}),
-        e('rect', {x:2, y:14, width:40, height:4, rx:1, fill:"#cbd5e1"}),
-        e('rect', {x:2, y:20, width:30, height:4, rx:1, fill:"#cbd5e1"})
-      );
-    case "brand_artisjet":
-      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
-        e('rect', {x:1, y:3, width:10, height:12, rx:1, fill:"#dbeafe"}),
-        e('line', {x1:12, y1:3, x2:42, y2:3, stroke:"#93c5fd", strokeWidth:2}),
-        e('line', {x1:12, y1:8, x2:42, y2:8, stroke:"#93c5fd", strokeWidth:1}),
-        e('line', {x1:12, y1:13, x2:42, y2:13, stroke:"#93c5fd", strokeWidth:1}),
-        e('line', {x1:2, y1:19, x2:42, y2:19, stroke:"#93c5fd", strokeWidth:1})
-      );
-    case "brand_mbo":
-      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
-        e('rect', {x:1, y:3, width:10, height:12, rx:1, fill:"#ede9fe"}),
-        e('line', {x1:12, y1:3, x2:42, y2:3, stroke:"#ddd6fe", strokeWidth:2}),
-        e('line', {x1:12, y1:8, x2:42, y2:8, stroke:"#ddd6fe", strokeWidth:1}),
-        e('line', {x1:12, y1:13, x2:42, y2:13, stroke:"#ddd6fe", strokeWidth:1}),
-        e('line', {x1:2, y1:19, x2:42, y2:19, stroke:"#ddd6fe", strokeWidth:1})
-      );
-    case "brand_pimpam":
-      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
-        e('rect', {x:1, y:3, width:10, height:12, rx:1, fill:"#ffedd5"}),
-        e('line', {x1:12, y1:3, x2:42, y2:3, stroke:"#fed7aa", strokeWidth:2}),
-        e('line', {x1:12, y1:8, x2:42, y2:8, stroke:"#fed7aa", strokeWidth:1}),
-        e('line', {x1:12, y1:13, x2:42, y2:13, stroke:"#fed7aa", strokeWidth:1}),
-        e('line', {x1:2, y1:19, x2:42, y2:19, stroke:"#fed7aa", strokeWidth:1})
-      );
-    case "product_single":
-      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
-        e('rect', {x:9, y:2, width:26, height:24, rx:2, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5})
-      );
-    case "product_pair":
-      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
-        e('rect', {x:1, y:2, width:20, height:24, rx:2, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5}),
-        e('rect', {x:23, y:2, width:20, height:24, rx:2, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5})
-      );
-    case "product_trio":
-      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
-        e('rect', {x:1, y:3, width:12, height:22, rx:1.5, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5}),
-        e('rect', {x:16, y:3, width:12, height:22, rx:1.5, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5}),
-        e('rect', {x:31, y:3, width:12, height:22, rx:1.5, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5})
-      );
-    case "freebird":
-      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
-        e('rect', {x:1, y:2, width:42, height:24, rx:2, fill:"linear-gradient(135deg,#1e3a8a,#3b82f6)"}),
-        e('polygon', {points:"20,10 20,22 30,16", fill:"#ffffff"})
-      );
-    case "pimpam_hero":
-      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
-        e('rect', {x:1, y:3, width:14, height:22, rx:2, fill:"#ffedd5"}),
-        e('line', {x1:18, y1:5, x2:42, y2:5, stroke:"#94a3b8", strokeWidth:1}),
-        e('line', {x1:18, y1:10, x2:42, y2:10, stroke:"#94a3b8", strokeWidth:1}),
-        e('line', {x1:18, y1:15, x2:42, y2:15, stroke:"#94a3b8", strokeWidth:1}),
-        e('line', {x1:18, y1:20, x2:36, y2:20, stroke:"#94a3b8", strokeWidth:1})
-      );
-    case "pimpam_steps":
-      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
-        e('rect', {x:2, y:6, width:8, height:16, rx:1, fill:"#ffedd5"}),
-        e('rect', {x:12, y:6, width:8, height:16, rx:1, fill:"#ffedd5"}),
-        e('rect', {x:22, y:6, width:8, height:16, rx:1, fill:"#ffedd5"}),
-        e('rect', {x:32, y:6, width:8, height:16, rx:1, fill:"#ffedd5"})
-      );
-    default: return null;
+    case "text": return { id:id, type:type, text:"Hola,\n\nEscribe aquí tu texto personalizado." };
+    case "brand_artisjet": return { id:id, type:type, brand:"artisjet" };
+    case "brand_mbo": return { id:id, type:type, brand:"mbo" };
+    case "brand_pimpam": return { id:id, type:type, brand:"pimpam" };
+    case "product_single": return { id:id, type:type, product1:"young" };
+    case "product_pair": return { id:id, type:type, product1:"young", product2:"3000pro" };
+    case "product_trio": return { id:id, type:type, product1:"uv1612g", product2:"uv1812", product3:"uv2513" };
+    case "freebird": return { id:id, type:type };
+    case "pimpam_hero": return { id:id, type:type };
+    case "pimpam_steps": return { id:id, type:type };
+    default: return { id:id, type:type };
   }
 }
 
@@ -400,7 +428,7 @@ var CSS_BLOCK = '<style>' +
   '}' +
   '</style>';
 
-function generateFullHtml(blocks) {
+function generateFullHtml(blocks, products) {
   var rows = '';
   for (var i = 0; i < blocks.length; i++) {
     var b = blocks[i];
@@ -410,18 +438,18 @@ function generateFullHtml(blocks) {
       case 'brand_mbo': rows += brandStripHtml('mbo'); break;
       case 'brand_pimpam': rows += brandStripHtml('pimpam'); break;
       case 'product_single':
-        var ps = PRODUCTS.find(function(p){return p.id===b.product1});
+        var ps = products.find(function(p){return p.id===b.product1});
         if(ps) rows += productSingleHtml(ps);
         break;
       case 'product_pair':
-        var p1 = PRODUCTS.find(function(p){return p.id===b.product1});
-        var p2 = PRODUCTS.find(function(p){return p.id===b.product2});
+        var p1 = products.find(function(p){return p.id===b.product1});
+        var p2 = products.find(function(p){return p.id===b.product2});
         if(p1&&p2) rows += productPairHtml(p1,p2);
         break;
       case 'product_trio':
-        var pt1 = PRODUCTS.find(function(p){return p.id===b.product1});
-        var pt2 = PRODUCTS.find(function(p){return p.id===b.product2});
-        var pt3 = PRODUCTS.find(function(p){return p.id===b.product3});
+        var pt1 = products.find(function(p){return p.id===b.product1});
+        var pt2 = products.find(function(p){return p.id===b.product2});
+        var pt3 = products.find(function(p){return p.id===b.product3});
         if(pt1&&pt2&&pt3) rows += productTrioHtml(pt1,pt2,pt3);
         break;
       case 'freebird': rows += freebirdHtml(); break;
@@ -433,7 +461,7 @@ function generateFullHtml(blocks) {
     '<table class="wrap" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto">' + rows + '</table></body></html>';
 }
 
-// ─── ARROW SVG ───────────────────────────────────────────────
+// ─── ICONS ───────────────────────────────────────────────────
 function ArrowUp(){return e('svg',{width:14,height:14,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2},e('path',{d:"M18 15l-6-6-6 6"}))}
 function ArrowDown(){return e('svg',{width:14,height:14,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2},e('path',{d:"M6 9l6 6 6-6"}))}
 function XIcon(){return e('svg',{width:14,height:14,viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",strokeWidth:2},e('path',{d:"M18 6L6 18M6 6l12 12"}))}
@@ -441,17 +469,411 @@ function ChevronDown(){return e('svg',{width:14,height:14,viewBox:"0 0 24 24",fi
 
 // ─── PRODUCT SELECT ──────────────────────────────────────────
 function ProductSelect(props) {
-  return e('select', {value:props.value, onChange:function(ev){props.onChange(ev.target.value)}},
-    PRODUCTS.map(function(p){
+  return e('select', {value:props.value, onChange:function(ev){props.onChange(ev.target.value)}, className:'form-select'},
+    props.products.map(function(p){
       return e('option', {key:p.id, value:p.id, disabled:p.id===props.exclude||p.id===props.exclude2}, p.name + ' — ' + p.price);
     })
   );
 }
 
-// ─── BLOCK EDITOR ────────────────────────────────────────────
+// ─── PRODUCT EDITOR MODAL ────────────────────────────────────
+function ProductEditorModal(props) {
+  var product = props.product || {id:'',brand:'artisjet',name:'',badge:'',badgeBg:'#dcfce7',badgeColor:'#15803d',img:'',desc:'',area:'-',alt:'-',feat1:'',feat2:'',price:'',link:'',accent:'#1d4ed8',gradient:'linear-gradient(90deg,#1d4ed8,#3b82f6)'};
+  var _form = useState(product);
+  var form = _form[0], setForm = _form[1];
+
+  var updateForm = function(key, value) {
+    var newForm = Object.assign({}, form, {});
+    newForm[key] = value;
+    if(key === 'accent') {
+      newForm.gradient = 'linear-gradient(90deg,' + value + ',' + value.replace('#', '#').slice(0, 7) + ')';
+    }
+    setForm(newForm);
+  };
+
+  return e('div', {className:'modal-overlay', onClick:props.onClose},
+    e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}},
+      e('div', {className:'modal-header'},
+        e('span', null, props.isNew ? 'Nuevo producto' : 'Editar producto'),
+        e('button', {className:'modal-close', onClick:props.onClose}, '✕')
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'ID (único)'),
+        e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
+      ),
+
+      e('div', {className:'form-row'},
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Nombre'),
+          e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
+        ),
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Marca'),
+          e('select', {className:'form-select', value:form.brand, onChange:function(ev){updateForm('brand', ev.target.value)}},
+            e('option', {value:'artisjet'}, 'artisJet'),
+            e('option', {value:'mbo'}, 'MBO'),
+            e('option', {value:'pimpam'}, 'PimPam')
+          )
+        )
+      ),
+
+      e('div', {className:'form-row-3'},
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Badge'),
+          e('input', {className:'form-input', value:form.badge, onChange:function(ev){updateForm('badge', ev.target.value)}})
+        ),
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Badge BG'),
+          e('input', {className:'form-color', type:'color', value:form.badgeBg, onChange:function(ev){updateForm('badgeBg', ev.target.value)}})
+        ),
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Badge Color'),
+          e('input', {className:'form-color', type:'color', value:form.badgeColor, onChange:function(ev){updateForm('badgeColor', ev.target.value)}})
+        )
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'URL de imagen'),
+        e('input', {className:'form-input', value:form.img, onChange:function(ev){updateForm('img', ev.target.value)}}),
+        form.img && e('img', {src:form.img, alt:'preview', className:'image-preview', onError:function(ev){ev.target.style.display='none'}})
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Descripción'),
+        e('textarea', {className:'form-textarea', value:form.desc, onChange:function(ev){updateForm('desc', ev.target.value)}})
+      ),
+
+      e('div', {className:'form-row'},
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Área'),
+          e('input', {className:'form-input', value:form.area, onChange:function(ev){updateForm('area', ev.target.value)}})
+        ),
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Altura máxima'),
+          e('input', {className:'form-input', value:form.alt, onChange:function(ev){updateForm('alt', ev.target.value)}})
+        )
+      ),
+
+      e('div', {className:'form-row'},
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Feature 1'),
+          e('input', {className:'form-input', value:form.feat1, onChange:function(ev){updateForm('feat1', ev.target.value)}})
+        ),
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Feature 2'),
+          e('input', {className:'form-input', value:form.feat2, onChange:function(ev){updateForm('feat2', ev.target.value)}})
+        )
+      ),
+
+      e('div', {className:'form-row'},
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Precio'),
+          e('input', {className:'form-input', value:form.price, onChange:function(ev){updateForm('price', ev.target.value)}})
+        ),
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Link'),
+          e('input', {className:'form-input', value:form.link, onChange:function(ev){updateForm('link', ev.target.value)}})
+        )
+      ),
+
+      e('div', {className:'form-row'},
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Color acentuado'),
+          e('input', {className:'form-color', type:'color', value:form.accent, onChange:function(ev){updateForm('accent', ev.target.value)}})
+        )
+      ),
+
+      e('div', {className:'modal-footer'},
+        e('button', {className:'btn btn-ghost', onClick:props.onClose}, 'Cancelar'),
+        e('button', {className:'btn btn-primary', onClick:function(){props.onSave(form)}}, 'Guardar')
+      )
+    )
+  );
+}
+
+// ─── BLOCK EDITOR MODAL ──────────────────────────────────────
+function BlockEditorModal(props) {
+  var block = props.block || {id:'',title:'',desc:'',priceRange:'',colorTag:'blue',introText:'',brandStrip:'none',blockType:'product_pair',products:[],includeHero:false,includeSteps:false};
+  var _form = useState(block);
+  var form = _form[0], setForm = _form[1];
+
+  var updateForm = function(key, value) {
+    var newForm = Object.assign({}, form, {});
+    newForm[key] = value;
+    setForm(newForm);
+  };
+
+  return e('div', {className:'modal-overlay', onClick:props.onClose},
+    e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}},
+      e('div', {className:'modal-header'},
+        e('span', null, props.isNew ? 'Nuevo bloque' : 'Editar bloque'),
+        e('button', {className:'modal-close', onClick:props.onClose}, '✕')
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'ID (único)'),
+        e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Título'),
+        e('input', {className:'form-input', value:form.title, onChange:function(ev){updateForm('title', ev.target.value)}})
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Descripción'),
+        e('input', {className:'form-input', value:form.desc, onChange:function(ev){updateForm('desc', ev.target.value)}})
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Rango de precio'),
+        e('input', {className:'form-input', value:form.priceRange, onChange:function(ev){updateForm('priceRange', ev.target.value)}})
+      ),
+
+      e('div', {className:'form-row'},
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Color tag'),
+          e('select', {className:'form-select', value:form.colorTag, onChange:function(ev){updateForm('colorTag', ev.target.value)}},
+            e('option', {value:'blue'}, 'Azul'),
+            e('option', {value:'purple'}, 'Púrpura'),
+            e('option', {value:'orange'}, 'Naranja'),
+            e('option', {value:'gray'}, 'Gris')
+          )
+        ),
+        e('div', {className:'form-group'},
+          e('label', {className:'form-label'}, 'Brand strip'),
+          e('select', {className:'form-select', value:form.brandStrip, onChange:function(ev){updateForm('brandStrip', ev.target.value)}},
+            e('option', {value:'none'}, 'Ninguno'),
+            e('option', {value:'artisjet'}, 'artisJet'),
+            e('option', {value:'mbo'}, 'MBO'),
+            e('option', {value:'pimpam'}, 'PimPam')
+          )
+        )
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Tipo de bloque'),
+        e('select', {className:'form-select', value:form.blockType, onChange:function(ev){updateForm('blockType', ev.target.value)}},
+          e('option', {value:'product_pair'}, 'Par de productos'),
+          e('option', {value:'product_trio'}, 'Trío de productos'),
+          e('option', {value:'product_single'}, 'Producto único')
+        )
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Intro text'),
+        e('textarea', {className:'form-textarea', value:form.introText, onChange:function(ev){updateForm('introText', ev.target.value)}})
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label', style:{marginBottom:'10px'}},
+          e('input', {type:'checkbox', checked:form.includeHero, onChange:function(ev){updateForm('includeHero', ev.target.checked)}, style:{marginRight:'6px'}}),
+          'Incluir hero'
+        ),
+        e('label', {className:'form-label'},
+          e('input', {type:'checkbox', checked:form.includeSteps, onChange:function(ev){updateForm('includeSteps', ev.target.checked)}, style:{marginRight:'6px'}}),
+          'Incluir pasos'
+        )
+      ),
+
+      e('div', {className:'modal-footer'},
+        e('button', {className:'btn btn-ghost', onClick:props.onClose}, 'Cancelar'),
+        e('button', {className:'btn btn-primary', onClick:function(){props.onSave(form)}}, 'Guardar')
+      )
+    )
+  );
+}
+
+// ─── TEXT EDITOR MODAL ───────────────────────────────────────
+function TextEditorModal(props) {
+  var text = props.text || {id:'',name:'',icon:'',text:''};
+  var _form = useState(text);
+  var form = _form[0], setForm = _form[1];
+
+  var updateForm = function(key, value) {
+    var newForm = Object.assign({}, form, {});
+    newForm[key] = value;
+    setForm(newForm);
+  };
+
+  return e('div', {className:'modal-overlay', onClick:props.onClose},
+    e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}},
+      e('div', {className:'modal-header'},
+        e('span', null, props.isNew ? 'Nuevo texto' : 'Editar texto'),
+        e('button', {className:'modal-close', onClick:props.onClose}, '✕')
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'ID (único)'),
+        e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Nombre'),
+        e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Icono (emoji o carácter)'),
+        e('input', {className:'form-input', value:form.icon, onChange:function(ev){updateForm('icon', ev.target.value)}, style:{maxWidth:'80px'}})
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Texto'),
+        e('textarea', {className:'form-textarea', value:form.text, onChange:function(ev){updateForm('text', ev.target.value)}, style:{minHeight:'150px'}})
+      ),
+
+      e('div', {className:'modal-footer'},
+        e('button', {className:'btn btn-ghost', onClick:props.onClose}, 'Cancelar'),
+        e('button', {className:'btn btn-primary', onClick:function(){props.onSave(form)}}, 'Guardar')
+      )
+    )
+  );
+}
+
+// ─── TEMPLATE EDITOR MODAL ──────────────────────────────────────
+function TemplateEditorModal(props) {
+  var template = props.template || {id:'',name:'',colorClass:'blue',blocks:[]};
+  var _form = useState(template);
+  var form = _form[0], setForm = _form[1];
+
+  var updateForm = function(key, value) {
+    var newForm = Object.assign({}, form, {});
+    newForm[key] = value;
+    setForm(newForm);
+  };
+
+  var allItems = (props.blocks || []).concat(props.texts || []).sort(function(a,b){return (a.id||'').localeCompare(b.id||'')});
+
+  var toggleBlock = function(id) {
+    var blocks = form.blocks.slice();
+    var idx = blocks.indexOf(id);
+    if(idx >= 0) {
+      blocks.splice(idx, 1);
+    } else {
+      blocks.push(id);
+    }
+    updateForm('blocks', blocks);
+  };
+
+  var moveBlockUp = function(idx) {
+    if(idx <= 0) return;
+    var blocks = form.blocks.slice();
+    var tmp = blocks[idx]; blocks[idx] = blocks[idx-1]; blocks[idx-1] = tmp;
+    updateForm('blocks', blocks);
+  };
+
+  var moveBlockDown = function(idx) {
+    if(idx >= form.blocks.length - 1) return;
+    var blocks = form.blocks.slice();
+    var tmp = blocks[idx]; blocks[idx] = blocks[idx+1]; blocks[idx+1] = tmp;
+    updateForm('blocks', blocks);
+  };
+
+  var removeBlock = function(idx) {
+    var blocks = form.blocks.slice();
+    blocks.splice(idx, 1);
+    updateForm('blocks', blocks);
+  };
+
+  return e('div', {className:'modal-overlay', onClick:props.onClose},
+    e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}},
+      e('div', {className:'modal-header'},
+        e('span', null, props.isNew ? 'Nueva plantilla' : 'Editar plantilla'),
+        e('button', {className:'modal-close', onClick:props.onClose}, '✕')
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'ID (único)'),
+        e('input', {className:'form-input', value:form.id, onChange:function(ev){updateForm('id', ev.target.value)}, disabled:!props.isNew})
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Nombre'),
+        e('input', {className:'form-input', value:form.name, onChange:function(ev){updateForm('name', ev.target.value)}})
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label'}, 'Clase de color'),
+        e('select', {className:'form-select', value:form.colorClass, onChange:function(ev){updateForm('colorClass', ev.target.value)}},
+          e('option', {value:'blue'}, 'Azul'),
+          e('option', {value:'purple'}, 'Púrpura'),
+          e('option', {value:'orange'}, 'Naranja'),
+          e('option', {value:'gray'}, 'Gris')
+        )
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label', style:{marginBottom:'10px'}}, 'Bloques en plantilla'),
+        e('div', null,
+          form.blocks.length > 0
+            ? form.blocks.map(function(bid, idx){
+                var item = allItems.find(function(x){return x.id===bid});
+                return e('div', {key:bid, style:{background:'#f9fafb',padding:'10px',borderRadius:'6px',marginBottom:'8px',display:'flex',justifyContent:'space-between',alignItems:'center'}},
+                  e('span', {style:{fontSize:'12px',fontWeight:600}}, item ? (item.name || bid) : bid),
+                  e('div', null,
+                    e('button', {className:'btn btn-sm btn-ghost', onClick:function(){moveBlockUp(idx)}, disabled:idx===0, style:{marginRight:'4px'}}, '▲'),
+                    e('button', {className:'btn btn-sm btn-ghost', onClick:function(){moveBlockDown(idx)}, disabled:idx===form.blocks.length-1, style:{marginRight:'4px'}}, '▼'),
+                    e('button', {className:'btn btn-sm btn-danger', onClick:function(){removeBlock(idx)}}, '✕')
+                  )
+                );
+              })
+            : e('p', {style:{fontSize:'11px',color:'#9ca3af',fontStyle:'italic'}}, 'Sin bloques añadidos')
+        )
+      ),
+
+      e('div', {className:'form-group'},
+        e('label', {className:'form-label', style:{marginBottom:'10px'}}, 'Añadir bloques/textos'),
+        e('div', {style:{background:'#f3f4f6',padding:'10px',borderRadius:'6px',maxHeight:'200px',overflowY:'auto'}},
+          allItems.map(function(item){
+            var isSelected = form.blocks.indexOf(item.id) >= 0;
+            return e('label', {key:item.id, style:{display:'block',marginBottom:'6px',cursor:'pointer',fontSize:'12px'}},
+              e('input', {type:'checkbox', checked:isSelected, onChange:function(){toggleBlock(item.id)}, style:{marginRight:'6px'}}),
+              item.name || item.id
+            );
+          })
+        )
+      ),
+
+      e('div', {className:'modal-footer'},
+        e('button', {className:'btn btn-ghost', onClick:props.onClose}, 'Cancelar'),
+        e('button', {className:'btn btn-primary', onClick:function(){props.onSave(form)}}, 'Guardar')
+      )
+    )
+  );
+}
+
+// ─── SIDEBAR FOR COMPOSITOR ──────────────────────────────────
+function SidebarSection(props) {
+  var _s = useState(true);
+  var isOpen = _s[0], setIsOpen = _s[1];
+  return e('div', {className:'sidebar-section'},
+    e('div', {className:'sidebar-section-header', onClick:function(){setIsOpen(!isOpen)}},
+      e('span', {className:'sidebar-section-title'}, props.title),
+      e('span', {className:'sidebar-section-toggle' + (isOpen?' open':'')}, e(ChevronDown))
+    ),
+    isOpen && e('div', {className:'sidebar-section-content'}, props.children)
+  );
+}
+
+// ─── BLOCK EDITOR FOR COMPOSITOR ────────────────────────────
 function BlockEditor(props) {
   var block = props.block;
-  var info = BLOCK_TYPES.find(function(t){return t.type===block.type}) || {icon:'',label:'',cardClass:''};
+  var info = {icon:'',label:'',cardClass:''};
+  var typeMap = {
+    'text':{icon:'Aa',label:'Texto libre',cardClass:''},
+    'brand_artisjet':{icon:'aJ',label:'artisJet',cardClass:'blue'},
+    'brand_mbo':{icon:'M',label:'MBO',cardClass:'purple'},
+    'brand_pimpam':{icon:'PP',label:'PimPam',cardClass:'orange'},
+    'product_single':{icon:'📦',label:'1 Producto',cardClass:'green'},
+    'product_pair':{icon:'📦📦',label:'2 Productos',cardClass:'green'},
+    'product_trio':{icon:'3️⃣',label:'3 Productos',cardClass:'green'},
+    'freebird':{icon:'▶',label:'Freebird',cardClass:'blue'},
+    'pimpam_hero':{icon:'📱',label:'Hero',cardClass:'orange'},
+    'pimpam_steps':{icon:'1234',label:'Pasos',cardClass:'orange'},
+  };
+  info = typeMap[block.type] || info;
 
   var body;
   if (block.type === 'text') {
@@ -462,21 +884,21 @@ function BlockEditor(props) {
     });
   } else if (block.type === 'product_single') {
     body = e('div', {className:'prod-selectors'},
-      e('label', null, 'Producto: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}}))
+      e('label', null, 'Producto: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}, products:props.products}))
     );
   } else if (block.type === 'product_pair') {
     body = e('div', {className:'prod-selectors'},
-      e('label', null, 'Izq: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}, exclude:block.product2})),
-      e('label', null, 'Der: ', e(ProductSelect, {value:block.product2, onChange:function(v){props.onChange(Object.assign({},block,{product2:v}))}, exclude:block.product1}))
+      e('label', null, 'Izq: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}, exclude:block.product2, products:props.products})),
+      e('label', null, 'Der: ', e(ProductSelect, {value:block.product2, onChange:function(v){props.onChange(Object.assign({},block,{product2:v}))}, exclude:block.product1, products:props.products}))
     );
   } else if (block.type === 'product_trio') {
     body = e('div', {className:'prod-selectors'},
-      e('label', null, 'Izq: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}, exclude:block.product2, exclude2:block.product3})),
-      e('label', null, 'Centro: ', e(ProductSelect, {value:block.product2, onChange:function(v){props.onChange(Object.assign({},block,{product2:v}))}, exclude:block.product1, exclude2:block.product3})),
-      e('label', null, 'Der: ', e(ProductSelect, {value:block.product3, onChange:function(v){props.onChange(Object.assign({},block,{product3:v}))}, exclude:block.product1, exclude2:block.product2}))
+      e('label', null, 'Izq: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}, exclude:block.product2, exclude2:block.product3, products:props.products})),
+      e('label', null, 'Centro: ', e(ProductSelect, {value:block.product2, onChange:function(v){props.onChange(Object.assign({},block,{product2:v}))}, exclude:block.product1, exclude2:block.product3, products:props.products})),
+      e('label', null, 'Der: ', e(ProductSelect, {value:block.product3, onChange:function(v){props.onChange(Object.assign({},block,{product3:v}))}, exclude:block.product1, exclude2:block.product2, products:props.products}))
     );
   } else {
-    body = e('p', {className:'fixed-msg'}, 'Bloque predefinido — sin opciones editables');
+    body = e('p', {className:'fixed-msg'}, 'Bloque predefinido');
   }
 
   return e('div', {className:'block-card ' + info.cardClass},
@@ -495,31 +917,79 @@ function BlockEditor(props) {
   );
 }
 
-// ─── COLLAPSIBLE SIDEBAR SECTION ───────────────────────────────
-function SidebarSection(props) {
-  var _s = useState(true);
-  var isOpen = _s[0], setIsOpen = _s[1];
-
-  return e('div', {className:'sidebar-section'},
-    e('div', {className:'sidebar-section-header', onClick:function(){setIsOpen(!isOpen)}},
-      e('span', {className:'sidebar-section-title'}, props.title),
-      e('span', {className:'sidebar-section-toggle' + (isOpen?' open':'')}, e(ChevronDown))
-    ),
-    isOpen && e('div', {className:'sidebar-section-content'}, props.children)
-  );
-}
-
 // ─── MAIN APP ────────────────────────────────────────────────
 function EmailComposer() {
-  var _s1 = useState([createBlock("text")]);
-  var blocks = _s1[0], setBlocks = _s1[1];
-  var _s2 = useState(false);
-  var copied = _s2[0], setCopied = _s2[1];
-  var _s3 = useState(true);
-  var showPreview = _s3[0], setShowPreview = _s3[1];
-  var _s4 = useState(false);
-  var showHtmlCode = _s4[0], setShowHtmlCode = _s4[1];
+  // State
+  var _appMode = useState('compositor');
+  var appMode = _appMode[0], setAppMode = _appMode[1];
 
+  var _boUnlocked = useState(false);
+  var boUnlocked = _boUnlocked[0], setBoUnlocked = _boUnlocked[1];
+
+  var _showBoLogin = useState(false);
+  var showBoLogin = _showBoLogin[0], setShowBoLogin = _showBoLogin[1];
+
+  var _boPass = useState('');
+  var boPass = _boPass[0], setBoPass = _boPass[1];
+
+  var _boPassError = useState(false);
+  var boPassError = _boPassError[0], setBoPassError = _boPassError[1];
+
+  var BO_PASSWORD = 'bomedia-edu';
+
+  function tryOpenBackoffice() {
+    if (boUnlocked) { setAppMode('backoffice'); return; }
+    setShowBoLogin(true);
+    setBoPass('');
+    setBoPassError(false);
+  }
+
+  function submitBoPassword() {
+    if (boPass === BO_PASSWORD) {
+      setBoUnlocked(true);
+      setShowBoLogin(false);
+      setAppMode('backoffice');
+      setBoPass('');
+      setBoPassError(false);
+    } else {
+      setBoPassError(true);
+    }
+  }
+
+  var _appState = useState(function(){
+    var stored = getStorageData();
+    return stored || getDefaultState();
+  });
+  var appState = _appState[0], setAppState = _appState[1];
+
+  var _blocks = useState([createBlock("text")]);
+  var blocks = _blocks[0], setBlocks = _blocks[1];
+
+  var _copied = useState(false);
+  var copied = _copied[0], setCopied = _copied[1];
+
+  var _showPreview = useState(true);
+  var showPreview = _showPreview[0], setShowPreview = _showPreview[1];
+
+  var _showHtmlCode = useState(false);
+  var showHtmlCode = _showHtmlCode[0], setShowHtmlCode = _showHtmlCode[1];
+
+  var _backofficeTab = useState('products');
+  var backofficeTab = _backofficeTab[0], setBackofficeTab = _backofficeTab[1];
+
+  var _editingProduct = useState(null);
+  var editingProduct = _editingProduct[0], setEditingProduct = _editingProduct[1];
+
+  var _editingBlock = useState(null);
+  var editingBlock = _editingBlock[0], setEditingBlock = _editingBlock[1];
+
+  var _editingText = useState(null);
+  var editingText = _editingText[0], setEditingText = _editingText[1];
+
+  var _editingTemplate = useState(null);
+  var editingTemplate = _editingTemplate[0], setEditingTemplate = _editingTemplate[1];
+
+  // Compositor handlers
   function addBlock(type) { setBlocks(function(prev){return prev.concat([createBlock(type)])}); }
   function updateBlock(id, updated) { setBlocks(function(prev){return prev.map(function(b){return b.id===id?updated:b})}); }
   function deleteBlock(id) { setBlocks(function(prev){return prev.filter(function(b){return b.id!==id})}); }
@@ -533,18 +1003,63 @@ function EmailComposer() {
     });
   }
 
-  function addComposedBlock(blockList) {
-    setBlocks(function(prev){
-      var newBlocks = blockList.map(function(spec){
-        var b = createBlock(spec.type);
-        return Object.assign(b, spec.overrides || {});
-      });
-      return prev.concat(newBlocks);
+  function addComposedBlock(composedBlock) {
+    var newBlocks = [];
+    // Add intro text block
+    if (composedBlock.introText) {
+      newBlocks.push({id: ++blockIdCounter, type:'text', text: composedBlock.introText});
+    }
+    // Add brand strip if specified
+    if (composedBlock.brandStrip && composedBlock.brandStrip !== 'none') {
+      newBlocks.push({id: ++blockIdCounter, type:'brand_' + composedBlock.brandStrip, brand: composedBlock.brandStrip});
+    }
+    // Add hero if PimPam
+    if (composedBlock.includeHero) {
+      newBlocks.push({id: ++blockIdCounter, type:'pimpam_hero'});
+    }
+    // Add products
+    var prods = composedBlock.products || [];
+    if (composedBlock.blockType === 'product_trio' && prods.length >= 3) {
+      newBlocks.push({id: ++blockIdCounter, type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
+    } else if (composedBlock.blockType === 'product_pair' && prods.length >= 2) {
+      newBlocks.push({id: ++blockIdCounter, type:'product_pair', product1:prods[0], product2:prods[1]});
+    } else if (composedBlock.blockType === 'product_single' && prods.length >= 1) {
+      newBlocks.push({id: ++blockIdCounter, type:'product_single', product1:prods[0]});
+    }
+    // Add steps if specified
+    if (composedBlock.includeSteps) {
+      newBlocks.push({id: ++blockIdCounter, type:'pimpam_steps'});
+    }
+    setBlocks(function(prev){ return prev.concat(newBlocks); });
+  }
+
+  function addPrewrittenText(textObj) {
+    setBlocks(function(prev){ return prev.concat([{id: ++blockIdCounter, type:'text', text: textObj.text}]); });
+  }
+
+  function loadTemplate(template) {
+    var newBlocks = [];
+    template.blocks.forEach(function(refId) {
+      var composed = appState.composedBlocks.find(function(b){return b.id===refId});
+      if (composed) {
+        if (composed.introText) newBlocks.push({id: ++blockIdCounter, type:'text', text: composed.introText});
+        if (composed.brandStrip && composed.brandStrip !== 'none') newBlocks.push({id: ++blockIdCounter, type:'brand_' + composed.brandStrip, brand: composed.brandStrip});
+        if (composed.includeHero) newBlocks.push({id: ++blockIdCounter, type:'pimpam_hero'});
+        var prods = composed.products || [];
+        if (composed.blockType === 'product_trio' && prods.length >= 3) newBlocks.push({id: ++blockIdCounter, type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
+        else if (composed.blockType === 'product_pair' && prods.length >= 2) newBlocks.push({id: ++blockIdCounter, type:'product_pair', product1:prods[0], product2:prods[1]});
+        else if (composed.blockType === 'product_single' && prods.length >= 1) newBlocks.push({id: ++blockIdCounter, type:'product_single', product1:prods[0]});
+        if (composed.includeSteps) newBlocks.push({id: ++blockIdCounter, type:'pimpam_steps'});
+      } else {
+        var textObj = appState.prewrittenTexts.find(function(t){return t.id===refId});
+        if (textObj) newBlocks.push({id: ++blockIdCounter, type:'text', text: textObj.text});
+      }
     });
+    setBlocks(newBlocks);
   }
 
   function copyHtml() {
-    var html = generateFullHtml(blocks);
+    var html = generateFullHtml(blocks, appState.products);
     try {
       navigator.clipboard.write([
         new ClipboardItem({
@@ -561,336 +1076,513 @@ function EmailComposer() {
     }
   }
 
-  function loadTemplate(tpl) {
-    if (tpl === 'compactas') {
-      setBlocks([
-        Object.assign(createBlock("text"), {text:"Hola,\n\nTras nuestra conversación, te envío información sobre algunas de nuestras impresoras UV-LED de formato compacto. Son ideales para empezar o para negocios que buscan personalización en punto de venta sin necesitar gran espacio.\n\nLa tecnología UV-LED permite imprimir directamente sobre casi cualquier material (plástico, madera, metal, cerámica…) con secado instantáneo y calidad fotorrealista en CMYK + blanco.\n\nTe destaco dos opciones de artisJet (marca premium) y dos de MBO (nuestra marca propia con mejor relación calidad-precio):"}),
-        Object.assign(createBlock("brand_artisjet")),
-        Object.assign(createBlock("product_pair"), {product1:"young",product2:"3000pro"}),
-        Object.assign(createBlock("text"), {text:"Y en nuestra línea MBO, tenemos opciones con precios muy competitivos:"}),
-        Object.assign(createBlock("brand_mbo")),
-        Object.assign(createBlock("product_pair"), {product1:"mbo3050",product2:"mbo4060"}),
-        Object.assign(createBlock("text"), {text:"Si quieres, podemos organizar una demo sin compromiso.\n\n¡Quedo a tu disposición!\nUn saludo,"}),
-      ]);
-    } else if (tpl === 'pimpam') {
-      setBlocks([
-        Object.assign(createBlock("text"), {text:"Hola,\n\nTe escribo porque creo que te puede interesar un concepto que está funcionando muy bien: máquinas de vending que imprimen fundas de móvil personalizadas al momento, sin necesidad de operario. Se llama PimPam y combina impresión UV-LED con autoservicio — ideal para centros comerciales, aeropuertos, ferias y retail.\n\nEl cliente elige el diseño en pantalla, paga y recibe su funda impresa en HD en menos de 30 segundos. Te cuento más:"}),
-        Object.assign(createBlock("brand_pimpam")),
-        createBlock("pimpam_hero"),
-        Object.assign(createBlock("product_pair"), {product1:"casebox",product2:"custom"}),
-        Object.assign(createBlock("text"), {text:"El proceso para el usuario es muy sencillo — 4 pasos:"}),
-        createBlock("pimpam_steps"),
-        Object.assign(createBlock("text"), {text:"Si te interesa, puedo enviarte más detalles o concertar una demo.\n\n¡Un saludo!"}),
-      ]);
-    } else if (tpl === 'formatos') {
-      setBlocks([
-        Object.assign(createBlock("text"), {text:"Hola,\n\nSiguiendo nuestra conversación, te paso información sobre algunas impresoras UV-LED que creo que encajan bien con lo que necesitas. He seleccionado equipos de distintos tamaños — desde formato medio hasta gran formato industrial — para que puedas comparar según tu volumen de producción.\n\nTodas funcionan con tecnología UV-LED: impresión directa sobre cualquier material rígido (plástico, madera, metal, vidrio, cerámica…) con secado instantáneo y calidad fotorrealista en CMYK + blanco.\n\nTe muestro dos de artisJet (marca premium) y dos de MBO (nuestra marca propia, excelente relación calidad-precio):"}),
-        Object.assign(createBlock("brand_artisjet")),
-        Object.assign(createBlock("product_pair"), {product1:"3000pro",product2:"6090trust"}),
-        createBlock("freebird"),
-        Object.assign(createBlock("text"), {text:"En nuestra línea MBO, tenemos opciones desde semiformato hasta gran formato industrial:"}),
-        Object.assign(createBlock("brand_mbo")),
-        Object.assign(createBlock("product_pair"), {product1:"mbo6090",product2:"uv1612g"}),
-        Object.assign(createBlock("text"), {text:"¿Te gustaría organizar una demo sin compromiso?\n\n¡Quedo a tu disposición!\nUn saludo,"}),
-      ]);
-    } else if (tpl === 'modulares') {
-      setBlocks([
-        Object.assign(createBlock("text"), {text:"Hola,\n\nTe presento una selección completa de nuestras impresoras UV-LED — todos los formatos, marcas y capacidades. Explora cada bloque y encuentra la solución perfecta para tu negocio."}),
-        Object.assign(createBlock("brand_artisjet")),
-        Object.assign(createBlock("product_trio"), {product1:"young",product2:"3000pro",product3:"proud"}),
-        Object.assign(createBlock("product_pair"), {product1:"5000u",product2:"6090trust"}),
-        createBlock("freebird"),
-        Object.assign(createBlock("brand_mbo")),
-        Object.assign(createBlock("product_trio"), {product1:"mbo3050",product2:"mbo4060",product3:"mbo6090"}),
-        Object.assign(createBlock("product_trio"), {product1:"mbo1015",product2:"uv1612g",product3:"uv1812"}),
-        Object.assign(createBlock("product_single"), {product1:"uv2513"}),
-        Object.assign(createBlock("brand_pimpam")),
-        Object.assign(createBlock("product_pair"), {product1:"casebox",product2:"custom"}),
-        createBlock("pimpam_hero"),
-        createBlock("pimpam_steps"),
-        Object.assign(createBlock("text"), {text:"Contacta con nosotros para más información, precios o para concertar una demo sin compromiso.\n\n¡Un saludo!"}),
-      ]);
+  // Backoffice handlers
+  function updateAppState(key, value) {
+    var newState = Object.assign({}, appState);
+    newState[key] = value;
+    setAppState(newState);
+    saveStorageData(newState);
+  }
+
+  function persistState(newState) {
+    setAppState(newState);
+    saveStorageData(newState);
+  }
+
+  function exportJSON() {
+    var dataStr = JSON.stringify(appState, null, 2);
+    var blob = new Blob([dataStr], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'bomedia-config-' + new Date().getTime() + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importJSON() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = function(e) {
+      var file = e.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          var data = JSON.parse(evt.target.result);
+          setAppState(data);
+          saveStorageData(data);
+          alert('Configuración importada correctamente');
+        } catch(err) {
+          alert('Error al importar JSON: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  function resetToDefaults() {
+    if(window.confirm('¿Restaurar configuración original? Se perderán todos los cambios.')) {
+      var defaultState = getDefaultState();
+      setAppState(defaultState);
+      saveStorageData(defaultState);
     }
   }
 
-  var fullHtml = generateFullHtml(blocks);
+  // Product management
+  function saveProduct(product) {
+    var products = appState.products.slice();
+    var idx = products.findIndex(function(p){return p.id===product.id});
+    if(idx >= 0) {
+      products[idx] = product;
+    } else {
+      products.push(product);
+    }
+    updateAppState('products', products);
+    setEditingProduct(null);
+  }
+
+  function deleteProduct(id) {
+    if(window.confirm('¿Eliminar este producto?')) {
+      var products = appState.products.filter(function(p){return p.id!==id});
+      updateAppState('products', products);
+    }
+  }
+
+  // Block management
+  function saveComposedBlock(block) {
+    var blocks = appState.composedBlocks.slice();
+    var idx = blocks.findIndex(function(b){return b.id===block.id});
+    if(idx >= 0) {
+      blocks[idx] = block;
+    } else {
+      blocks.push(block);
+    }
+    persistState(Object.assign({}, appState, {composedBlocks:blocks}));
+    setEditingBlock(null);
+  }
+
+  function deleteComposedBlock(id) {
+    if(window.confirm('¿Eliminar este bloque?')) {
+      var blocks = appState.composedBlocks.filter(function(b){return b.id!==id});
+      persistState(Object.assign({}, appState, {composedBlocks:blocks}));
+    }
+  }
+
+  // Text management
+  function saveText(text) {
+    var texts = appState.prewrittenTexts.slice();
+    var idx = texts.findIndex(function(t){return t.id===text.id});
+    if(idx >= 0) {
+      texts[idx] = text;
+    } else {
+      texts.push(text);
+    }
+    persistState(Object.assign({}, appState, {prewrittenTexts:texts}));
+    setEditingText(null);
+  }
+
+  function deleteText(id) {
+    if(window.confirm('¿Eliminar este texto?')) {
+      var texts = appState.prewrittenTexts.filter(function(t){return t.id!==id});
+      persistState(Object.assign({}, appState, {prewrittenTexts:texts}));
+    }
+  }
+
+  // Template management
+  function saveTemplate(template) {
+    var templates = appState.templates.slice();
+    var idx = templates.findIndex(function(t){return t.id===template.id});
+    if(idx >= 0) {
+      templates[idx] = template;
+    } else {
+      templates.push(template);
+    }
+    persistState(Object.assign({}, appState, {templates:templates}));
+    setEditingTemplate(null);
+  }
+
+  function deleteTemplate(id) {
+    if(window.confirm('¿Eliminar esta plantilla?')) {
+      var templates = appState.templates.filter(function(t){return t.id!==id});
+      persistState(Object.assign({}, appState, {templates:templates}));
+    }
+  }
+
+  var fullHtml = generateFullHtml(blocks, appState.products);
   var sizeKb = (new Blob([fullHtml]).size / 1024).toFixed(1);
 
-  // ─── RENDER ─────────────────────────────────────────────
+  // COMPOSITOR MODE RENDER
+  if(appMode === 'compositor') {
+    return e('div', {className:'app'},
+      e('div', {className:'header'},
+        e('div', {className:'header-left'},
+          e('div', {className:'logo'}, 'B'),
+          e('div', null,
+            e('div', {className:'header-title'}, 'Bomedia Email Composer'),
+            e('div', {className:'header-sub'}, 'Compón emails con bloques de producto UV-LED')
+          )
+        ),
+        e('div', {className:'header-right'},
+          e('div', {className:'header-mode-toggle'},
+            e('button', {className:'mode-btn active', onClick:function(){setAppMode('compositor')}}, 'Compositor'),
+            e('button', {className:'mode-btn', onClick:tryOpenBackoffice}, 'Backoffice')
+          ),
+          e('button', {className:'btn ' + (showPreview?'btn-toggle':'btn-toggle off'), onClick:function(){setShowPreview(!showPreview)}}, showPreview?'Preview ON':'Preview OFF'),
+          e('button', {className:'btn ' + (copied?'btn-success':'btn-primary'), onClick:copyHtml}, copied?'¡Copiado!':'Copiar HTML')
+        )
+      ),
+
+      e('div', {className:'main'},
+        e('div', {className:'sidebar'},
+
+          // PLANTILLAS RÁPIDAS
+          e(SidebarSection, {title:'PLANTILLAS RÁPIDAS'},
+            appState.templates.map(function(tpl) {
+              var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
+              return e('button', {key:tpl.id, className:'add-btn', onClick:function(){loadTemplate(tpl)}},
+                e('span', {className:'add-btn-icon', style:{background:colorMap[tpl.colorClass]||'#f3f4f6'}}, '⚡'),
+                e('div', null,
+                  e('div', {className:'add-btn-label'}, tpl.name),
+                  e('div', {className:'add-btn-desc'}, tpl.blocks.length + ' bloques')
+                )
+              );
+            })
+          ),
+
+          // BLOQUES DE TEXTO
+          e(SidebarSection, {title:'BLOQUES DE TEXTO'},
+            e('button', {className:'add-btn', onClick:function(){addBlock("text")}},
+              e('span', {className:'add-btn-icon', style:{background:"#f1f5f9"}},'A'),
+              e('div', null,
+                e('div', {className:'add-btn-label'}, 'Texto libre'),
+                e('div', {className:'add-btn-desc'}, 'Bloque vacío editable')
+              )
+            ),
+            appState.prewrittenTexts.map(function(txt) {
+              return e('button', {key:txt.id, className:'add-btn', onClick:function(){addPrewrittenText(txt)}},
+                e('span', {className:'add-btn-icon', style:{background:"#f0fdf4"}}, txt.icon || '📝'),
+                e('div', null,
+                  e('div', {className:'add-btn-label'}, txt.name),
+                  e('div', {className:'add-btn-desc'}, txt.text.substring(0,50) + '...')
+                )
+              );
+            })
+          ),
+
+          // BLOQUES DE PRODUCTO (composed blocks from backoffice)
+          e(SidebarSection, {title:'BLOQUES DE PRODUCTO'},
+            appState.composedBlocks.map(function(cb) {
+              var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
+              var iconMap = {blue:'aJ',purple:'MBO',orange:'🧃',gray:'Mix'};
+              return e('button', {key:cb.id, className:'add-btn', onClick:function(){addComposedBlock(cb)}},
+                e('span', {className:'add-btn-icon', style:{background:colorMap[cb.colorTag]||'#f3f4f6'}}, iconMap[cb.colorTag]||'📦'),
+                e('div', null,
+                  e('div', {className:'add-btn-label'}, cb.title),
+                  e('div', {className:'add-btn-desc'}, cb.desc + (cb.priceRange && cb.priceRange !== '-' ? ' · ' + cb.priceRange : ''))
+                )
+              );
+            })
+          ),
+
+          // OTROS BLOQUES (standalone)
+          e(SidebarSection, {title:'OTROS BLOQUES'},
+            e('button', {className:'add-btn', onClick:function(){addBlock("brand_artisjet")}},
+              e('span', {className:'add-btn-icon', style:{background:"#dbeafe"}},'aJ'),
+              e('div', null,
+                e('div', {className:'add-btn-label'}, 'Brand artisJet'),
+                e('div', {className:'add-btn-desc'}, 'Logo + enlace')
+              )
+            ),
+            e('button', {className:'add-btn', onClick:function(){addBlock("brand_mbo")}},
+              e('span', {className:'add-btn-icon', style:{background:"#ede9fe"}},'MBO'),
+              e('div', null,
+                e('div', {className:'add-btn-label'}, 'Brand MBO'),
+                e('div', {className:'add-btn-desc'}, 'Logo + enlace')
+              )
+            ),
+            e('button', {className:'add-btn', onClick:function(){addBlock("brand_pimpam")}},
+              e('span', {className:'add-btn-icon', style:{background:"#ffedd5"}},'PP'),
+              e('div', null,
+                e('div', {className:'add-btn-label'}, 'Brand PimPam'),
+                e('div', {className:'add-btn-desc'}, 'Logo + enlace')
+              )
+            ),
+            e('button', {className:'add-btn', onClick:function(){addBlock("freebird")}},
+              e('span', {className:'add-btn-icon', style:{background:"#1e3a8a", color:"#fff"}},'▶'),
+              e('div', null,
+                e('div', {className:'add-btn-label'}, 'Vídeo Freebird'),
+                e('div', {className:'add-btn-desc'}, 'Banner azul con preview')
+              )
+            ),
+            e('button', {className:'add-btn', onClick:function(){addBlock("product_single")}},
+              e('span', {className:'add-btn-icon', style:{background:"#dcfce7"}},'📦'),
+              e('div', null,
+                e('div', {className:'add-btn-label'}, '1 Producto'),
+                e('div', {className:'add-btn-desc'}, 'Individual con selector')
+              )
+            ),
+            e('button', {className:'add-btn', onClick:function(){addBlock("product_pair")}},
+              e('span', {className:'add-btn-icon', style:{background:"#dcfce7"}},'📦📦'),
+              e('div', null,
+                e('div', {className:'add-btn-label'}, '2 Productos'),
+                e('div', {className:'add-btn-desc'}, 'Par con selectores')
+              )
+            ),
+            e('button', {className:'add-btn', onClick:function(){addBlock("product_trio")}},
+              e('span', {className:'add-btn-icon', style:{background:"#dcfce7"}},'📦³'),
+              e('div', null,
+                e('div', {className:'add-btn-label'}, '3 Productos'),
+                e('div', {className:'add-btn-desc'}, 'Trío con selectores')
+              )
+            ),
+            e('button', {className:'add-btn', onClick:function(){addBlock("pimpam_hero")}},
+              e('span', {className:'add-btn-icon', style:{background:"#ffedd5"}},'🖼'),
+              e('div', null,
+                e('div', {className:'add-btn-label'}, 'PimPam Hero'),
+                e('div', {className:'add-btn-desc'}, 'Banner vending')
+              )
+            ),
+            e('button', {className:'add-btn', onClick:function(){addBlock("pimpam_steps")}},
+              e('span', {className:'add-btn-icon', style:{background:"#ffedd5"}},'1234'),
+              e('div', null,
+                e('div', {className:'add-btn-label'}, 'PimPam 4 Pasos'),
+                e('div', {className:'add-btn-desc'}, 'Proceso en 4 pasos')
+              )
+            )
+          )
+        ),
+
+        e('div', {className:'editor', style:{width:showPreview?'50%':'100%'}},
+          e('div', {className:'editor-inner'},
+            blocks.length === 0
+              ? e('div', {className:'empty-state'},
+                  e('div', {className:'empty-icon'}, '📧'),
+                  e('p', {style:{fontSize:13,fontWeight:500}}, 'Añade bloques desde el panel izquierdo')
+                )
+              : blocks.map(function(block, idx){
+                  return e(BlockEditor, {
+                    key: block.id,
+                    block: block,
+                    products: appState.products,
+                    onChange: function(u){updateBlock(block.id,u)},
+                    onDelete: function(){deleteBlock(block.id)},
+                    onMoveUp: function(){moveBlock(block.id,-1)},
+                    onMoveDown: function(){moveBlock(block.id,1)},
+                    isFirst: idx===0,
+                    isLast: idx===blocks.length-1
+                  });
+                })
+          )
+        ),
+
+        showPreview && e('div', {className:'preview-panel'},
+          e('div', {className:'preview-header'},
+            e('span', {className:'preview-label'}, 'Vista previa email'),
+            e('button', {className:'btn btn-ghost', onClick:function(){setShowHtmlCode(!showHtmlCode)}}, showHtmlCode?'Ver preview':'Ver HTML')
+          ),
+          showHtmlCode
+            ? e('pre', {className:'html-code'}, fullHtml)
+            : e('div', {className:'preview-content'},
+                e('div', {className:'preview-frame', dangerouslySetInnerHTML:{__html:fullHtml}})
+              )
+        )
+      ),
+
+      e('div', {className:'footer'},
+        e('span', null, blocks.length + ' bloque' + (blocks.length!==1?'s':'')),
+        e('span', null, sizeKb + ' KB')
+      )
+    );
+  }
+
+  // BACKOFFICE MODE RENDER
   return e('div', {className:'app'},
-    // Header
     e('div', {className:'header'},
       e('div', {className:'header-left'},
         e('div', {className:'logo'}, 'B'),
         e('div', null,
-          e('div', {className:'header-title'}, 'Bomedia Email Composer'),
-          e('div', {className:'header-sub'}, 'Compón emails con bloques de producto UV-LED')
+          e('div', {className:'header-title'}, 'Bomedia Admin Panel'),
+          e('div', {className:'header-sub'}, 'Gestiona productos, bloques, textos y plantillas')
         )
       ),
       e('div', {className:'header-right'},
-        e('button', {className:'btn ' + (showPreview?'btn-toggle':'btn-toggle off'), onClick:function(){setShowPreview(!showPreview)}}, showPreview?'Preview ON':'Preview OFF'),
-        e('button', {className:'btn ' + (copied?'btn-success':'btn-primary'), onClick:copyHtml}, copied?'¡Copiado!':'Copiar HTML')
+        e('div', {className:'header-mode-toggle'},
+          e('button', {className:'mode-btn', onClick:function(){setAppMode('compositor')}}, 'Compositor'),
+          e('button', {className:'mode-btn active', onClick:function(){setAppMode('backoffice')}}, 'Backoffice')
+        ),
+        e('button', {className:'btn btn-primary btn-sm', onClick:exportJSON}, 'Exportar JSON'),
+        e('button', {className:'btn btn-primary btn-sm', onClick:importJSON}, 'Importar JSON'),
+        e('button', {className:'btn btn-ghost btn-sm', onClick:resetToDefaults}, 'Restaurar')
       )
     ),
 
-    // Main
-    e('div', {className:'main'},
-      // Sidebar
-      e('div', {className:'sidebar'},
-        // Section 1: BLOQUES DE TEXTO
-        e(SidebarSection, {title:'BLOQUES DE TEXTO'},
-          e('button', {className:'add-btn', onClick:function(){addBlock("text")}},
-            e('span', {className:'add-btn-icon', style:{background:"#f1f5f9"}},'A'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Texto libre'),
-              e('div', {className:'add-btn-desc'}, 'Bloque vacío editable')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){addBlock("text"); updateBlock(blocks[blocks.length]?.id, {text:"Hola,\n\nTras nuestra conversación, te envío información sobre algunas de nuestras impresoras UV-LED que creo que encajan con lo que necesitas.\n\nLa tecnología UV-LED permite imprimir directamente sobre casi cualquier material (plástico, madera, metal, vidrio, cerámica…) con secado instantáneo y calidad fotorrealista en CMYK + blanco. Te muestro algunas opciones:"})}},
-            e('span', {className:'add-btn-icon', style:{background:"#f1f5f9"}},'Aa'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Intro UV-LED'),
-              e('div', {className:'add-btn-desc'}, 'Presentación de tecnología')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){setBlocks(function(p){var b=createBlock("text");b.text="En nuestra línea MBO (marca propia, excelente relación calidad-precio) también tenemos opciones interesantes:";return p.concat([b])})}},
-            e('span', {className:'add-btn-icon', style:{background:"#f1f5f9"}},'▶'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Transición a MBO'),
-              e('div', {className:'add-btn-desc'}, 'Puente a marca propia')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){setBlocks(function(p){var b=createBlock("text");b.text="Y si te interesa el concepto de vending con personalización automática, tenemos PimPam — máquinas que imprimen fundas de móvil al momento, sin operario:";return p.concat([b])})}},
-            e('span', {className:'add-btn-icon', style:{background:"#f1f5f9"}},'🔹'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Transición a PimPam'),
-              e('div', {className:'add-btn-desc'}, 'Introduce vending')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){setBlocks(function(p){var b=createBlock("text");b.text="Por cierto, varios de estos equipos incluyen tecnología Freebird — un sensor láser que ajusta automáticamente la altura del cabezal para imprimir sobre objetos 3D irregulares:";return p.concat([b])})}},
-            e('span', {className:'add-btn-icon', style:{background:"#f1f5f9"}},'✨'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Mención Freebird'),
-              e('div', {className:'add-btn-desc'}, 'Destaca tecnología')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){setBlocks(function(p){var b=createBlock("text");b.text="Si quieres, podemos organizar una demo (presencial o videollamada) para que veas cualquiera de estos equipos en funcionamiento. También te puedo enviar muestras impresas sin compromiso.\n\n¡Quedo a tu disposición!\nUn saludo,";return p.concat([b])})}},
-            e('span', {className:'add-btn-icon', style:{background:"#f1f5f9"}},'👋'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Cierre comercial'),
-              e('div', {className:'add-btn-desc'}, 'CTA y despedida')
-            )
-          )
-        ),
-
-        // Section 2: BLOQUES DE PRODUCTO
-        e(SidebarSection, {title:'BLOQUES DE PRODUCTO'},
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"Si buscas empezar con impresión UV-LED sin una inversión inicial grande, estas dos compactas de nuestra marca MBO son la mejor opción del mercado. Ideales para negocios que quieren probar la tecnología o complementar su producción:"}},{type:"brand_mbo"},{type:"product_pair",overrides:{product1:"mbo3050",product2:"mbo4060"}}])}},
-            e('div', {className:'product-block-btn-border purple'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'Entry Level · MBO 3050 + 4060'),
-              e('div', {className:'product-block-btn-desc'}, 'Compactas MBO con mejor precio'),
-              e('div', {className:'product-block-btn-price'}, 'desde 6.495 € + 7.995 €')
-            )
-          ),
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"Nuestra gama compacta de artisJet cubre desde la personalización en punto de venta (Young) hasta la producción profesional con Freebird para objetos 3D (3000Pro). Ambas ocupan poco espacio y son fáciles de integrar en cualquier entorno de trabajo:"}},{type:"brand_artisjet"},{type:"product_pair",overrides:{product1:"young",product2:"3000pro"}}])}},
-            e('div', {className:'product-block-btn-border blue'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'artisJet Compactas · Young + 3000Pro'),
-              e('div', {className:'product-block-btn-desc'}, 'Personalización a producción pro'),
-              e('div', {className:'product-block-btn-price'}, '9.300 € + 13.900 €')
-            )
-          ),
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"Para entornos que requieren producción continua o especialización: la Proud está diseñada para tarjetas, carnets y artículos promocionales en volúmenes industriales, y la 5000U es el salto a formato A3+ para negocios en crecimiento:"}},{type:"brand_artisjet"},{type:"product_pair",overrides:{product1:"proud",product2:"5000u"}}])}},
-            e('div', {className:'product-block-btn-border blue'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'artisJet Producción · Proud + 5000U'),
-              e('div', {className:'product-block-btn-desc'}, 'Tarjetas y formato A3+'),
-              e('div', {className:'product-block-btn-price'}, '21.500 € + 18.900 €')
-            )
-          ),
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"Si necesitas cubrir desde formato medio hasta producción industrial, esta combinación te da flexibilidad: la 5000U para trabajos variados del día a día, y la 6090 Trust para señalización y tiradas grandes — ambas con tecnología Freebird:"}},{type:"brand_artisjet"},{type:"product_pair",overrides:{product1:"5000u",product2:"6090trust"}}])}},
-            e('div', {className:'product-block-btn-border blue'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'artisJet Medio + Gran Formato'),
-              e('div', {className:'product-block-btn-desc'}, '5000U + 6090 Trust con Freebird'),
-              e('div', {className:'product-block-btn-price'}, '18.900 € + 20.900 €')
-            )
-          ),
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"Para producción profesional con la mejor relación calidad-precio: la MBO 6090 con 3 cabezales y barniz integrado, y la MBO 1015 para tiradas grandes en formato industrial:"}},{type:"brand_mbo"},{type:"product_pair",overrides:{product1:"mbo6090",product2:"mbo1015"}}])}},
-            e('div', {className:'product-block-btn-border purple'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'MBO Semiformato + Industrial'),
-              e('div', {className:'product-block-btn-desc'}, '6090 (3 cabezales) + 1015'),
-              e('div', {className:'product-block-btn-price'}, '14.500 € + desde 21.500 €')
-            )
-          ),
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"Dos opciones de formato medio de marcas distintas para comparar: la artisJet 3000Pro con Freebird y certificación Braille, y la MBO 6090 con 3 cabezales y barniz:"}},{type:"product_pair",overrides:{product1:"3000pro",product2:"mbo6090"}}])}},
-            e('div', {className:'product-block-btn-border gray'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'Mix Formato Medio'),
-              e('div', {className:'product-block-btn-desc'}, '3000Pro vs MBO 6090'),
-              e('div', {className:'product-block-btn-price'}, 'Comparativa marcas')
-            )
-          ),
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"Para producción de gran formato, las dos opciones de marcas distintas: la artisJet 6090 Trust con Freebird y la MBO 1015 con cabezales Epson i3200:"}},{type:"product_pair",overrides:{product1:"6090trust",product2:"mbo1015"}}])}},
-            e('div', {className:'product-block-btn-border gray'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'Mix Gran Formato'),
-              e('div', {className:'product-block-btn-desc'}, '6090 Trust vs MBO 1015'),
-              e('div', {className:'product-block-btn-price'}, 'Comparativa industrial')
-            )
-          ),
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"Nuestra gama industrial MBO para producción a gran escala: desde 160×120cm hasta 250×130cm, con estructura de acero reforzado y múltiples cabezales:"}},{type:"brand_mbo"},{type:"product_trio",overrides:{product1:"uv1612g",product2:"uv1812",product3:"uv2513"}}])}},
-            e('div', {className:'product-block-btn-border purple'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'MBO Gran Formato Industrial'),
-              e('div', {className:'product-block-btn-desc'}, 'UV1612G + UV1812 + UV2513'),
-              e('div', {className:'product-block-btn-price'}, 'desde 26.500 € a 34.000 €')
-            )
-          ),
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"PimPam es nuestro concepto de vending con impresión UV-LED: máquinas que permiten al cliente diseñar y comprar su funda personalizada sin operario:"}},{type:"brand_pimpam"},{type:"pimpam_hero"},{type:"product_pair",overrides:{product1:"casebox",product2:"custom"}}])}},
-            e('div', {className:'product-block-btn-border orange'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'PimPam Vending'),
-              e('div', {className:'product-block-btn-desc'}, 'CaseBox + Custom con hero'),
-              e('div', {className:'product-block-btn-price'}, 'Vending autoservicio')
-            )
-          ),
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"Y si además de vending necesitas producción manual — pedidos online, tiradas a demanda — la artisJet Young es el complemento perfecto:"}},{type:"product_single",overrides:{product1:"young"}}])}},
-            e('div', {className:'product-block-btn-border orange'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'Complemento Vending'),
-              e('div', {className:'product-block-btn-desc'}, 'artisJet Young + cta')
-            )
-          ),
-          e('button', {className:'product-block-btn', onClick:function(){addComposedBlock([{type:"text",overrides:{text:"El proceso para el usuario final es completamente autónomo y se completa en menos de un minuto:"}},{type:"pimpam_steps"}])}},
-            e('div', {className:'product-block-btn-border orange'}),
-            e('div', {className:'product-block-btn-content'},
-              e('div', {className:'product-block-btn-title'}, 'Proceso PimPam'),
-              e('div', {className:'product-block-btn-desc'}, '4 pasos del flujo')
-            )
-          )
-        ),
-
-        // Section 3: OTROS BLOQUES
-        e(SidebarSection, {title:'OTROS BLOQUES'},
-          e('button', {className:'add-btn', onClick:function(){addBlock("brand_artisjet")}},
-            e('span', {className:'add-btn-icon', style:{background:"#dbeafe"}},'aJ'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Brand artisJet'),
-              e('div', {className:'add-btn-desc'}, 'Logo + enlace boprint')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){addBlock("brand_mbo")}},
-            e('span', {className:'add-btn-icon', style:{background:"#ede9fe"}},'M'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Brand MBO'),
-              e('div', {className:'add-btn-desc'}, 'Logo + enlace mboprinters')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){addBlock("brand_pimpam")}},
-            e('span', {className:'add-btn-icon', style:{background:"#ffedd5"}},'PP'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Brand PimPam'),
-              e('div', {className:'add-btn-desc'}, 'Logo + enlace pimpam')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){addBlock("freebird")}},
-            e('span', {className:'add-btn-icon', style:{background:"#1e3a8a", color:"#fff"}},'▶'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Vídeo Freebird'),
-              e('div', {className:'add-btn-desc'}, 'Banner con imagen + CTA')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){addBlock("pimpam_hero")}},
-            e('span', {className:'add-btn-icon', style:{background:"#fff7ed"}},'📱'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, 'Hero PimPam'),
-              e('div', {className:'add-btn-desc'}, 'Imagen + beneficios')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){addBlock("pimpam_steps")}},
-            e('span', {className:'add-btn-icon', style:{background:"#fff7ed"}},'1234'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, '4 Pasos PimPam'),
-              e('div', {className:'add-btn-desc'}, 'Flujo del usuario')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){addBlock("product_single")}},
-            e('span', {className:'add-btn-icon', style:{background:"#dcfce7"}},'📦'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, '1 Producto'),
-              e('div', {className:'add-btn-desc'}, 'Ficha con selector')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){addBlock("product_pair")}},
-            e('span', {className:'add-btn-icon', style:{background:"#dcfce7"}},'📦📦'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, '2 Productos'),
-              e('div', {className:'add-btn-desc'}, 'Par con selectores')
-            )
-          ),
-          e('button', {className:'add-btn', onClick:function(){addBlock("product_trio")}},
-            e('span', {className:'add-btn-icon', style:{background:"#dcfce7"}},'3️⃣'),
-            e('div', null,
-              e('div', {className:'add-btn-label'}, '3 Productos'),
-              e('div', {className:'add-btn-desc'}, 'Trío compacto')
-            )
-          )
-        ),
-
-        // Section 4: PLANTILLAS RÁPIDAS
-        e(SidebarSection, {title:'PLANTILLAS RÁPIDAS'},
-          e('button', {className:'tpl-btn tpl-blue', onClick:function(){loadTemplate('compactas')}}, 'Compactas UV-LED'),
-          e('button', {className:'tpl-btn tpl-orange', onClick:function(){loadTemplate('pimpam')}}, 'PimPam Vending'),
-          e('button', {className:'tpl-btn tpl-purple', onClick:function(){loadTemplate('formatos')}}, 'Formatos varios'),
-          e('button', {className:'tpl-btn tpl-gray', onClick:function(){loadTemplate('modulares')}}, 'Bloques modulares')
-        )
+    e('div', {className:'backoffice-container'},
+      e('div', {className:'backoffice-tabs'},
+        e('button', {className:'backoffice-tab ' + (backofficeTab==='products'?'active':''), onClick:function(){setBackofficeTab('products')}}, 'Productos'),
+        e('button', {className:'backoffice-tab ' + (backofficeTab==='blocks'?'active':''), onClick:function(){setBackofficeTab('blocks')}}, 'Bloques'),
+        e('button', {className:'backoffice-tab ' + (backofficeTab==='texts'?'active':''), onClick:function(){setBackofficeTab('texts')}}, 'Textos'),
+        e('button', {className:'backoffice-tab ' + (backofficeTab==='templates'?'active':''), onClick:function(){setBackofficeTab('templates')}}, 'Plantillas')
       ),
 
-      // Editor
-      e('div', {className:'editor', style:{width:showPreview?'50%':'100%'}},
-        e('div', {className:'editor-inner'},
-          blocks.length === 0
-            ? e('div', {className:'empty-state'},
-                e('div', {className:'empty-icon'}, '📧'),
-                e('p', {style:{fontSize:13,fontWeight:500}}, 'Añade bloques desde el panel izquierdo'),
-                e('p', {style:{fontSize:11,color:'#cbd5e1',marginTop:4}}, 'o usa una plantilla rápida')
+      e('div', {className:'backoffice-content'},
+        // PRODUCTOS
+        backofficeTab === 'products' && e('div', null,
+          e('div', {className:'backoffice-actions'},
+            e('button', {className:'btn btn-primary', onClick:function(){setEditingProduct({})}}, '+ Añadir producto')
+          ),
+          e('table', {className:'data-table'},
+            e('thead', null,
+              e('tr', null,
+                e('th', null, 'Imagen'),
+                e('th', null, 'Nombre'),
+                e('th', null, 'Marca'),
+                e('th', null, 'Precio'),
+                e('th', null, 'Acciones')
               )
-            : blocks.map(function(block, idx){
-                return e(BlockEditor, {
-                  key: block.id,
-                  block: block,
-                  onChange: function(u){updateBlock(block.id,u)},
-                  onDelete: function(){deleteBlock(block.id)},
-                  onMoveUp: function(){moveBlock(block.id,-1)},
-                  onMoveDown: function(){moveBlock(block.id,1)},
-                  isFirst: idx===0,
-                  isLast: idx===blocks.length-1
-                });
+            ),
+            e('tbody', null,
+              appState.products.map(function(p){
+                return e('tr', {key:p.id},
+                  e('td', null, p.img && e('img', {src:p.img, className:'product-thumb', alt:p.name, onError:function(ev){ev.target.style.display='none'}})),
+                  e('td', null, p.name),
+                  e('td', null, p.brand),
+                  e('td', null, p.price),
+                  e('td', null,
+                    e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingProduct(p)}}, 'Editar'),
+                    e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteProduct(p.id)}, style:{marginLeft:'4px'}}, 'Borrar')
+                  )
+                );
               })
-        )
-      ),
-
-      // Preview
-      showPreview && e('div', {className:'preview-panel'},
-        e('div', {className:'preview-header'},
-          e('span', {className:'preview-label'}, 'Vista previa email'),
-          e('button', {className:'btn btn-ghost', onClick:function(){setShowHtmlCode(!showHtmlCode)}}, showHtmlCode?'Ver preview':'Ver HTML')
-        ),
-        showHtmlCode
-          ? e('pre', {className:'html-code'}, fullHtml)
-          : e('div', {className:'preview-content'},
-              e('div', {className:'preview-frame', dangerouslySetInnerHTML:{__html:fullHtml}})
             )
+          )
+        ),
+
+        // BLOQUES
+        backofficeTab === 'blocks' && e('div', null,
+          e('div', {className:'backoffice-actions'},
+            e('button', {className:'btn btn-primary', onClick:function(){setEditingBlock({})}}, '+ Añadir bloque')
+          ),
+          e('div', null,
+            appState.composedBlocks.map(function(b){
+              return e('div', {key:b.id, className:'block-list-item'},
+                e('div', {className:'block-list-content'},
+                  e('div', {className:'block-list-title'},
+                    e('span', {className:'color-tag ' + b.colorTag}),
+                    b.title
+                  ),
+                  e('div', {className:'block-list-desc'}, b.desc)
+                ),
+                e('div', {className:'list-item-actions'},
+                  e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingBlock(b)}}, 'Editar'),
+                  e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteComposedBlock(b.id)}}, 'Borrar')
+                )
+              );
+            })
+          )
+        ),
+
+        // TEXTOS
+        backofficeTab === 'texts' && e('div', null,
+          e('div', {className:'backoffice-actions'},
+            e('button', {className:'btn btn-primary', onClick:function(){setEditingText({})}}, '+ Añadir texto')
+          ),
+          e('div', null,
+            appState.prewrittenTexts.map(function(t){
+              return e('div', {key:t.id, className:'list-item'},
+                e('div', {className:'list-item-info'},
+                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.icon + ' ' + t.name),
+                  e('div', {style:{fontSize:'11px',color:'#6b7280'}}, t.text.substring(0,60) + '...')
+                ),
+                e('div', {className:'list-item-actions'},
+                  e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingText(t)}}, 'Editar'),
+                  e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteText(t.id)}}, 'Borrar')
+                )
+              );
+            })
+          )
+        ),
+
+        // PLANTILLAS
+        backofficeTab === 'templates' && e('div', null,
+          e('div', {className:'backoffice-actions'},
+            e('button', {className:'btn btn-primary', onClick:function(){setEditingTemplate({})}}, '+ Añadir plantilla')
+          ),
+          e('div', null,
+            appState.templates.map(function(t){
+              return e('div', {key:t.id, className:'list-item'},
+                e('div', {className:'list-item-info'},
+                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.name),
+                  e('div', {style:{fontSize:'11px',color:'#6b7280'}}, t.blocks.length + ' bloque(s)')
+                ),
+                e('div', {className:'list-item-actions'},
+                  e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingTemplate(t)}}, 'Editar'),
+                  e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteTemplate(t.id)}}, 'Borrar')
+                )
+              );
+            })
+          )
+        )
       )
     ),
 
-    // Footer
-    e('div', {className:'footer'},
-      e('span', null, blocks.length + ' bloque' + (blocks.length!==1?'s':'')),
-      e('span', null, sizeKb + ' KB')
+    editingProduct !== null && e(ProductEditorModal, {
+      product: editingProduct.id ? editingProduct : null,
+      isNew: !editingProduct.id,
+      onClose: function(){setEditingProduct(null)},
+      onSave: saveProduct
+    }),
+
+    editingBlock !== null && e(BlockEditorModal, {
+      block: editingBlock.id ? editingBlock : null,
+      isNew: !editingBlock.id,
+      onClose: function(){setEditingBlock(null)},
+      onSave: saveComposedBlock
+    }),
+
+    editingText !== null && e(TextEditorModal, {
+      text: editingText.id ? editingText : null,
+      isNew: !editingText.id,
+      onClose: function(){setEditingText(null)},
+      onSave: saveText
+    }),
+
+    editingTemplate !== null && e(TemplateEditorModal, {
+      template: editingTemplate.id ? editingTemplate : null,
+      isNew: !editingTemplate.id,
+      blocks: appState.composedBlocks,
+      texts: appState.prewrittenTexts,
+      onClose: function(){setEditingTemplate(null)},
+      onSave: saveTemplate
+    }),
+
+    // PASSWORD MODAL
+    showBoLogin && e('div', {className:'modal-overlay', onClick:function(){setShowBoLogin(false)}},
+      e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}, style:{maxWidth:'360px'}},
+        e('div', {className:'modal-header'},
+          e('span', null, '🔒 Acceso Backoffice'),
+          e('button', {className:'modal-close', onClick:function(){setShowBoLogin(false)}}, '✕')
+        ),
+        e('div', {style:{padding:'20px'}},
+          e('p', {style:{fontSize:'13px',color:'#6b7280',marginBottom:'16px'}}, 'Introduce la contraseña para acceder al panel de administración.'),
+          e('input', {
+            className:'form-input',
+            type:'password',
+            placeholder:'Contraseña',
+            value:boPass,
+            onChange:function(ev){setBoPass(ev.target.value); setBoPassError(false)},
+            onKeyDown:function(ev){if(ev.key==='Enter') submitBoPassword()},
+            style: boPassError ? {borderColor:'#ef4444'} : {},
+            autoFocus: true
+          }),
+          boPassError && e('p', {style:{color:'#ef4444',fontSize:'12px',marginTop:'8px'}}, 'Contraseña incorrecta')
+        ),
+        e('div', {className:'modal-footer'},
+          e('button', {className:'btn btn-ghost', onClick:function(){setShowBoLogin(false)}}, 'Cancelar'),
+          e('button', {className:'btn btn-primary', onClick:submitBoPassword}, 'Entrar')
+        )
+      )
     )
   );
 }
