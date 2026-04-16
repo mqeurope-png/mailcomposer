@@ -2265,6 +2265,72 @@ function EmailComposer() {
     setBlocks(newBlocks);
   }
 
+  function saveCurrentAsTemplate() {
+    if (blocks.length <= 1) { alert('Añade al menos 2 bloques antes de guardar como plantilla.'); return; }
+    var name = window.prompt('Nombre para la plantilla:');
+    if (!name || !name.trim()) return;
+    name = name.trim();
+    // Convert current compositor blocks into innerBlocks format
+    var innerBlocks = [];
+    var innerIdCounter = 0;
+    blocks.forEach(function(b) {
+      var ib = {_id: ++innerIdCounter};
+      if (b.type === 'text') {
+        ib.type = 'text'; ib.text = b.text || '';
+      } else if (b.type === 'composed') {
+        // Expand composed block's own innerBlocks
+        var srcBlock = appState.composedBlocks.find(function(cb){return cb.id===b.composedRef});
+        if (srcBlock && srcBlock.innerBlocks) {
+          srcBlock.innerBlocks.forEach(function(sib) {
+            innerBlocks.push(Object.assign({_id: ++innerIdCounter}, sib));
+          });
+        }
+        return;
+      } else if (b.type.indexOf('brand_') === 0) {
+        ib.type = 'brand_strip'; ib.brand = b.brand || b.type.replace('brand_','');
+      } else if (b.type === 'product_single') {
+        ib.type = 'product_single'; ib.product1 = b.product1;
+      } else if (b.type === 'product_pair') {
+        ib.type = 'product_pair'; ib.product1 = b.product1; ib.product2 = b.product2;
+      } else if (b.type === 'product_trio') {
+        ib.type = 'product_trio'; ib.product1 = b.product1; ib.product2 = b.product2; ib.product3 = b.product3;
+      } else if (b.type === 'pimpam_hero') {
+        ib.type = 'pimpam_hero';
+        if (b.heroImage) ib.heroImage = b.heroImage;
+        if (b.heroTitle) ib.heroTitle = b.heroTitle;
+        if (b.heroSubtitle) ib.heroSubtitle = b.heroSubtitle;
+        if (b.heroBullets) ib.heroBullets = b.heroBullets;
+        if (b.heroBgColor) ib.heroBgColor = b.heroBgColor;
+        if (b.heroCtaText) ib.heroCtaText = b.heroCtaText;
+        if (b.heroCtaUrl) ib.heroCtaUrl = b.heroCtaUrl;
+      } else if (b.type === 'pimpam_steps') {
+        ib.type = 'pimpam_steps';
+        if (b.steps) ib.steps = b.steps;
+      } else if (b.type === 'freebird') {
+        ib.type = 'freebird';
+        if (b.youtubeUrl) ib.youtubeUrl = b.youtubeUrl;
+      } else {
+        ib.type = b.type;
+      }
+      innerBlocks.push(ib);
+    });
+    var newId = 'tpl-saved-' + Date.now();
+    var newBlock = {
+      id: newId,
+      title: name,
+      desc: 'Guardado desde compositor · ' + innerBlocks.length + ' bloques',
+      colorTag: 'gray',
+      brandStrip: 'mix',
+      visible: true,
+      innerBlocks: innerBlocks,
+      langs: ['es','fr','de','en','nl']
+    };
+    var composedBlocks = appState.composedBlocks.slice();
+    composedBlocks.push(newBlock);
+    persistState(Object.assign({}, appState, {composedBlocks: composedBlocks}));
+    alert('Plantilla "' + name + '" guardada con ' + innerBlocks.length + ' bloques.');
+  }
+
   function copyHtml() {
     var html = generateFullHtml(blocks, appState.products, lang, appState.brands);
     try {
@@ -2582,6 +2648,7 @@ function EmailComposer() {
               setBlocks([createBlock("text")]);
             }
           }, style:{color:'#ef4444'}}, '+ Nuevo email'),
+          e('button', {className:'btn btn-ghost', onClick:saveCurrentAsTemplate, style:{color:'#6366f1'}}, '💾 Guardar plantilla'),
           e('button', {className:'btn ' + (showPreview?'btn-toggle':'btn-toggle off'), onClick:function(){setShowPreview(!showPreview)}}, showPreview?'Preview ON':'Preview OFF'),
           e('button', {className:'btn ' + (copied?'btn-success':'btn-primary'), onClick:copyHtml}, copied?'¡Copiado!':'Copiar HTML')
         )
