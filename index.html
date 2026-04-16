@@ -2295,8 +2295,17 @@ function EmailComposer() {
   }
 
   function loadTemplate(template) {
+    // New format: compositorBlocks stores blocks directly
+    if (template.compositorBlocks && template.compositorBlocks.length > 0) {
+      var newBlocks = template.compositorBlocks.map(function(b) {
+        return Object.assign({}, b, {id: ++blockIdCounter});
+      });
+      setBlocks(newBlocks);
+      return;
+    }
+    // Legacy format: blocks is array of IDs referencing composedBlocks/texts
     var newBlocks = [];
-    template.blocks.forEach(function(refId) {
+    (template.blocks || []).forEach(function(refId) {
       var composed = appState.composedBlocks.find(function(b){return b.id===refId});
       if (composed) {
         var introText = getLocalizedText(composed, 'introText', lang);
@@ -2330,75 +2339,39 @@ function EmailComposer() {
     var brandOptions = (appState.brands||[]).map(function(br){return br.id}).concat(['mix']);
     var brandPrompt = 'Marca de la plantilla:\n\n' + brandOptions.map(function(b,i){return (i+1) + ' = ' + b}).join('\n') + '\n\nEscribe el número:';
     var brandChoice = window.prompt(brandPrompt, '1');
+    if (brandChoice === null) return;
     var brandIdx = parseInt(brandChoice) - 1;
     var brand = (brandIdx >= 0 && brandIdx < brandOptions.length) ? brandOptions[brandIdx] : 'mix';
-    // Color tag based on brand
-    var colorTagMap = {artisjet:'blue', mbo:'purple', pimpam:'orange', flux:'cyan', mix:'gray'};
-    var colorTag = colorTagMap[brand] || 'gray';
+    var colorClassMap = {artisjet:'blue', mbo:'purple', pimpam:'orange', flux:'cyan', mix:'gray'};
 
-    // Convert blocks to innerBlocks
-    var innerBlocks = [];
-    var innerIdCounter = 0;
-    function blockToInner(b) {
-      var ib = {_id: ++innerIdCounter};
-      if (b.type === 'text') {
-        ib.type = 'text'; ib.text = b.text || '';
-        if (b.i18n) ib.i18n = b.i18n;
-      } else if (b.type === 'composed') {
-        // Expand: use innerBlocks from the block itself first, then try composedRef
-        var ibs = b.innerBlocks;
-        if ((!ibs || ibs.length === 0) && b.composedRef) {
-          var src = appState.composedBlocks.find(function(cb){return cb.id===b.composedRef});
-          if (src) ibs = src.innerBlocks;
-        }
-        if (ibs && ibs.length > 0) {
-          ibs.forEach(function(sib) {
-            innerBlocks.push(Object.assign({_id: ++innerIdCounter}, sib));
-          });
-        }
-        return; // already pushed
-      } else if (b.type.indexOf('brand_') === 0) {
-        ib.type = 'brand_strip'; ib.brand = b.brand || b.type.replace('brand_','');
-      } else if (b.type === 'product_single') {
-        ib.type = 'product_single'; ib.product1 = b.product1;
-      } else if (b.type === 'product_pair') {
-        ib.type = 'product_pair'; ib.product1 = b.product1; ib.product2 = b.product2;
-      } else if (b.type === 'product_trio') {
-        ib.type = 'product_trio'; ib.product1 = b.product1; ib.product2 = b.product2; ib.product3 = b.product3;
-      } else if (b.type === 'pimpam_hero') {
-        ib.type = 'pimpam_hero';
-        ['heroImage','heroTitle','heroSubtitle','heroBullets','heroBgColor','heroCtaText','heroCtaUrl','heroCtaColor','heroImageLink','i18n'].forEach(function(k){ if(b[k]) ib[k]=b[k]; });
-      } else if (b.type === 'pimpam_steps') {
-        ib.type = 'pimpam_steps';
-        if (b.steps) ib.steps = b.steps;
-      } else if (b.type === 'freebird') {
-        ib.type = 'freebird';
-        if (b.youtubeUrl) ib.youtubeUrl = b.youtubeUrl;
-        if (b.thumbnailOverride) ib.thumbnailOverride = b.thumbnailOverride;
-      } else {
-        ib.type = b.type;
-      }
-      innerBlocks.push(ib);
-    }
-    blocks.forEach(blockToInner);
+    // Save blocks as-is (strip only the id which will be regenerated on load)
+    var compositorBlocks = blocks.map(function(b) {
+      var clone = Object.assign({}, b);
+      delete clone.id; // will get new id on load
+      return clone;
+    });
 
-    if (innerBlocks.length === 0) { alert('No se pudo convertir ningún bloque.'); return; }
-
-    var newId = 'saved-' + Date.now();
-    var newBlock = {
-      id: newId,
-      title: name,
-      desc: 'Guardado desde compositor · ' + innerBlocks.length + ' bloques',
-      colorTag: colorTag,
-      brandStrip: brand,
+    var newTemplate = {
+      id: 'tpl-saved-' + Date.now(),
+      name: name,
+      brand: brand,
+      colorClass: colorClassMap[brand] || 'gray',
+      compositorBlocks: compositorBlocks,
+      blocks: [], // empty legacy array
       visible: true,
-      innerBlocks: innerBlocks,
       langs: ['es','fr','de','en','nl']
     };
-    var composedBlocks = appState.composedBlocks.slice();
-    composedBlocks.push(newBlock);
-    persistState(Object.assign({}, appState, {composedBlocks: composedBlocks}));
-    alert('Plantilla "' + name + '" guardada (' + brand + ') con ' + innerBlocks.length + ' bloques.');
+    try {
+      var newTemplates = appState.templates.slice();
+      newTemplates.push(newTemplate);
+      var newState = Object.assign({}, appState, {templates: newTemplates});
+      setAppState(newState);
+      saveStorageData(newState);
+      saveToSupabase(newState);
+      alert('Plantilla "' + name + '" guardada (' + brand + ', ' + compositorBlocks.length + ' bloques).');
+    } catch(err) {
+      alert('Error al guardar: ' + err.message);
+    }
   }
 
   function copyHtml() {
@@ -2740,11 +2713,12 @@ function EmailComposer() {
             ),
             appState.templates.filter(function(tpl){return tpl.visible !== false && isAvailableInLang(tpl, lang) && (filterTpl.length===0 || filterTpl.indexOf(tpl.brand||'mix')>=0)}).map(function(tpl) {
               var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6',cyan:'#cffafe'};
+              var tplCount = (tpl.compositorBlocks && tpl.compositorBlocks.length) || (tpl.blocks && tpl.blocks.length) || 0;
               return e('button', {key:tpl.id, className:'add-btn', onClick:function(){loadTemplate(tpl)}},
                 e('span', {className:'add-btn-icon', style:{background:colorMap[tpl.colorClass]||'#f3f4f6'}}, '⚡'),
                 e('div', null,
                   e('div', {className:'add-btn-label'}, tpl.name),
-                  e('div', {className:'add-btn-desc'}, tpl.blocks.length + ' bloques')
+                  e('div', {className:'add-btn-desc'}, tplCount + ' bloques')
                 )
               );
             })
@@ -3158,7 +3132,7 @@ function EmailComposer() {
               return e('div', {key:t.id, className:'list-item', style:{opacity:tVis?1:0.5}},
                 e('div', {className:'list-item-info'},
                   e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.name, t.brand && t.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, t.brand) : null),
-                  e('div', {style:{fontSize:'11px',color:'#6b7280'}}, t.blocks.length + ' bloque(s)')
+                  e('div', {style:{fontSize:'11px',color:'#6b7280'}}, ((t.compositorBlocks&&t.compositorBlocks.length)||t.blocks.length) + ' bloque(s)')
                 ),
                 e('div', {className:'list-item-actions'},
                   e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:tVis?'#dcfce7':'#f3f4f6',color:tVis?'#16a34a':'#9ca3af'}, onClick:function(){toggleTemplateVisible(t.id)}, title:tVis?'Visible':'Oculto'}, tVis?'👁':'👁‍🗨'),
