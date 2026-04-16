@@ -2322,26 +2322,41 @@ function EmailComposer() {
   }
 
   function saveCurrentAsTemplate() {
-    if (blocks.length <= 1) { alert('Añade al menos 2 bloques antes de guardar como plantilla.'); return; }
+    if (blocks.length < 1) { alert('Añade al menos un bloque antes de guardar.'); return; }
     var name = window.prompt('Nombre para la plantilla:');
     if (!name || !name.trim()) return;
     name = name.trim();
-    // Convert current compositor blocks into innerBlocks format
+    // Ask for brand
+    var brandOptions = (appState.brands||[]).map(function(br){return br.id}).concat(['mix']);
+    var brandPrompt = 'Marca de la plantilla:\n\n' + brandOptions.map(function(b,i){return (i+1) + ' = ' + b}).join('\n') + '\n\nEscribe el número:';
+    var brandChoice = window.prompt(brandPrompt, '1');
+    var brandIdx = parseInt(brandChoice) - 1;
+    var brand = (brandIdx >= 0 && brandIdx < brandOptions.length) ? brandOptions[brandIdx] : 'mix';
+    // Color tag based on brand
+    var colorTagMap = {artisjet:'blue', mbo:'purple', pimpam:'orange', flux:'cyan', mix:'gray'};
+    var colorTag = colorTagMap[brand] || 'gray';
+
+    // Convert blocks to innerBlocks
     var innerBlocks = [];
     var innerIdCounter = 0;
-    blocks.forEach(function(b) {
+    function blockToInner(b) {
       var ib = {_id: ++innerIdCounter};
       if (b.type === 'text') {
         ib.type = 'text'; ib.text = b.text || '';
+        if (b.i18n) ib.i18n = b.i18n;
       } else if (b.type === 'composed') {
-        // Expand composed block's own innerBlocks
-        var srcBlock = appState.composedBlocks.find(function(cb){return cb.id===b.composedRef});
-        if (srcBlock && srcBlock.innerBlocks) {
-          srcBlock.innerBlocks.forEach(function(sib) {
+        // Expand: use innerBlocks from the block itself first, then try composedRef
+        var ibs = b.innerBlocks;
+        if ((!ibs || ibs.length === 0) && b.composedRef) {
+          var src = appState.composedBlocks.find(function(cb){return cb.id===b.composedRef});
+          if (src) ibs = src.innerBlocks;
+        }
+        if (ibs && ibs.length > 0) {
+          ibs.forEach(function(sib) {
             innerBlocks.push(Object.assign({_id: ++innerIdCounter}, sib));
           });
         }
-        return;
+        return; // already pushed
       } else if (b.type.indexOf('brand_') === 0) {
         ib.type = 'brand_strip'; ib.brand = b.brand || b.type.replace('brand_','');
       } else if (b.type === 'product_single') {
@@ -2352,31 +2367,30 @@ function EmailComposer() {
         ib.type = 'product_trio'; ib.product1 = b.product1; ib.product2 = b.product2; ib.product3 = b.product3;
       } else if (b.type === 'pimpam_hero') {
         ib.type = 'pimpam_hero';
-        if (b.heroImage) ib.heroImage = b.heroImage;
-        if (b.heroTitle) ib.heroTitle = b.heroTitle;
-        if (b.heroSubtitle) ib.heroSubtitle = b.heroSubtitle;
-        if (b.heroBullets) ib.heroBullets = b.heroBullets;
-        if (b.heroBgColor) ib.heroBgColor = b.heroBgColor;
-        if (b.heroCtaText) ib.heroCtaText = b.heroCtaText;
-        if (b.heroCtaUrl) ib.heroCtaUrl = b.heroCtaUrl;
+        ['heroImage','heroTitle','heroSubtitle','heroBullets','heroBgColor','heroCtaText','heroCtaUrl','heroCtaColor','heroImageLink','i18n'].forEach(function(k){ if(b[k]) ib[k]=b[k]; });
       } else if (b.type === 'pimpam_steps') {
         ib.type = 'pimpam_steps';
         if (b.steps) ib.steps = b.steps;
       } else if (b.type === 'freebird') {
         ib.type = 'freebird';
         if (b.youtubeUrl) ib.youtubeUrl = b.youtubeUrl;
+        if (b.thumbnailOverride) ib.thumbnailOverride = b.thumbnailOverride;
       } else {
         ib.type = b.type;
       }
       innerBlocks.push(ib);
-    });
-    var newId = 'tpl-saved-' + Date.now();
+    }
+    blocks.forEach(blockToInner);
+
+    if (innerBlocks.length === 0) { alert('No se pudo convertir ningún bloque.'); return; }
+
+    var newId = 'saved-' + Date.now();
     var newBlock = {
       id: newId,
       title: name,
       desc: 'Guardado desde compositor · ' + innerBlocks.length + ' bloques',
-      colorTag: 'gray',
-      brandStrip: 'mix',
+      colorTag: colorTag,
+      brandStrip: brand,
       visible: true,
       innerBlocks: innerBlocks,
       langs: ['es','fr','de','en','nl']
@@ -2384,7 +2398,7 @@ function EmailComposer() {
     var composedBlocks = appState.composedBlocks.slice();
     composedBlocks.push(newBlock);
     persistState(Object.assign({}, appState, {composedBlocks: composedBlocks}));
-    alert('Plantilla "' + name + '" guardada con ' + innerBlocks.length + ' bloques.');
+    alert('Plantilla "' + name + '" guardada (' + brand + ') con ' + innerBlocks.length + ' bloques.');
   }
 
   function copyHtml() {
