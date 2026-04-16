@@ -1035,7 +1035,7 @@ function BlockLibraryPicker(props) {
   items.push({cat:'Utilidades', icon:'—', title:'Separador', desc:'Línea horizontal', _action:{type:'separator'}});
   // 2. Prewritten texts
   (props.prewrittenTexts||[]).filter(function(t){return t.visible!==false}).forEach(function(t){
-    items.push({cat:'Textos preescritos', icon:t.icon||'📝', title:t.name, desc:(t.text||'').substring(0,60)+'...', _action:{type:'text', text:t.text||'', i18n:t.i18n||{}, _sourceId:t.id}});
+    items.push({cat:'Textos preescritos', icon:t.icon||'📝', title:t.name, desc:(t.text||'').substring(0,60)+'...', brand:t.brand||'mix', _action:{type:'text', text:t.text||'', i18n:t.i18n||{}, _sourceId:t.id}});
   });
   // 3. Standalone blocks from backoffice
   (props.standaloneBlocks||[]).filter(function(sb){return sb.visible!==false}).forEach(function(sb){
@@ -1053,14 +1053,19 @@ function BlockLibraryPicker(props) {
     }
     if (action) {
       action._sourceId = sb.id;
-      items.push({cat:'Bloques sueltos', icon:sb.icon||'📦', title:sb.title, desc:sb.desc, _action:action});
+      items.push({cat:'Bloques sueltos', icon:sb.icon||'📦', title:sb.title, desc:sb.desc, brand:sb.brand||'mix', _action:action});
     }
   });
 
+  // Filter by brand: show items matching the composed block's brand, or 'mix' items (always shown)
+  var bf = props.brandFilter || 'none';
+  var brandFiltered = (bf === 'none' || bf === 'all') ? items : items.filter(function(it){
+    return !it.brand || it.brand === 'mix' || it.brand === bf;
+  });
   var q = search.toLowerCase().trim();
-  var filtered = q ? items.filter(function(it){
+  var filtered = q ? brandFiltered.filter(function(it){
     return it.title.toLowerCase().indexOf(q)>=0 || it.desc.toLowerCase().indexOf(q)>=0 || it.cat.toLowerCase().indexOf(q)>=0;
-  }) : items;
+  }) : brandFiltered;
 
   // Group by category
   var cats = [];
@@ -1301,6 +1306,7 @@ function BlockEditorModal(props) {
             showPicker && e(BlockLibraryPicker, {
               prewrittenTexts: props.prewrittenTexts || [],
               standaloneBlocks: props.standaloneBlocks || [],
+              brandFilter: form.brandStrip,
               onSelect: function(action){ addInnerBlockFromAction(action); setShowPicker(false); },
               onClose: function(){ setShowPicker(false); }
             })
@@ -2269,6 +2275,15 @@ function EmailComposer() {
     URL.revokeObjectURL(url);
   }
 
+  function mergeArrayById(existing, incoming) {
+    var merged = existing.slice();
+    (incoming || []).forEach(function(item) {
+      var idx = merged.findIndex(function(e){ return e.id === item.id; });
+      if (idx >= 0) { merged[idx] = item; } else { merged.push(item); }
+    });
+    return merged;
+  }
+
   function importJSON() {
     var input = document.createElement('input');
     input.type = 'file';
@@ -2279,8 +2294,29 @@ function EmailComposer() {
       reader.onload = function(evt) {
         try {
           var data = JSON.parse(evt.target.result);
-          persistState(data);
-          alert('Configuración importada correctamente');
+          var mode = window.confirm('¿Fusionar con datos existentes?\n\nAceptar = Fusionar (añade lo nuevo, actualiza duplicados)\nCancelar = Reemplazar todo');
+          if (mode) {
+            // Merge mode: combine arrays by id
+            var merged = Object.assign({}, appState);
+            merged.brands = mergeArrayById(merged.brands || [], data.brands);
+            merged.products = mergeArrayById(merged.products || [], data.products);
+            merged.composedBlocks = mergeArrayById(merged.composedBlocks || [], data.composedBlocks);
+            merged.prewrittenTexts = mergeArrayById(merged.prewrittenTexts || [], data.prewrittenTexts);
+            merged.standaloneBlocks = mergeArrayById(merged.standaloneBlocks || [], data.standaloneBlocks);
+            merged.templates = mergeArrayById(merged.templates || [], data.templates);
+            persistState(merged);
+            var counts = [];
+            if (data.brands && data.brands.length) counts.push(data.brands.length + ' marcas');
+            if (data.products && data.products.length) counts.push(data.products.length + ' productos');
+            if (data.composedBlocks && data.composedBlocks.length) counts.push(data.composedBlocks.length + ' bloques');
+            if (data.prewrittenTexts && data.prewrittenTexts.length) counts.push(data.prewrittenTexts.length + ' textos');
+            if (data.standaloneBlocks && data.standaloneBlocks.length) counts.push(data.standaloneBlocks.length + ' bloques sueltos');
+            if (data.templates && data.templates.length) counts.push(data.templates.length + ' plantillas');
+            alert('Fusión completada: ' + counts.join(', '));
+          } else {
+            persistState(data);
+            alert('Configuración reemplazada correctamente');
+          }
         } catch(err) {
           alert('Error al importar JSON: ' + err.message);
         }
