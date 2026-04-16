@@ -2192,12 +2192,12 @@ function EmailComposer() {
       aiPromptOpen && e('div', {className:'ai-prompt-overlay', onClick:function(){if(!aiLoading){setAiPromptOpen(null)}}},
         e('div', {className:'ai-prompt-box', onClick:function(ev){ev.stopPropagation()}},
           e('h3', null, '✨ Asistente de redacción IA'),
-          e('p', {style:{fontSize:'12px',color:'#6b7280',marginBottom:'12px'}}, 'Escribe los puntos clave o ideas sueltas y la IA redactará un párrafo comercial en ' + (langNameMap[selectedLang]||'español') + '.'),
+          e('p', {style:{fontSize:'12px',color:'#6b7280',marginBottom:'12px'}}, 'Escribe los puntos clave o ideas sueltas y la IA redactará un párrafo comercial en ' + (langNameMap[lang]||'español') + '.'),
           e('textarea', {className:'', value:aiPromptText, onChange:function(ev){setAiPromptText(ev.target.value)}, placeholder:'Ej: impresora compacta, ideal para tiendas, precio competitivo, incluye formación...', autoFocus:true, disabled:aiLoading, style:{width:'100%',minHeight:'80px',border:'1.5px solid #d1d5db',borderRadius:'8px',padding:'10px',fontSize:'13px',fontFamily:'inherit',resize:'vertical',outline:'none'}}),
           e('div', {className:'ai-prompt-actions'},
             e('button', {className:'ai-btn ai-btn-ghost', onClick:function(){setAiPromptOpen(null)}, disabled:aiLoading}, 'Cancelar'),
             e('button', {className:'ai-btn ai-btn-primary', disabled:aiLoading || !aiPromptText.trim(), onClick:function(){
-              callOpenAI(aiPromptText, selectedLang, function(result) {
+              callOpenAI(aiPromptText, lang, function(result) {
                 if (aiPromptOpen.target === 'compositor') {
                   var bid = aiPromptOpen.blockId;
                   setBlocks(function(prev){ return prev.map(function(b){ return b.id === bid ? Object.assign({}, b, {text: (b.text ? b.text + '\n\n' : '') + result}) : b; }); });
