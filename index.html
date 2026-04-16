@@ -23,11 +23,11 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 .footer{background:#fff;border-top:1px solid #e5e7eb;padding:5px 16px;display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;flex-shrink:0}
 
 /* Sidebar */
-.sidebar{width:230px;background:#fff;border-right:1px solid #e5e7eb;padding:12px;overflow-y:auto;flex-shrink:0}
+.sidebar{width:250px;background:#fff;border-right:1px solid #e5e7eb;padding:12px;overflow-y:auto;flex-shrink:0}
 .sidebar-title{font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
 .add-btn{width:100%;display:flex;align-items:center;gap:8px;padding:7px 8px;border:none;background:transparent;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s}
 .add-btn:hover{background:#f3f4f6}
-.add-btn-icon{width:32px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.add-btn-icon{width:44px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
 .add-btn-label{font-size:11px;font-weight:600;color:#374151}
 .add-btn-desc{font-size:9px;color:#9ca3af;line-height:1.3;margin-top:1px}
 
@@ -36,6 +36,7 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 .tpl-blue{background:#eff6ff;color:#1d4ed8}.tpl-blue:hover{background:#dbeafe}
 .tpl-orange{background:#fff7ed;color:#c2410c}.tpl-orange:hover{background:#ffedd5}
 .tpl-purple{background:#f5f3ff;color:#6d28d9}.tpl-purple:hover{background:#ede9fe}
+.tpl-gray{background:#f3f4f6;color:#475569}.tpl-gray:hover{background:#e5e7eb}
 
 /* Editor panel */
 .editor{flex:1;padding:16px;overflow-y:auto}
@@ -88,7 +89,7 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 
 /* Responsive */
 @media(max-width:900px){
-  .sidebar{width:180px}
+  .sidebar{width:250px}
   .preview-panel{display:none}
 }
 </style>
@@ -128,10 +129,11 @@ const BLOCK_TYPES = [
   { type:"brand_artisjet", label:"artisJet", icon:"aJ", desc:"Logo + enlace boprint.net con separador", cardClass:"blue", previewBg:"#dbeafe", previewColor:"#1d4ed8" },
   { type:"brand_mbo", label:"MBO Printers", icon:"M", desc:"Logo + enlace mboprinters.com con separador", cardClass:"purple", previewBg:"#ede9fe", previewColor:"#6d28d9" },
   { type:"brand_pimpam", label:"PimPam Vending", icon:"PP", desc:"Logo + enlace pimpam-vending.com con separador", cardClass:"orange", previewBg:"#ffedd5", previewColor:"#ea580c" },
-  { type:"product_pair", label:"2 Productos", icon:"\u{1F4E6}\u{1F4E6}", desc:"Dos fichas lado a lado con foto, specs y precio", cardClass:"green", previewBg:"#dcfce7", previewColor:"#15803d" },
-  { type:"product_single", label:"1 Producto", icon:"\u{1F4E6}", desc:"Ficha individual con foto, specs y precio", cardClass:"green", previewBg:"#dcfce7", previewColor:"#15803d" },
-  { type:"freebird", label:"Vídeo Freebird", icon:"\u25B6", desc:"Banner azul con CTA al vídeo de tecnología Freebird", cardClass:"blue", previewBg:"#1e3a8a", previewColor:"#ffffff" },
-  { type:"pimpam_hero", label:"Hero PimPam", icon:"\u{1F4F1}", desc:"Imagen + texto: personaliza, imprime y vende sin operario", cardClass:"orange", previewBg:"#fff7ed", previewColor:"#ea580c" },
+  { type:"product_single", label:"1 Producto", icon:"📦", desc:"Ficha individual con foto, specs y precio", cardClass:"green", previewBg:"#dcfce7", previewColor:"#15803d" },
+  { type:"product_pair", label:"2 Productos", icon:"📦📦", desc:"Dos fichas lado a lado con foto, specs y precio", cardClass:"green", previewBg:"#dcfce7", previewColor:"#15803d" },
+  { type:"product_trio", label:"3 Productos", icon:"📦📦📦", desc:"Tres fichas lado a lado, tamaño compacto", cardClass:"green", previewBg:"#dcfce7", previewColor:"#15803d" },
+  { type:"freebird", label:"Vídeo Freebird", icon:"▶", desc:"Banner azul con CTA al vídeo de tecnología Freebird", cardClass:"blue", previewBg:"#1e3a8a", previewColor:"#ffffff" },
+  { type:"pimpam_hero", label:"Hero PimPam", icon:"📱", desc:"Imagen + texto: personaliza, imprime y vende sin operario", cardClass:"orange", previewBg:"#fff7ed", previewColor:"#ea580c" },
   { type:"pimpam_steps", label:"4 Pasos PimPam", icon:"1234", desc:"Los 4 pasos del proceso: elige, personaliza, paga, listo", cardClass:"orange", previewBg:"#fff7ed", previewColor:"#ea580c" },
 ];
 
@@ -143,12 +145,86 @@ function createBlock(type) {
     case "brand_artisjet": return { id, type, brand:"artisjet" };
     case "brand_mbo": return { id, type, brand:"mbo" };
     case "brand_pimpam": return { id, type, brand:"pimpam" };
-    case "product_pair": return { id, type, product1:"young", product2:"3000pro" };
     case "product_single": return { id, type, product1:"young" };
+    case "product_pair": return { id, type, product1:"young", product2:"3000pro" };
+    case "product_trio": return { id, type, product1:"uv1612g", product2:"uv1812", product3:"uv2513" };
     case "freebird": return { id, type };
     case "pimpam_hero": return { id, type };
     case "pimpam_steps": return { id, type };
     default: return { id, type };
+  }
+}
+
+// ─── BLOCK PREVIEW SVGS ──────────────────────────────────────
+function blockPreviewSvg(type) {
+  switch(type) {
+    case "text":
+      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
+        e('rect', {x:2, y:2, width:40, height:4, rx:1, fill:"#cbd5e1"}),
+        e('rect', {x:2, y:8, width:40, height:4, rx:1, fill:"#cbd5e1"}),
+        e('rect', {x:2, y:14, width:40, height:4, rx:1, fill:"#cbd5e1"}),
+        e('rect', {x:2, y:20, width:30, height:4, rx:1, fill:"#cbd5e1"})
+      );
+    case "brand_artisjet":
+      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
+        e('rect', {x:1, y:3, width:10, height:12, rx:1, fill:"#dbeafe"}),
+        e('line', {x1:12, y1:3, x2:42, y2:3, stroke:"#93c5fd", strokeWidth:2}),
+        e('line', {x1:12, y1:8, x2:42, y2:8, stroke:"#93c5fd", strokeWidth:1}),
+        e('line', {x1:12, y1:13, x2:42, y2:13, stroke:"#93c5fd", strokeWidth:1}),
+        e('line', {x1:2, y1:19, x2:42, y2:19, stroke:"#93c5fd", strokeWidth:1})
+      );
+    case "brand_mbo":
+      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
+        e('rect', {x:1, y:3, width:10, height:12, rx:1, fill:"#ede9fe"}),
+        e('line', {x1:12, y1:3, x2:42, y2:3, stroke:"#ddd6fe", strokeWidth:2}),
+        e('line', {x1:12, y1:8, x2:42, y2:8, stroke:"#ddd6fe", strokeWidth:1}),
+        e('line', {x1:12, y1:13, x2:42, y2:13, stroke:"#ddd6fe", strokeWidth:1}),
+        e('line', {x1:2, y1:19, x2:42, y2:19, stroke:"#ddd6fe", strokeWidth:1})
+      );
+    case "brand_pimpam":
+      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
+        e('rect', {x:1, y:3, width:10, height:12, rx:1, fill:"#ffedd5"}),
+        e('line', {x1:12, y1:3, x2:42, y2:3, stroke:"#fed7aa", strokeWidth:2}),
+        e('line', {x1:12, y1:8, x2:42, y2:8, stroke:"#fed7aa", strokeWidth:1}),
+        e('line', {x1:12, y1:13, x2:42, y2:13, stroke:"#fed7aa", strokeWidth:1}),
+        e('line', {x1:2, y1:19, x2:42, y2:19, stroke:"#fed7aa", strokeWidth:1})
+      );
+    case "product_single":
+      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
+        e('rect', {x:9, y:2, width:26, height:24, rx:2, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5})
+      );
+    case "product_pair":
+      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
+        e('rect', {x:1, y:2, width:20, height:24, rx:2, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5}),
+        e('rect', {x:23, y:2, width:20, height:24, rx:2, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5})
+      );
+    case "product_trio":
+      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
+        e('rect', {x:1, y:3, width:12, height:22, rx:1.5, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5}),
+        e('rect', {x:16, y:3, width:12, height:22, rx:1.5, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5}),
+        e('rect', {x:31, y:3, width:12, height:22, rx:1.5, fill:"#dcfce7", stroke:"#86efac", strokeWidth:0.5})
+      );
+    case "freebird":
+      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
+        e('rect', {x:1, y:2, width:42, height:24, rx:2, fill:"linear-gradient(135deg,#1e3a8a,#3b82f6)"}),
+        e('polygon', {points:"20,10 20,22 30,16", fill:"#ffffff"})
+      );
+    case "pimpam_hero":
+      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
+        e('rect', {x:1, y:3, width:14, height:22, rx:2, fill:"#ffedd5"}),
+        e('line', {x1:18, y1:5, x2:42, y2:5, stroke:"#94a3b8", strokeWidth:1}),
+        e('line', {x1:18, y1:10, x2:42, y2:10, stroke:"#94a3b8", strokeWidth:1}),
+        e('line', {x1:18, y1:15, x2:42, y2:15, stroke:"#94a3b8", strokeWidth:1}),
+        e('line', {x1:18, y1:20, x2:36, y2:20, stroke:"#94a3b8", strokeWidth:1})
+      );
+    case "pimpam_steps":
+      return e('svg', {width:44, height:28, viewBox:"0 0 44 28"},
+        e('rect', {x:2, y:6, width:8, height:16, rx:1, fill:"#ffedd5"}),
+        e('rect', {x:12, y:6, width:8, height:16, rx:1, fill:"#ffedd5"}),
+        e('rect', {x:22, y:6, width:8, height:16, rx:1, fill:"#ffedd5"}),
+        e('rect', {x:32, y:6, width:8, height:16, rx:1, fill:"#ffedd5"})
+      );
+    default: return null;
   }
 }
 
@@ -180,6 +256,33 @@ function productCardHtml(p) {
     '</td></tr></table>';
 }
 
+function productCardCompactHtml(p) {
+  var areaBlock = '';
+  if (p.area !== '-') {
+    areaBlock = '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0">' +
+      '<tr><td style="font-size:7px;font-weight:700;color:#94a3b8;text-transform:uppercase">Área: ' + p.area + '</td></tr>' +
+      (p.alt !== '-' ? '<tr><td style="font-size:7px;font-weight:700;color:#94a3b8;text-transform:uppercase">Alt: ' + p.alt + '</td></tr>' : '') +
+      '</table>';
+  }
+  var priceExtra = p.price !== 'Consultar' ? ' <span style="font-size:8px;font-weight:500;color:#475569">(+IVA)</span>' : '';
+  var ctaLabel = p.brand === 'pimpam' ? 'Detalles' : 'Info';
+  var bgExtra = p.brand === 'pimpam' ? ';background:#fff7ed' : '';
+  return '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid ' + (p.brand==='pimpam'?'#fed7aa':'#e2e8f0') + ';border-radius:8px;overflow:hidden;background:#fff">' +
+    '<tr><td style="background:#fff;padding:8px 8px 6px;border-bottom:1px solid ' + (p.brand==='pimpam'?'#ffedd5':'#f1f5f9') + ';text-align:center">' +
+    '<img src="' + p.img + '" width="120" alt="' + p.name + '" style="object-fit:contain;width:100%;max-width:120px;max-height:90px;height:auto">' +
+    '</td></tr>' +
+    '<tr><td style="padding:8px' + bgExtra + '">' +
+    '<span style="display:inline-block;font-size:7px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:16px;margin-bottom:3px;background:' + p.badgeBg + ';color:' + p.badgeColor + '">' + p.badge + '</span>' +
+    '<p style="font-size:11px;font-weight:900;color:#0f172a;margin:0">' + p.name + '</p>' +
+    '<p style="font-size:8px;color:#64748b;margin:2px 0 0;line-height:1.3">' + p.desc + '</p>' +
+    areaBlock +
+    '<p style="font-size:8px;color:#475569;padding:1px 0;margin:' + (p.area==='-'?'4px':'0') + ' 0 0">✓ ' + p.feat1 + '</p>' +
+    '<p style="font-size:8px;color:#475569;padding:1px 0;margin:0">✓ ' + p.feat2 + '</p>' +
+    '<p style="font-size:11px;font-weight:900;color:' + p.accent + ';margin:6px 0 0;text-align:center">' + p.price + priceExtra + '</p>' +
+    '<a href="' + p.link + '" style="display:block;text-align:center;font-size:9px;font-weight:800;text-decoration:none;padding:6px 8px;border-radius:6px;text-transform:uppercase;background:' + p.gradient + ';color:#fff;margin-top:4px">' + ctaLabel + ' →</a>' +
+    '</td></tr></table>';
+}
+
 function brandStripHtml(key) {
   var b = BRAND_STRIPS[key];
   return '<tr><td style="padding:16px 8px 8px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
@@ -197,6 +300,11 @@ function textBlockHtml(text) {
   return '<tr><td style="padding:16px 8px;font-size:14px;color:#1e293b;line-height:1.65">\n' + html + '</td></tr>';
 }
 
+function productSingleHtml(p) {
+  return '<tr><td style="padding:8px 8px 16px"><table width="320" cellpadding="0" cellspacing="0" border="0">' +
+    productCardHtml(p).slice(71) + '</td></tr>';
+}
+
 function productPairHtml(p1, p2) {
   return '<tr><td style="padding:8px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr class="prod-row">' +
     '<td class="col-half prod-cell" width="50%" valign="top" style="padding:0 5px 0 0">' + productCardHtml(p1) + '</td>' +
@@ -204,17 +312,23 @@ function productPairHtml(p1, p2) {
     '</tr></table></td></tr>';
 }
 
-function productSingleHtml(p) {
-  return '<tr><td style="padding:8px 8px 16px"><table width="320" cellpadding="0" cellspacing="0" border="0">' +
-    productCardHtml(p).slice(71) + '</td></tr>';
+function productTrioHtml(p1, p2, p3) {
+  return '<tr><td style="padding:8px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr class="prod-row">' +
+    '<td class="col-third prod-cell" width="33%" valign="top" style="padding:0 4px 0 0">' + productCardCompactHtml(p1) + '</td>' +
+    '<td class="col-third prod-cell" width="33%" valign="top" style="padding:0 4px">' + productCardCompactHtml(p2) + '</td>' +
+    '<td class="col-third prod-cell" width="33%" valign="top" style="padding:0 0 0 4px">' + productCardCompactHtml(p3) + '</td>' +
+    '</tr></table></td></tr>';
 }
 
 function freebirdHtml() {
-  return '<tr><td style="padding:0 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#1e3a8a,#3b82f6)"><tr><td style="padding:18px;text-align:center">' +
-    '<p style="font-size:36px;margin:0">▶️</p>' +
-    '<p style="font-size:12px;font-weight:800;color:#ffffff;margin:6px 0 0">Tecnología Freebird — altura variable automática</p>' +
-    '<p style="font-size:11px;color:rgba(255,255,255,0.85);margin:4px 0 0;line-height:1.4">Impresión sobre superficies irregulares sin ajustes manuales</p>' +
-    '<a href="https://boprint.net/freebird" style="display:inline-block;margin-top:10px;font-size:11px;font-weight:800;text-decoration:none;padding:8px 16px;border-radius:6px;background:#ffffff;color:#1d4ed8;text-transform:uppercase">Ver vídeo →</a>' +
+  return '<tr><td style="padding:0 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:10px;overflow:hidden">' +
+    '<tr><td style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);padding:0;text-align:center">' +
+    '<img src="https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png" width="280" alt="Freebird" style="width:100%;max-width:280px;height:auto;max-height:160px;object-fit:contain;margin:16px auto 0;display:block">' +
+    '</td></tr>' +
+    '<tr><td style="background:linear-gradient(135deg,#1e3a8a,#3b82f6);padding:4px 18px 18px;text-align:center">' +
+    '<p style="font-size:14px;font-weight:900;color:#ffffff;margin:0 0 4px">Tecnología Freebird</p>' +
+    '<p style="font-size:11px;color:rgba(255,255,255,0.85);margin:0 0 10px;line-height:1.4">Altura variable automática — impresión sobre superficies irregulares sin ajustes manuales</p>' +
+    '<a href="https://boprint.net/freebird" style="display:inline-block;font-size:11px;font-weight:800;text-decoration:none;padding:8px 20px;border-radius:6px;background:#ffffff;color:#1d4ed8;text-transform:uppercase">▶ Ver vídeo</a>' +
     '</td></tr></table></td></tr>';
 }
 
@@ -273,14 +387,20 @@ function generateFullHtml(blocks) {
       case 'brand_artisjet': rows += brandStripHtml('artisjet'); break;
       case 'brand_mbo': rows += brandStripHtml('mbo'); break;
       case 'brand_pimpam': rows += brandStripHtml('pimpam'); break;
+      case 'product_single':
+        var ps = PRODUCTS.find(function(p){return p.id===b.product1});
+        if(ps) rows += productSingleHtml(ps);
+        break;
       case 'product_pair':
         var p1 = PRODUCTS.find(function(p){return p.id===b.product1});
         var p2 = PRODUCTS.find(function(p){return p.id===b.product2});
         if(p1&&p2) rows += productPairHtml(p1,p2);
         break;
-      case 'product_single':
-        var ps = PRODUCTS.find(function(p){return p.id===b.product1});
-        if(ps) rows += productSingleHtml(ps);
+      case 'product_trio':
+        var pt1 = PRODUCTS.find(function(p){return p.id===b.product1});
+        var pt2 = PRODUCTS.find(function(p){return p.id===b.product2});
+        var pt3 = PRODUCTS.find(function(p){return p.id===b.product3});
+        if(pt1&&pt2&&pt3) rows += productTrioHtml(pt1,pt2,pt3);
         break;
       case 'freebird': rows += freebirdHtml(); break;
       case 'pimpam_hero': rows += pimpamHeroHtml(); break;
@@ -300,7 +420,7 @@ function XIcon(){return e('svg',{width:14,height:14,viewBox:"0 0 24 24",fill:"no
 function ProductSelect(props) {
   return e('select', {value:props.value, onChange:function(ev){props.onChange(ev.target.value)}},
     PRODUCTS.map(function(p){
-      return e('option', {key:p.id, value:p.id, disabled:p.id===props.exclude}, p.name + ' — ' + p.price);
+      return e('option', {key:p.id, value:p.id, disabled:p.id===props.exclude||p.id===props.exclude2}, p.name + ' — ' + p.price);
     })
   );
 }
@@ -317,14 +437,20 @@ function BlockEditor(props) {
       onChange: function(ev) { props.onChange(Object.assign({}, block, {text: ev.target.value})); },
       placeholder: "Escribe tu texto aquí..."
     });
+  } else if (block.type === 'product_single') {
+    body = e('div', {className:'prod-selectors'},
+      e('label', null, 'Producto: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}}))
+    );
   } else if (block.type === 'product_pair') {
     body = e('div', {className:'prod-selectors'},
       e('label', null, 'Izq: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}, exclude:block.product2})),
       e('label', null, 'Der: ', e(ProductSelect, {value:block.product2, onChange:function(v){props.onChange(Object.assign({},block,{product2:v}))}, exclude:block.product1}))
     );
-  } else if (block.type === 'product_single') {
+  } else if (block.type === 'product_trio') {
     body = e('div', {className:'prod-selectors'},
-      e('label', null, 'Producto: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}}))
+      e('label', null, 'Izq: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}, exclude:block.product2, exclude2:block.product3})),
+      e('label', null, 'Centro: ', e(ProductSelect, {value:block.product2, onChange:function(v){props.onChange(Object.assign({},block,{product2:v}))}, exclude:block.product1, exclude2:block.product3})),
+      e('label', null, 'Der: ', e(ProductSelect, {value:block.product3, onChange:function(v){props.onChange(Object.assign({},block,{product3:v}))}, exclude:block.product1, exclude2:block.product2}))
     );
   } else {
     body = e('p', {className:'fixed-msg'}, 'Bloque predefinido — sin opciones editables');
@@ -420,6 +546,23 @@ function EmailComposer() {
         Object.assign(createBlock("product_pair"), {product1:"mbo6090",product2:"uv1612g"}),
         Object.assign(createBlock("text"), {text:"¿Te gustaría organizar una demo sin compromiso?\n\n¡Quedo a tu disposición!\nUn saludo,"}),
       ]);
+    } else if (tpl === 'modulares') {
+      setBlocks([
+        Object.assign(createBlock("text"), {text:"Hola,\n\nTe presento una selección completa de nuestras impresoras UV-LED — todos los formatos, marcas y capacidades. Explora cada bloque y encuentra la solución perfecta para tu negocio."}),
+        Object.assign(createBlock("brand_artisjet")),
+        Object.assign(createBlock("product_trio"), {product1:"young",product2:"3000pro",product3:"proud"}),
+        Object.assign(createBlock("product_pair"), {product1:"5000u",product2:"6090trust"}),
+        createBlock("freebird"),
+        Object.assign(createBlock("brand_mbo")),
+        Object.assign(createBlock("product_trio"), {product1:"mbo3050",product2:"mbo4060",product3:"mbo6090"}),
+        Object.assign(createBlock("product_trio"), {product1:"mbo1015",product2:"uv1612g",product3:"uv1812"}),
+        Object.assign(createBlock("product_single"), {product1:"uv2513"}),
+        Object.assign(createBlock("brand_pimpam")),
+        Object.assign(createBlock("product_pair"), {product1:"casebox",product2:"custom"}),
+        createBlock("pimpam_hero"),
+        createBlock("pimpam_steps"),
+        Object.assign(createBlock("text"), {text:"Contacta con nosotros para más información, precios o para concertar una demo sin compromiso.\n\n¡Un saludo!"}),
+      ]);
     }
   }
 
@@ -450,7 +593,9 @@ function EmailComposer() {
         e('p', {className:'sidebar-title'}, 'Añadir bloque'),
         BLOCK_TYPES.map(function(bt){
           return e('button', {key:bt.type, className:'add-btn', onClick:function(){addBlock(bt.type)}},
-            e('span', {className:'add-btn-icon', style:{background:bt.previewBg, color:bt.previewColor, fontWeight:800, fontSize:bt.icon.length>2?'8px':'11px'}}, bt.icon),
+            e('span', {className:'add-btn-icon', style:{background:bt.previewBg, display:'flex', alignItems:'center', justifyContent:'center'}},
+              blockPreviewSvg(bt.type)
+            ),
             e('div', null,
               e('div', {className:'add-btn-label'}, bt.label),
               e('div', {className:'add-btn-desc'}, bt.desc)
@@ -461,7 +606,8 @@ function EmailComposer() {
           e('p', {className:'sidebar-title'}, 'Plantillas rápidas'),
           e('button', {className:'tpl-btn tpl-blue', onClick:function(){loadTemplate('compactas')}}, 'Compactas UV-LED'),
           e('button', {className:'tpl-btn tpl-orange', onClick:function(){loadTemplate('pimpam')}}, 'PimPam Vending'),
-          e('button', {className:'tpl-btn tpl-purple', onClick:function(){loadTemplate('formatos')}}, 'Formatos varios')
+          e('button', {className:'tpl-btn tpl-purple', onClick:function(){loadTemplate('formatos')}}, 'Formatos varios'),
+          e('button', {className:'tpl-btn tpl-gray', onClick:function(){loadTemplate('modulares')}}, 'Bloques modulares')
         )
       ),
 
