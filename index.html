@@ -188,13 +188,13 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 <div id="root"></div>
 <script>
 const e = React.createElement;
-const { useState, useRef, useCallback } = React;
+const { useState, useEffect, useRef, useCallback } = React;
 
 // ─── DEFAULT DATA STATE ──────────────────────────────────────
 const DEFAULT_PRODUCTS = [
   { id:"young", brand:"artisjet", name:"artisJet Young", badge:"A4", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://artisjet-printers.eu/wp-content/uploads/2020/10/Imagen-102.png", desc:"Compacta para personalización en punto de venta, stands y start-ups.", area:"20 × 30 cm", alt:"5 cm", feat1:"Sensor de altura automático", feat2:"CMYK + Blanco", price:"9.300 €", link:"https://boprint.net/producto/artis-young-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
-  { id:"3000pro", brand:"artisjet", name:"artisJet 3000Pro Freebird", badge:"Freebird", badgeBg:"#dbeafe", badgeColor:"#1d4ed8", img:"https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png", desc:"Flatbed pro con Freebird. Velocidad 2,5× y certificación Braille/ADA.", area:"35 × 50 cm", alt:"17 cm", feat1:"Módulo Freebird integrado", feat2:"Mesa de vacío", price:"13.900 €", link:"https://boprint.net/contacto/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
-  { id:"proud", brand:"artisjet", name:"artisJet Proud", badge:"Tarjetas", badgeBg:"#fef3c7", badgeColor:"#92400e", img:"https://artisjet-printers.eu/wp-content/uploads/2024/05/artisJet-proud-card-printer-left-side-view.jpeg", desc:"Especialista en tarjetas, carnets y artículos promocionales.", area:"-", alt:"-", feat1:"Alta precisión piezas pequeñas", feat2:"CR80 y tarjetas grandes", price:"21.500 €", link:"https://boprint.net/?post_type=product&p=3276", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
+  { id:"3000pro", brand:"artisjet", name:"artisJet 3000Pro Freebird", badge:"Freebird", badgeBg:"#dbeafe", badgeColor:"#1d4ed8", img:"https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png", desc:"Flatbed pro con Freebird. Velocidad 2,5× y certificación Braille/ADA.", area:"35 × 50 cm", alt:"17 cm", feat1:"Módulo Freebird integrado", feat2:"Mesa de vacío", price:"13.900 €", link:"https://boprint.net/producto/3000-pro-freebird/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
+  { id:"proud", brand:"artisjet", name:"artisJet Proud", badge:"Tarjetas", badgeBg:"#fef3c7", badgeColor:"#92400e", img:"https://artisjet-printers.eu/wp-content/uploads/2024/05/artisJet-proud-card-printer-left-side-view.jpeg", desc:"Especialista en tarjetas, carnets y artículos promocionales.", area:"-", alt:"-", feat1:"Alta precisión piezas pequeñas", feat2:"CR80 y tarjetas grandes", price:"21.500 €", link:"https://boprint.net/producto/artisjet-proud/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
   { id:"5000u", brand:"artisjet", name:"artisJet 5000U", badge:"A3+ Freebird", badgeBg:"#e0e7ff", badgeColor:"#4338ca", img:"https://artisjet-printers.eu/wp-content/uploads/2017/11/artis5000Uimg1.jpg", desc:"Formato medio para volúmenes crecientes y objetos 3D.", area:"A3+", alt:"-", feat1:"Velocidad profesional", feat2:"CMYK + Blanco", price:"18.900 €", link:"https://boprint.net/producto/5000-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
   { id:"6090trust", brand:"artisjet", name:"artisJet 6090 Trust", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#991b1b", img:"https://artisjet-printers.eu/wp-content/uploads/2024/08/trust-freebird.png", desc:"Producción industrial: señalización, placas, paneles decorativos.", area:"59 × 89 cm", alt:"10 cm", feat1:"Freebird integrado", feat2:"Alta productividad", price:"20.900 €", link:"https://boprint.net/producto/artisjet-6090-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
   { id:"mbo3050", brand:"mbo", name:"MBO 3050", badge:"Nuevo", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://mboprinters.com/wp-content/uploads/2026/02/mbo3050.png", desc:"Compacta multifuncional, la más reciente de MBO.", area:"30 × 50 cm", alt:"10 cm", feat1:"Sensor 1-3 mm", feat2:"Tanques 250 cc", price:"6.495 €", link:"https://mboprinters.com/product/mbo-3050-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
@@ -215,6 +215,57 @@ const BRAND_STRIPS = {
 };
 
 // ─── HELPERS ────────────────────────────────────────────────────
+// ─── SUPABASE CONFIG ─────────────────────────────────────────
+var SUPABASE_URL = 'https://midvgxxndddasxlnstkg.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_uiXB5JmZfPETeyGn3Rsw_Q_D7SLaJNd';
+var SUPABASE_TABLE = 'composer_data';
+var SUPABASE_ROW_ID = 'main';
+
+function supabaseFetch(method, body) {
+  var url = SUPABASE_URL + '/rest/v1/' + SUPABASE_TABLE + '?id=eq.' + SUPABASE_ROW_ID;
+  var opts = {
+    method: method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'GET' ? '' : 'return=minimal'
+    }
+  };
+  if (method === 'GET') {
+    url = SUPABASE_URL + '/rest/v1/' + SUPABASE_TABLE + '?select=data&id=eq.' + SUPABASE_ROW_ID;
+    delete opts.headers['Prefer'];
+  }
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(url, opts);
+}
+
+function loadFromSupabase() {
+  return supabaseFetch('GET')
+    .then(function(r) { return r.json(); })
+    .then(function(rows) {
+      if (rows && rows.length > 0 && rows[0].data && Object.keys(rows[0].data).length > 0) {
+        return rows[0].data;
+      }
+      return null;
+    })
+    .catch(function(e) {
+      console.warn('Supabase load failed:', e);
+      return null;
+    });
+}
+
+function saveToSupabase(data) {
+  supabaseFetch('PATCH', { data: data, updated_at: new Date().toISOString() })
+    .then(function(r) {
+      if (!r.ok) console.warn('Supabase save failed:', r.status);
+    })
+    .catch(function(e) {
+      console.warn('Supabase save error:', e);
+    });
+}
+
+// ─── LOCAL STORAGE ───────────────────────────────────────────
 function getStorageData() {
   try {
     var stored = localStorage.getItem('bomedia_composer_data');
@@ -269,8 +320,8 @@ function getDefaultState() {
       {id:'sb-005',title:'1 Producto',desc:'Individual con selector',icon:'📦',iconBg:'#dcfce7',section:'otros',blockType:'product_single',config:{defaultProduct:'young'},visible:true},
       {id:'sb-006',title:'2 Productos',desc:'Par con selectores',icon:'📦📦',iconBg:'#dcfce7',section:'otros',blockType:'product_pair',config:{defaultProduct1:'young',defaultProduct2:'3000pro'},visible:true},
       {id:'sb-007',title:'3 Productos',desc:'Trío con selectores',icon:'📦³',iconBg:'#dcfce7',section:'otros',blockType:'product_trio',config:{defaultProduct1:'uv1612g',defaultProduct2:'uv1812',defaultProduct3:'uv2513'},visible:true},
-      {id:'sb-008',title:'PimPam Hero',desc:'Banner vending',icon:'🖼',iconBg:'#ffedd5',section:'otros',blockType:'pimpam_hero',config:{},visible:true},
-      {id:'sb-009',title:'PimPam 4 Pasos',desc:'Proceso en 4 pasos',icon:'1234',iconBg:'#ffedd5',section:'otros',blockType:'pimpam_steps',config:{},visible:true},
+      {id:'sb-008',title:'PimPam Hero',desc:'Banner vending',icon:'🖼',iconBg:'#ffedd5',section:'otros',blockType:'pimpam_hero',config:{heroImage:'https://pimpam-vending.com/wp-content/uploads/2026/01/ChatGPT-Image-22-ene-2026-16_17_36.png',heroTitle:'Personaliza, imprime y vende… sin operario',heroSubtitle:'Impresión UV-LED directa sobre fundas de móvil en autoservicio completo.',heroBullets:['Autoservicio 100% — sin personal','Pago con tarjeta, móvil o QR','Funda impresa en HD en 30 segundos','Compatible con +600 modelos de móvil'],heroImageLink:'',heroCtaText:'',heroCtaUrl:'',heroBgColor:'#fff'},visible:true},
+      {id:'sb-009',title:'PimPam 4 Pasos',desc:'Proceso en 4 pasos',icon:'1234',iconBg:'#ffedd5',section:'otros',blockType:'pimpam_steps',config:{steps:[{n:"1️⃣",t:"Elige diseño",s:"Pantalla táctil"},{n:"2️⃣",t:"Personaliza",s:"Texto, colores…"},{n:"3️⃣",t:"Paga",s:"Tarjeta / QR"},{n:"4️⃣",t:"¡Listo!",s:"Funda en 30s"}],stepsBgColor:'#fff7ed',stepsBorderColor:'#fed7aa'},visible:true},
     ],
   };
 }
@@ -411,31 +462,61 @@ function freebirdHtml(config) {
     '</table></td></tr>';
 }
 
-function pimpamHeroHtml() {
-  return '<tr><td style="padding:12px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
-    '<td class="pp-img-cell" width="45%" valign="top" style="padding:0 12px 0 0"><img src="https://pimpam-vending.com/wp-content/uploads/2026/01/ChatGPT-Image-22-ene-2026-16_17_36.png" width="260" alt="PimPam" style="width:100%;height:auto;max-height:220px;border-radius:10px;object-fit:cover"></td>' +
+function pimpamHeroHtml(config) {
+  var cfg = config || {};
+  var imgUrl = cfg.heroImage || 'https://pimpam-vending.com/wp-content/uploads/2026/01/ChatGPT-Image-22-ene-2026-16_17_36.png';
+  var title = cfg.heroTitle || 'Personaliza, imprime y vende… sin operario';
+  var subtitle = cfg.heroSubtitle || 'Impresión UV-LED directa sobre fundas de móvil en autoservicio completo.';
+  var bullets = cfg.heroBullets || ['Autoservicio 100% — sin personal','Pago con tarjeta, móvil o QR','Funda impresa en HD en 30 segundos','Compatible con +600 modelos de móvil'];
+  var imgLink = cfg.heroImageLink || '';
+  var ctaText = cfg.heroCtaText || '';
+  var ctaUrl = cfg.heroCtaUrl || '';
+  var bgColor = cfg.heroBgColor || '#fff';
+
+  // Build image cell
+  var imgHtml = '<img src="' + imgUrl + '" width="260" alt="Hero" style="width:100%;height:auto;max-height:220px;border-radius:10px;object-fit:cover">';
+  if (imgLink) {
+    imgHtml = '<a href="' + imgLink + '" target="_blank" style="text-decoration:none">' + imgHtml + '</a>';
+  }
+
+  // Build bullets
+  var bulletsHtml = '';
+  for (var i = 0; i < bullets.length; i++) {
+    bulletsHtml += '<p style="font-size:10px;color:#475569;margin:0 0 3px">✓ ' + bullets[i] + '</p>';
+  }
+
+  // Build CTA
+  var ctaHtml = '';
+  if (ctaText && ctaUrl) {
+    ctaHtml = '<table cellpadding="0" cellspacing="0" border="0" style="margin-top:10px"><tr><td style="background:#ea580c;border-radius:6px;padding:8px 18px"><a href="' + ctaUrl + '" target="_blank" style="color:#fff;font-size:11px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">' + ctaText + '</a></td></tr></table>';
+  }
+
+  return '<tr><td style="padding:12px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + bgColor + '"><tr>' +
+    '<td class="pp-img-cell" width="45%" valign="top" style="padding:0 12px 0 0">' + imgHtml + '</td>' +
     '<td class="pp-body-cell" valign="top" style="padding:0">' +
-    '<p style="font-size:14px;font-weight:900;color:#0f172a;margin:0 0 8px">Personaliza, imprime y vende… sin operario</p>' +
-    '<p style="font-size:11px;color:#64748b;margin:0 0 10px;line-height:1.5">Impresión UV-LED directa sobre fundas de móvil en autoservicio completo.</p>' +
-    '<p style="font-size:10px;color:#475569;margin:0 0 3px">✓ Autoservicio 100% — sin personal</p>' +
-    '<p style="font-size:10px;color:#475569;margin:0 0 3px">✓ Pago con tarjeta, móvil o QR</p>' +
-    '<p style="font-size:10px;color:#475569;margin:0 0 3px">✓ Funda impresa en HD en 30 segundos</p>' +
-    '<p style="font-size:10px;color:#475569;margin:0">✓ Compatible con +600 modelos de móvil</p>' +
+    '<p style="font-size:14px;font-weight:900;color:#0f172a;margin:0 0 8px">' + title + '</p>' +
+    '<p style="font-size:11px;color:#64748b;margin:0 0 10px;line-height:1.5">' + subtitle + '</p>' +
+    bulletsHtml +
+    ctaHtml +
     '</td></tr></table></td></tr>';
 }
 
-function pimpamStepsHtml() {
-  var steps = [
+function pimpamStepsHtml(config) {
+  var cfg = config || {};
+  var steps = cfg.steps || [
     {n:"1️⃣",t:"Elige diseño",s:"Pantalla táctil"},
     {n:"2️⃣",t:"Personaliza",s:"Texto, colores…"},
     {n:"3️⃣",t:"Paga",s:"Tarjeta / QR"},
     {n:"4️⃣",t:"¡Listo!",s:"Funda en 30s"}
   ];
+  var bgColor = cfg.stepsBgColor || '#fff7ed';
+  var borderColor = cfg.stepsBorderColor || '#fed7aa';
+
   var cells = '';
-  for (var i = 0; i < 4; i++) {
-    var pad = i===0?'0 4px 0 0':i===3?'0 0 0 4px':'0 4px';
-    cells += '<td class="step-cell" width="25%" valign="top" style="padding:'+pad+'">' +
-      '<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px;text-align:center">' +
+  for (var i = 0; i < steps.length; i++) {
+    var pad = i===0?'0 4px 0 0':i===steps.length-1?'0 0 0 4px':'0 4px';
+    cells += '<td class="step-cell" width="' + (100/steps.length) + '%" valign="top" style="padding:'+pad+'">' +
+      '<div style="background:' + bgColor + ';border:1px solid ' + borderColor + ';border-radius:8px;padding:10px;text-align:center">' +
       '<div style="font-size:22px;margin-bottom:4px">'+steps[i].n+'</div>' +
       '<p style="font-size:10px;font-weight:800;color:#0f172a;margin:0 0 2px">'+steps[i].t+'</p>' +
       '<p style="font-size:9px;color:#64748b;margin:0">'+steps[i].s+'</p></div></td>';
@@ -482,8 +563,8 @@ function generateFullHtml(blocks, products) {
         if(pt1&&pt2&&pt3) rows += productTrioHtml(pt1,pt2,pt3);
         break;
       case 'freebird': rows += freebirdHtml(b); break;
-      case 'pimpam_hero': rows += pimpamHeroHtml(); break;
-      case 'pimpam_steps': rows += pimpamStepsHtml(); break;
+      case 'pimpam_hero': rows += pimpamHeroHtml(b); break;
+      case 'pimpam_steps': rows += pimpamStepsHtml(b); break;
     }
   }
   return '<html><head>'+CSS_BLOCK+'</head><body style="font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;margin:0;padding:0;background:#ffffff;color:#1e293b">' +
@@ -986,8 +1067,76 @@ function StandaloneBlockEditorModal(props) {
             )
           ),
 
-          (form.blockType === 'pimpam_hero' || form.blockType === 'pimpam_steps') &&
-            e('p', {style:{fontSize:'12px',color:'#9ca3af',fontStyle:'italic'}}, 'Este tipo de bloque no tiene configuración adicional.')
+          form.blockType === 'pimpam_hero' && e('div', null,
+            e('div', {className:'form-group form-group-full'},
+              e('label', {className:'form-label'}, 'Imagen (URL)'),
+              e('input', {className:'form-input', value:cfg.heroImage||'', onChange:function(ev){updateConfig('heroImage', ev.target.value)}, placeholder:'https://...'})
+            ),
+            cfg.heroImage && e('div', {style:{marginTop:'8px',textAlign:'center'}},
+              e('img', {src:cfg.heroImage, style:{maxWidth:'100%',maxHeight:'150px',borderRadius:'8px',border:'1px solid #e5e7eb'}})
+            ),
+            e('div', {className:'form-group form-group-full'},
+              e('label', {className:'form-label'}, 'Título'),
+              e('input', {className:'form-input', value:cfg.heroTitle||'', onChange:function(ev){updateConfig('heroTitle', ev.target.value)}, placeholder:'Personaliza, imprime y vende…'})
+            ),
+            e('div', {className:'form-group form-group-full'},
+              e('label', {className:'form-label'}, 'Subtítulo'),
+              e('input', {className:'form-input', value:cfg.heroSubtitle||'', onChange:function(ev){updateConfig('heroSubtitle', ev.target.value)}, placeholder:'Impresión UV-LED...'})
+            ),
+            e('div', {className:'form-group form-group-full'},
+              e('label', {className:'form-label'}, 'Puntos (uno por línea)'),
+              e('textarea', {className:'form-textarea', value:(cfg.heroBullets||[]).join('\n'), onChange:function(ev){var lines = ev.target.value.split('\n').map(function(l){return l.trim()}).filter(function(l){return l.length>0}); updateConfig('heroBullets', lines)}, placeholder:'Punto 1\nPunto 2\nPunto 3\nPunto 4', style:{minHeight:'80px'}})
+            ),
+            e('div', {className:'form-group form-group-full'},
+              e('label', {className:'form-label'}, 'Enlace imagen (opcional)'),
+              e('input', {className:'form-input', value:cfg.heroImageLink||'', onChange:function(ev){updateConfig('heroImageLink', ev.target.value)}, placeholder:'https://...'})
+            ),
+            e('div', {className:'form-group form-group-full'},
+              e('label', {className:'form-label'}, 'Texto botón CTA (opcional)'),
+              e('input', {className:'form-input', value:cfg.heroCtaText||'', onChange:function(ev){updateConfig('heroCtaText', ev.target.value)}, placeholder:'Ver más'})
+            ),
+            e('div', {className:'form-group form-group-full'},
+              e('label', {className:'form-label'}, 'URL botón CTA (opcional)'),
+              e('input', {className:'form-input', value:cfg.heroCtaUrl||'', onChange:function(ev){updateConfig('heroCtaUrl', ev.target.value)}, placeholder:'https://...'})
+            ),
+            e('div', {className:'form-group'},
+              e('label', {className:'form-label'}, 'Color fondo'),
+              e('input', {type:'color', value:cfg.heroBgColor||'#fff', onChange:function(ev){updateConfig('heroBgColor', ev.target.value)}, style:{width:'48px',height:'36px',border:'1px solid #d1d5db',borderRadius:'6px',cursor:'pointer'}})
+            )
+          ),
+
+          form.blockType === 'pimpam_steps' && e('div', null,
+            e('div', {style:{fontSize:'10px',color:'#9ca3af',marginBottom:'12px'}},'Configurar los 4 pasos del proceso'),
+            (cfg.steps||[{n:'',t:'',s:''},{n:'',t:'',s:''},{n:'',t:'',s:''},{n:'',t:'',s:''}]).map(function(step, idx) {
+              return e('div', {key:idx, style:{marginBottom:'12px',padding:'12px',background:'#fff',border:'1px solid #e5e7eb',borderRadius:'6px'}},
+                e('div', {style:{fontSize:'10px',fontWeight:700,color:'#6b7280',marginBottom:'8px'}},'Paso ' + (idx+1)),
+                e('div', {className:'modal-grid', style:{gap:'8px'}},
+                  e('div', {className:'form-group'},
+                    e('label', {className:'form-label',style:{fontSize:'9px'}},'Emoji/Número'),
+                    e('input', {className:'form-input', value:step.n||'', onChange:function(ev){var newSteps = (cfg.steps||[]).slice(); newSteps[idx] = Object.assign({}, newSteps[idx], {n:ev.target.value}); updateConfig('steps', newSteps)}, placeholder:'1️⃣', style:{width:'60px'}})
+                  ),
+                  e('div', {className:'form-group'},
+                    e('label', {className:'form-label',style:{fontSize:'9px'}},'Título'),
+                    e('input', {className:'form-input', value:step.t||'', onChange:function(ev){var newSteps = (cfg.steps||[]).slice(); newSteps[idx] = Object.assign({}, newSteps[idx], {t:ev.target.value}); updateConfig('steps', newSteps)}, placeholder:'Elige diseño'})
+                  ),
+                  e('div', {className:'form-group'},
+                    e('label', {className:'form-label',style:{fontSize:'9px'}},'Subtítulo'),
+                    e('input', {className:'form-input', value:step.s||'', onChange:function(ev){var newSteps = (cfg.steps||[]).slice(); newSteps[idx] = Object.assign({}, newSteps[idx], {s:ev.target.value}); updateConfig('steps', newSteps)}, placeholder:'Pantalla táctil'})
+                  )
+                )
+              );
+            }),
+            e('div', {className:'modal-grid'},
+              e('div', {className:'form-group'},
+                e('label', {className:'form-label'}, 'Color fondo'),
+                e('input', {type:'color', value:cfg.stepsBgColor||'#fff7ed', onChange:function(ev){updateConfig('stepsBgColor', ev.target.value)}, style:{width:'48px',height:'36px',border:'1px solid #d1d5db',borderRadius:'6px',cursor:'pointer'}})
+              ),
+              e('div', {className:'form-group'},
+                e('label', {className:'form-label'}, 'Color borde'),
+                e('input', {type:'color', value:cfg.stepsBorderColor||'#fed7aa', onChange:function(ev){updateConfig('stepsBorderColor', ev.target.value)}, style:{width:'48px',height:'36px',border:'1px solid #d1d5db',borderRadius:'6px',cursor:'pointer'}})
+              )
+            )
+          )
         )
       ),
 
@@ -1052,6 +1201,25 @@ function BlockEditor(props) {
       e('label', null, 'Centro: ', e(ProductSelect, {value:block.product2, onChange:function(v){props.onChange(Object.assign({},block,{product2:v}))}, exclude:block.product1, exclude2:block.product3, products:props.products})),
       e('label', null, 'Der: ', e(ProductSelect, {value:block.product3, onChange:function(v){props.onChange(Object.assign({},block,{product3:v}))}, exclude:block.product1, exclude2:block.product2, products:props.products}))
     );
+  } else if (block.type === 'pimpam_hero') {
+    body = e('div', null,
+      e('div', {style:{marginBottom:'8px'}},
+        e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'4px'}},'Título'),
+        e('input', {className:'form-input', value:block.heroTitle||'', onChange:function(ev){props.onChange(Object.assign({},block,{heroTitle:ev.target.value}))}, placeholder:'Título del hero', style:{fontSize:'11px'}})
+      ),
+      e('div', {style:{marginBottom:'8px'}},
+        e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'4px'}},'Subtítulo'),
+        e('input', {className:'form-input', value:block.heroSubtitle||'', onChange:function(ev){props.onChange(Object.assign({},block,{heroSubtitle:ev.target.value}))}, placeholder:'Subtítulo', style:{fontSize:'11px'}})
+      ),
+      e('div', {style:{marginBottom:'8px'}},
+        e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'4px'}},'Imagen (URL)'),
+        e('input', {className:'form-input', value:block.heroImage||'', onChange:function(ev){props.onChange(Object.assign({},block,{heroImage:ev.target.value}))}, placeholder:'https://...', style:{fontSize:'11px'}})
+      ),
+      e('p', {style:{fontSize:'9px',color:'#9ca3af',fontStyle:'italic',margin:'4px 0'}},'Configuración adicional en editor modal')
+    );
+  } else if (block.type === 'pimpam_steps') {
+    var stepsSummary = (block.steps||[]).map(function(s){return s.t}).join(', ') || '4 pasos: Elige diseño, Personaliza, Paga, ¡Listo!';
+    body = e('p', {className:'fixed-msg'}, stepsSummary);
   } else {
     body = e('p', {className:'fixed-msg'}, 'Bloque predefinido');
   }
@@ -1116,6 +1284,29 @@ function EmailComposer() {
     return stored || getDefaultState();
   });
   var appState = _appState[0], setAppState = _appState[1];
+
+  var _syncStatus = useState('loading');
+  var syncStatus = _syncStatus[0], setSyncStatus = _syncStatus[1];
+
+  // Load from Supabase on first mount
+  var _loaded = useRef(false);
+  useEffect(function() {
+    if (_loaded.current) return;
+    _loaded.current = true;
+    loadFromSupabase().then(function(cloudData) {
+      if (cloudData && cloudData.products) {
+        setAppState(cloudData);
+        saveStorageData(cloudData);
+        setSyncStatus('cloud');
+        setTimeout(function(){ setSyncStatus(''); }, 3000);
+      } else {
+        // No cloud data yet — push local/default data to Supabase
+        var local = getStorageData() || getDefaultState();
+        saveToSupabase(local);
+        setSyncStatus('');
+      }
+    });
+  }, []);
 
   var _blocks = useState([createBlock("text")]);
   var blocks = _blocks[0], setBlocks = _blocks[1];
@@ -1204,8 +1395,8 @@ function EmailComposer() {
       case 'product_single': newBlock = {id: ++blockIdCounter, type:'product_single', product1: cfg.defaultProduct || 'young'}; break;
       case 'product_pair': newBlock = {id: ++blockIdCounter, type:'product_pair', product1: cfg.defaultProduct1 || 'young', product2: cfg.defaultProduct2 || '3000pro'}; break;
       case 'product_trio': newBlock = {id: ++blockIdCounter, type:'product_trio', product1: cfg.defaultProduct1 || 'uv1612g', product2: cfg.defaultProduct2 || 'uv1812', product3: cfg.defaultProduct3 || 'uv2513'}; break;
-      case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'pimpam_hero'}; break;
-      case 'pimpam_steps': newBlock = {id: ++blockIdCounter, type:'pimpam_steps'}; break;
+      case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'pimpam_hero', heroImage: cfg.heroImage||'', heroTitle: cfg.heroTitle||'', heroSubtitle: cfg.heroSubtitle||'', heroBullets: cfg.heroBullets||[], heroImageLink: cfg.heroImageLink||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#fff'}; break;
+      case 'pimpam_steps': newBlock = {id: ++blockIdCounter, type:'pimpam_steps', steps: cfg.steps||[], stepsBgColor: cfg.stepsBgColor||'#fff7ed', stepsBorderColor: cfg.stepsBorderColor||'#fed7aa'}; break;
       default: newBlock = {id: ++blockIdCounter, type: sb.blockType}; break;
     }
     setBlocks(function(prev){ return prev.concat([newBlock]); });
@@ -1261,6 +1452,9 @@ function EmailComposer() {
   function persistState(newState) {
     setAppState(newState);
     saveStorageData(newState);
+    saveToSupabase(newState);
+    setSyncStatus('saved');
+    setTimeout(function(){ setSyncStatus(''); }, 2000);
   }
 
   function exportJSON() {
@@ -1572,6 +1766,9 @@ function EmailComposer() {
 
       e('div', {className:'footer'},
         e('span', null, blocks.length + ' bloque' + (blocks.length!==1?'s':'')),
+        syncStatus === 'saved' && e('span', {style:{color:'#16a34a',fontSize:'10px'}}, '☁ Guardado'),
+        syncStatus === 'cloud' && e('span', {style:{color:'#2563eb',fontSize:'10px'}}, '☁ Datos cargados de la nube'),
+        syncStatus === 'loading' && e('span', {style:{color:'#9ca3af',fontSize:'10px'}}, '⟳ Cargando...'),
         e('span', null, sizeKb + ' KB')
       ),
 
@@ -1620,6 +1817,7 @@ function EmailComposer() {
           e('button', {className:'mode-btn', onClick:function(){setAppMode('compositor')}}, 'Compositor'),
           e('button', {className:'mode-btn active', onClick:function(){setAppMode('backoffice')}}, 'Backoffice')
         ),
+        syncStatus === 'saved' && e('span', {style:{color:'#16a34a',fontSize:'11px',fontWeight:600}}, '☁ Guardado'),
         e('button', {className:'btn btn-primary btn-sm', onClick:exportJSON}, 'Exportar JSON'),
         e('button', {className:'btn btn-primary btn-sm', onClick:importJSON}, 'Importar JSON'),
         e('button', {className:'btn btn-ghost btn-sm', onClick:resetToDefaults}, 'Restaurar')
