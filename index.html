@@ -1655,6 +1655,8 @@ function EmailComposer() {
   var aiPromptText = _aiPromptText[0], setAiPromptText = _aiPromptText[1];
   var _aiLoading = useState(false);
   var aiLoading = _aiLoading[0], setAiLoading = _aiLoading[1];
+  var _aiResult = useState('');
+  var aiResult = _aiResult[0], setAiResult = _aiResult[1];
 
   var langNameMap = {es:'español',fr:'français',de:'Deutsch',en:'English',nl:'Nederlands'};
 
@@ -2151,7 +2153,13 @@ function EmailComposer() {
                     onMoveDown: function(){moveBlock(block.id,1)},
                     isFirst: idx===0,
                     isLast: idx===blocks.length-1,
-                    onAiAssist: function(blockId){ setAiPromptOpen({target:'compositor', blockId:blockId}); setAiPromptText(''); }
+                    onAiAssist: function(blockId){
+                      var existingText = '';
+                      blocks.forEach(function(b){ if(b.id === blockId) existingText = b.text || ''; });
+                      setAiPromptOpen({target:'compositor', blockId:blockId, existingText:existingText});
+                      setAiPromptText(existingText);
+                      setAiResult('');
+                    }
                   });
                 })
           )
@@ -2207,23 +2215,45 @@ function EmailComposer() {
       ),
 
       // AI WRITING ASSISTANT MODAL
-      aiPromptOpen && e('div', {className:'ai-prompt-overlay', onClick:function(){if(!aiLoading){setAiPromptOpen(null)}}},
+      aiPromptOpen && e('div', {className:'ai-prompt-overlay', onClick:function(){if(!aiLoading){setAiPromptOpen(null);setAiResult('')}}},
         e('div', {className:'ai-prompt-box', onClick:function(ev){ev.stopPropagation()}},
           e('h3', null, '✨ Asistente de redacción IA'),
-          e('p', {style:{fontSize:'12px',color:'#6b7280',marginBottom:'12px'}}, 'Escribe los puntos clave o ideas sueltas y la IA redactará un párrafo comercial en ' + (langNameMap[lang]||'español') + '.'),
-          e('textarea', {className:'', value:aiPromptText, onChange:function(ev){setAiPromptText(ev.target.value)}, placeholder:'Ej: impresora compacta, ideal para tiendas, precio competitivo, incluye formación...', autoFocus:true, disabled:aiLoading, style:{width:'100%',minHeight:'80px',border:'1.5px solid #d1d5db',borderRadius:'8px',padding:'10px',fontSize:'13px',fontFamily:'inherit',resize:'vertical',outline:'none'}}),
-          e('div', {className:'ai-prompt-actions'},
-            e('button', {className:'ai-btn ai-btn-ghost', onClick:function(){setAiPromptOpen(null)}, disabled:aiLoading}, 'Cancelar'),
-            e('button', {className:'ai-btn ai-btn-primary', disabled:aiLoading || !aiPromptText.trim(), onClick:function(){
-              callOpenAI(aiPromptText, lang, function(result) {
+          e('p', {style:{fontSize:'12px',color:'#6b7280',marginBottom:'12px'}}, aiResult
+            ? 'Texto generado. ¿Qué quieres hacer?'
+            : 'Escribe los puntos clave o ideas sueltas y la IA redactará un párrafo comercial en ' + (langNameMap[lang]||'español') + '.' + (aiPromptOpen.existingText ? ' Se ha cargado el texto actual del bloque.' : '')
+          ),
+
+          // STEP 1: Input prompt
+          !aiResult && e('div', null,
+            e('textarea', {value:aiPromptText, onChange:function(ev){setAiPromptText(ev.target.value)}, placeholder:'Ej: impresora compacta, ideal para tiendas, precio competitivo, incluye formación...', autoFocus:true, disabled:aiLoading, style:{width:'100%',minHeight:'80px',border:'1.5px solid #d1d5db',borderRadius:'8px',padding:'10px',fontSize:'13px',fontFamily:'inherit',resize:'vertical',outline:'none'}}),
+            e('div', {className:'ai-prompt-actions'},
+              e('button', {className:'ai-btn ai-btn-ghost', onClick:function(){setAiPromptOpen(null);setAiResult('')}, disabled:aiLoading}, 'Cancelar'),
+              e('button', {className:'ai-btn ai-btn-primary', disabled:aiLoading || !aiPromptText.trim(), onClick:function(){
+                callOpenAI(aiPromptText, lang, function(result) { setAiResult(result); });
+              }}, aiLoading ? 'Generando...' : 'Redactar')
+            )
+          ),
+
+          // STEP 2: Show result + insert/replace
+          aiResult && e('div', null,
+            e('div', {style:{background:'#f0fdf4',border:'1px solid #bbf7d0',borderRadius:'8px',padding:'12px',fontSize:'13px',lineHeight:'1.6',marginBottom:'12px',maxHeight:'200px',overflowY:'auto',whiteSpace:'pre-wrap'}}, aiResult),
+            e('div', {className:'ai-prompt-actions', style:{flexWrap:'wrap',gap:'8px'}},
+              e('button', {className:'ai-btn ai-btn-ghost', onClick:function(){setAiResult('');}, style:{marginRight:'auto'}}, 'Regenerar'),
+              aiPromptOpen.existingText && e('button', {className:'ai-btn', onClick:function(){
                 if (aiPromptOpen.target === 'compositor') {
                   var bid = aiPromptOpen.blockId;
-                  setBlocks(function(prev){ return prev.map(function(b){ return b.id === bid ? Object.assign({}, b, {text: (b.text ? b.text + '\n\n' : '') + result}) : b; }); });
+                  setBlocks(function(prev){ return prev.map(function(b){ return b.id === bid ? Object.assign({}, b, {text: b.text + '\n\n' + aiResult}) : b; }); });
                 }
-                setAiPromptOpen(null);
-                setAiPromptText('');
-              });
-            }}, aiLoading ? 'Generando...' : 'Redactar')
+                setAiPromptOpen(null);setAiPromptText('');setAiResult('');
+              }, style:{background:'#dbeafe',color:'#1d4ed8'}}, 'Añadir al final'),
+              e('button', {className:'ai-btn ai-btn-primary', onClick:function(){
+                if (aiPromptOpen.target === 'compositor') {
+                  var bid = aiPromptOpen.blockId;
+                  setBlocks(function(prev){ return prev.map(function(b){ return b.id === bid ? Object.assign({}, b, {text: aiResult}) : b; }); });
+                }
+                setAiPromptOpen(null);setAiPromptText('');setAiResult('');
+              }}, 'Reemplazar')
+            )
           )
         )
       )
