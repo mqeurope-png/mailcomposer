@@ -192,20 +192,20 @@ const { useState, useRef, useCallback } = React;
 
 // ─── DEFAULT DATA STATE ──────────────────────────────────────
 const DEFAULT_PRODUCTS = [
-  { id:"young", brand:"artisjet", name:"artisJet Young", badge:"A4", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://artisjet-printers.eu/wp-content/uploads/2020/10/Imagen-102.png", desc:"Compacta para personalización en punto de venta, stands y start-ups.", area:"20 × 30 cm", alt:"5 cm", feat1:"Sensor de altura automático", feat2:"CMYK + Blanco", price:"9.300 €", link:"https://boprint.net/producto/artis-young-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
-  { id:"3000pro", brand:"artisjet", name:"artisJet 3000Pro Freebird", badge:"Freebird", badgeBg:"#dbeafe", badgeColor:"#1d4ed8", img:"https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png", desc:"Flatbed pro con Freebird. Velocidad 2,5× y certificación Braille/ADA.", area:"35 × 50 cm", alt:"17 cm", feat1:"Módulo Freebird integrado", feat2:"Mesa de vacío", price:"13.900 €", link:"https://boprint.net/contacto/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
-  { id:"proud", brand:"artisjet", name:"artisJet Proud", badge:"Tarjetas", badgeBg:"#fef3c7", badgeColor:"#92400e", img:"https://artisjet-printers.eu/wp-content/uploads/2024/05/artisJet-proud-card-printer-left-side-view.jpeg", desc:"Especialista en tarjetas, carnets y artículos promocionales.", area:"-", alt:"-", feat1:"Alta precisión piezas pequeñas", feat2:"CR80 y tarjetas grandes", price:"21.500 €", link:"https://boprint.net/?post_type=product&p=3276", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
-  { id:"5000u", brand:"artisjet", name:"artisJet 5000U", badge:"A3+ Freebird", badgeBg:"#e0e7ff", badgeColor:"#4338ca", img:"https://artisjet-printers.eu/wp-content/uploads/2017/11/artis5000Uimg1.jpg", desc:"Formato medio para volúmenes crecientes y objetos 3D.", area:"A3+", alt:"-", feat1:"Velocidad profesional", feat2:"CMYK + Blanco", price:"18.900 €", link:"https://boprint.net/producto/5000-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
-  { id:"6090trust", brand:"artisjet", name:"artisJet 6090 Trust", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#991b1b", img:"https://artisjet-printers.eu/wp-content/uploads/2024/08/trust-freebird.png", desc:"Producción industrial: señalización, placas, paneles decorativos.", area:"59 × 89 cm", alt:"10 cm", feat1:"Freebird integrado", feat2:"Alta productividad", price:"20.900 €", link:"https://boprint.net/producto/artisjet-6090-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)" },
-  { id:"mbo3050", brand:"mbo", name:"MBO 3050", badge:"Nuevo", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://mboprinters.com/wp-content/uploads/2026/02/mbo3050.png", desc:"Compacta multifuncional, la más reciente de MBO.", area:"30 × 50 cm", alt:"10 cm", feat1:"Sensor 1-3 mm", feat2:"Tanques 250 cc", price:"6.495 €", link:"https://mboprinters.com/product/mbo-3050-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
-  { id:"mbo4060", brand:"mbo", name:"MBO 4060", badge:"Top ventas", badgeBg:"#ede9fe", badgeColor:"#6d28d9", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo4060-1.jpg", desc:"El mejor ratio calidad-precio del mercado.", area:"33 × 55 cm", alt:"20 cm", feat1:"Pantalla táctil", feat2:"Control inteligente", price:"7.995 €", link:"https://mboprinters.com/product/mbo-4060-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
-  { id:"mbo6090", brand:"mbo", name:"MBO 6090", badge:"Semiformato", badgeBg:"#ede9fe", badgeColor:"#6d28d9", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo6090.jpg", desc:"Producción profesional multicolor. 3 cabezales.", area:"60 × 90 cm", alt:"20 cm", feat1:"CMYK LC LM+W+Barniz", feat2:"Servomotor", price:"14.500 €", link:"https://mboprinters.com/product/mbo-6090-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
-  { id:"mbo1015", brand:"mbo", name:"MBO 1015", badge:"Industrial", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo1015.jpg", desc:"Gran formato para tiradas grandes.", area:"100 × 150 cm", alt:"10 cm", feat1:"Epson i3200", feat2:"CMYK+WWWW+Barniz", price:"desde 21.500 €", link:"https://mboprinters.com/product/mbo-1015-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
-  { id:"uv1612g", brand:"mbo", name:"MBO UV1612G", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo1612g.jpg", desc:"Industrial de alta velocidad. Acero reforzado.", area:"160 × 120 cm", alt:"20 cm", feat1:"Múltiples cabezales", feat2:"Alta velocidad", price:"desde 26.500 €", link:"https://mboprinters.com/product/mbo-uv1612g", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
-  { id:"uv1812", brand:"mbo", name:"MBO UV1812", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo1812.jpg", desc:"Displays y publicidad. 180×120cm.", area:"180 × 120 cm", alt:"20 cm", feat1:"CMYK+W+Barniz", feat2:"PVC, madera, metal, vidrio", price:"desde 27.500 €", link:"https://mboprinters.com/product/mbo-uv1812", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
-  { id:"uv2513", brand:"mbo", name:"MBO UV2513", badge:"Súper Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo2513.jpg", desc:"Producción masiva. 250×130cm.", area:"250 × 130 cm", alt:"20 cm", feat1:"Cabezales alta velocidad", feat2:"Rígidos y flexibles", price:"desde 34.000 €", link:"https://mboprinters.com/product/mbo-uv2513", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)" },
-  { id:"casebox", brand:"pimpam", name:"PimPam CaseBox", badge:"Interior · Retail", badgeBg:"#ffedd5", badgeColor:"#9a3412", img:"https://pimpam-vending.com/wp-content/uploads/2026/01/pimpam-aeropuerto.png", desc:"Máquina compacta de interior para centros comerciales y aeropuertos.", area:"-", alt:"-", feat1:"UV en TPU/Silicona/PC", feat2:"Múltiples formas de pago", price:"Consultar", link:"https://pimpam-vending.com/casebox-vending/", accent:"#ea580c", gradient:"linear-gradient(90deg,#ea580c,#f97316)" },
-  { id:"custom", brand:"pimpam", name:"PimPam Custom", badge:"Tu marca", badgeBg:"#ffedd5", badgeColor:"#9a3412", img:"https://pimpam-vending.com/wp-content/uploads/2026/01/custom-pimpam-851x1024.png", desc:"Branding completo: vinilos, pantalla y campañas con tu marca.", area:"-", alt:"-", feat1:"Vinilos personalizados", feat2:"Campañas temporales", price:"Consultar", link:"https://pimpam-vending.com/custom/", accent:"#ea580c", gradient:"linear-gradient(90deg,#ea580c,#f97316)" },
+  { id:"young", brand:"artisjet", name:"artisJet Young", badge:"A4", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://artisjet-printers.eu/wp-content/uploads/2020/10/Imagen-102.png", desc:"Compacta para personalización en punto de venta, stands y start-ups.", area:"20 × 30 cm", alt:"5 cm", feat1:"Sensor de altura automático", feat2:"CMYK + Blanco", price:"9.300 €", link:"https://boprint.net/producto/artis-young-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
+  { id:"3000pro", brand:"artisjet", name:"artisJet 3000Pro Freebird", badge:"Freebird", badgeBg:"#dbeafe", badgeColor:"#1d4ed8", img:"https://artisjet-printers.eu/wp-content/uploads/2025/02/3000-pro-freebirdok.png", desc:"Flatbed pro con Freebird. Velocidad 2,5× y certificación Braille/ADA.", area:"35 × 50 cm", alt:"17 cm", feat1:"Módulo Freebird integrado", feat2:"Mesa de vacío", price:"13.900 €", link:"https://boprint.net/contacto/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
+  { id:"proud", brand:"artisjet", name:"artisJet Proud", badge:"Tarjetas", badgeBg:"#fef3c7", badgeColor:"#92400e", img:"https://artisjet-printers.eu/wp-content/uploads/2024/05/artisJet-proud-card-printer-left-side-view.jpeg", desc:"Especialista en tarjetas, carnets y artículos promocionales.", area:"-", alt:"-", feat1:"Alta precisión piezas pequeñas", feat2:"CR80 y tarjetas grandes", price:"21.500 €", link:"https://boprint.net/?post_type=product&p=3276", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
+  { id:"5000u", brand:"artisjet", name:"artisJet 5000U", badge:"A3+ Freebird", badgeBg:"#e0e7ff", badgeColor:"#4338ca", img:"https://artisjet-printers.eu/wp-content/uploads/2017/11/artis5000Uimg1.jpg", desc:"Formato medio para volúmenes crecientes y objetos 3D.", area:"A3+", alt:"-", feat1:"Velocidad profesional", feat2:"CMYK + Blanco", price:"18.900 €", link:"https://boprint.net/producto/5000-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
+  { id:"6090trust", brand:"artisjet", name:"artisJet 6090 Trust", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#991b1b", img:"https://artisjet-printers.eu/wp-content/uploads/2024/08/trust-freebird.png", desc:"Producción industrial: señalización, placas, paneles decorativos.", area:"59 × 89 cm", alt:"10 cm", feat1:"Freebird integrado", feat2:"Alta productividad", price:"20.900 €", link:"https://boprint.net/producto/artisjet-6090-uv-led/", accent:"#1d4ed8", gradient:"linear-gradient(90deg,#1d4ed8,#3b82f6)", visible:true },
+  { id:"mbo3050", brand:"mbo", name:"MBO 3050", badge:"Nuevo", badgeBg:"#dcfce7", badgeColor:"#15803d", img:"https://mboprinters.com/wp-content/uploads/2026/02/mbo3050.png", desc:"Compacta multifuncional, la más reciente de MBO.", area:"30 × 50 cm", alt:"10 cm", feat1:"Sensor 1-3 mm", feat2:"Tanques 250 cc", price:"6.495 €", link:"https://mboprinters.com/product/mbo-3050-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
+  { id:"mbo4060", brand:"mbo", name:"MBO 4060", badge:"Top ventas", badgeBg:"#ede9fe", badgeColor:"#6d28d9", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo4060-1.jpg", desc:"El mejor ratio calidad-precio del mercado.", area:"33 × 55 cm", alt:"20 cm", feat1:"Pantalla táctil", feat2:"Control inteligente", price:"7.995 €", link:"https://mboprinters.com/product/mbo-4060-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
+  { id:"mbo6090", brand:"mbo", name:"MBO 6090", badge:"Semiformato", badgeBg:"#ede9fe", badgeColor:"#6d28d9", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo6090.jpg", desc:"Producción profesional multicolor. 3 cabezales.", area:"60 × 90 cm", alt:"20 cm", feat1:"CMYK LC LM+W+Barniz", feat2:"Servomotor", price:"14.500 €", link:"https://mboprinters.com/product/mbo-6090-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
+  { id:"mbo1015", brand:"mbo", name:"MBO 1015", badge:"Industrial", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2022/02/mbo1015.jpg", desc:"Gran formato para tiradas grandes.", area:"100 × 150 cm", alt:"10 cm", feat1:"Epson i3200", feat2:"CMYK+WWWW+Barniz", price:"desde 21.500 €", link:"https://mboprinters.com/product/mbo-1015-uv-led", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
+  { id:"uv1612g", brand:"mbo", name:"MBO UV1612G", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo1612g.jpg", desc:"Industrial de alta velocidad. Acero reforzado.", area:"160 × 120 cm", alt:"20 cm", feat1:"Múltiples cabezales", feat2:"Alta velocidad", price:"desde 26.500 €", link:"https://mboprinters.com/product/mbo-uv1612g", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
+  { id:"uv1812", brand:"mbo", name:"MBO UV1812", badge:"Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo1812.jpg", desc:"Displays y publicidad. 180×120cm.", area:"180 × 120 cm", alt:"20 cm", feat1:"CMYK+W+Barniz", feat2:"PVC, madera, metal, vidrio", price:"desde 27.500 €", link:"https://mboprinters.com/product/mbo-uv1812", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
+  { id:"uv2513", brand:"mbo", name:"MBO UV2513", badge:"Súper Gran Formato", badgeBg:"#fee2e2", badgeColor:"#b91c1c", img:"https://mboprinters.com/wp-content/uploads/2024/11/mbo2513.jpg", desc:"Producción masiva. 250×130cm.", area:"250 × 130 cm", alt:"20 cm", feat1:"Cabezales alta velocidad", feat2:"Rígidos y flexibles", price:"desde 34.000 €", link:"https://mboprinters.com/product/mbo-uv2513", accent:"#6d28d9", gradient:"linear-gradient(90deg,#6d28d9,#8b5cf6)", visible:true },
+  { id:"casebox", brand:"pimpam", name:"PimPam CaseBox", badge:"Interior · Retail", badgeBg:"#ffedd5", badgeColor:"#9a3412", img:"https://pimpam-vending.com/wp-content/uploads/2026/01/pimpam-aeropuerto.png", desc:"Máquina compacta de interior para centros comerciales y aeropuertos.", area:"-", alt:"-", feat1:"UV en TPU/Silicona/PC", feat2:"Múltiples formas de pago", price:"Consultar", link:"https://pimpam-vending.com/casebox-vending/", accent:"#ea580c", gradient:"linear-gradient(90deg,#ea580c,#f97316)", visible:true },
+  { id:"custom", brand:"pimpam", name:"PimPam Custom", badge:"Tu marca", badgeBg:"#ffedd5", badgeColor:"#9a3412", img:"https://pimpam-vending.com/wp-content/uploads/2026/01/custom-pimpam-851x1024.png", desc:"Branding completo: vinilos, pantalla y campañas con tu marca.", area:"-", alt:"-", feat1:"Vinilos personalizados", feat2:"Campañas temporales", price:"Consultar", link:"https://pimpam-vending.com/custom/", accent:"#ea580c", gradient:"linear-gradient(90deg,#ea580c,#f97316)", visible:true },
 ];
 
 const BRAND_STRIPS = {
@@ -236,41 +236,41 @@ function getDefaultState() {
   return {
     products: DEFAULT_PRODUCTS.map(function(p){ return Object.assign({}, p); }),
     composedBlocks: [
-      {id:'block-001',title:'Entry Level MBO 3050+4060',desc:'Compactas MBO con mejor precio',priceRange:'desde 6.495 € + 7.995 €',colorTag:'purple',introText:'Si buscas empezar con impresión UV-LED sin una inversión inicial grande, estas dos compactas de nuestra marca MBO son la mejor opción del mercado. Ideales para negocios que quieren probar la tecnología o complementar su producción:',brandStrip:'mbo',blockType:'product_pair',products:['mbo3050','mbo4060'],includeHero:false,includeSteps:false},
-      {id:'block-002',title:'artisJet Compactas Young+3000Pro',desc:'Personalización a producción pro',priceRange:'9.300 € + 13.900 €',colorTag:'blue',introText:'Nuestra gama compacta de artisJet cubre desde la personalización en punto de venta (Young) hasta la producción profesional con Freebird para objetos 3D (3000Pro). Ambas ocupan poco espacio y son fáciles de integrar en cualquier entorno de trabajo:',brandStrip:'artisjet',blockType:'product_pair',products:['young','3000pro'],includeHero:false,includeSteps:false},
-      {id:'block-003',title:'artisJet Producción Proud+5000U',desc:'Tarjetas y formato A3+',priceRange:'21.500 € + 18.900 €',colorTag:'blue',introText:'Para entornos que requieren producción continua o especialización: la Proud está diseñada para tarjetas, carnets y artículos promocionales en volúmenes industriales, y la 5000U es el salto a formato A3+ para negocios en crecimiento:',brandStrip:'artisjet',blockType:'product_pair',products:['proud','5000u'],includeHero:false,includeSteps:false},
-      {id:'block-004',title:'artisJet Medio+Gran Formato 5000U+6090Trust',desc:'Formato A3+ e industrial',priceRange:'18.900 € + 20.900 €',colorTag:'blue',introText:'Cuando necesitas saltar a formatos mayores sin perder versatilidad. La 5000U es perfecta para personalización A3+ y la 6090 Trust para producción industrial de señalización, placas y paneles decorativos. Velocidad, precisión y productividad industrial:',brandStrip:'artisjet',blockType:'product_pair',products:['5000u','6090trust'],includeHero:false,includeSteps:false},
-      {id:'block-005',title:'MBO Semiformato+Industrial 6090+1015',desc:'Producción profesional multicolor',priceRange:'14.500 € + desde 21.500 €',colorTag:'purple',introText:'La pareja de MBO para producción a escala profesional. La 6090 es el punto de entrada a formato grande con 3 cabezales, y la 1015 es el caballo de batalla para tiradas industriales de gran formato. CMYK+W+Barniz disponibles:',brandStrip:'mbo',blockType:'product_pair',products:['mbo6090','mbo1015'],includeHero:false,includeSteps:false},
-      {id:'block-006',title:'Mix Formato Medio 3000Pro+MBO6090',desc:'Cross-brand: versatilidad artisJet + potencia MBO',priceRange:'13.900 € + 14.500 €',colorTag:'gray',introText:'Una combinación híbrida perfecta para estudios que necesitan versatilidad (la 3000Pro con Freebird) + producción en volumen (la MBO 6090). Dos filosofías de impresión complementarias, diferente software pero máxima cobertura de mercado:',brandStrip:'none',blockType:'product_pair',products:['3000pro','mbo6090'],includeHero:false,includeSteps:false},
-      {id:'block-007',title:'Mix Gran Formato 6090Trust+MBO1015',desc:'industrial: artisJet premium + MBO heavy duty',priceRange:'20.900 € + desde 21.500 €',colorTag:'gray',introText:'La élite del gran formato: la 6090 Trust de artisJet (con Freebird integrado) para máxima precisión + la MBO 1015 para volumen bruto. Dos máquinas de la liga de 100 × 150 cm, filosofías complementarias, presupuesto robusto:',brandStrip:'none',blockType:'product_pair',products:['6090trust','mbo1015'],includeHero:false,includeSteps:false},
-      {id:'block-008',title:'MBO Gran Formato Industrial UV1612G+UV1812+UV2513',desc:'Línea de producción masiva',priceRange:'desde 26.500 € + 27.500 € + 34.000 €',colorTag:'purple',introText:'Cuando necesitas línea de producción real: el dúo UV1612G+UV1812 para volumen medio-alto, o el salto a la UV2513 para producción masiva (250×130 cm). Cabezales de alta velocidad, rígidos y flexibles, CMYK+W+Barniz. Esto es factorización industrial:',brandStrip:'mbo',blockType:'product_trio',products:['uv1612g','uv1812','uv2513'],includeHero:false,includeSteps:false},
-      {id:'block-009',title:'PimPam Vending CaseBox+Custom',desc:'Autoservicio impreso 24/7',priceRange:'Consultar',colorTag:'orange',introText:'PimPam es el vending con personalización UV-LED integrada. Sin operario. El cliente elige, personaliza su funda, paga y se la lleva en 30 segundos. CaseBox para retail/interiores, Custom para branding completo con tus vinilos y campañas temporales:',brandStrip:'pimpam',blockType:'product_pair',products:['casebox','custom'],includeHero:true,includeSteps:false},
-      {id:'block-010',title:'Complemento Vending artisJet Young',desc:'Impresión manual + autoservicio híbrido',priceRange:'9.300 €',colorTag:'orange',introText:'Para negocios que quieren combinar: una Young en mostrador (operario imprime en el acto) + una PimPam en zona común (autoservicio). Máxima flexibilidad, dos modelos de negocio en paralelo, tiempos rápidos, márgenes altos:',brandStrip:'none',blockType:'product_single',products:['young'],includeHero:false,includeSteps:false},
-      {id:'block-011',title:'Proceso PimPam 4 Pasos',desc:'El viaje del cliente en 30 segundos',priceRange:'-',colorTag:'orange',introText:'Esto es lo que ve el cliente: selecciona diseño, personaliza, paga, y se va con su funda. Sin esperas, sin complicaciones, sin personal. El "por qué" de PimPam. Aquí se convierte en negocio rentable.',brandStrip:'pimpam',blockType:'product_single',products:['young'],includeHero:false,includeSteps:true},
+      {id:'block-001',title:'Entry Level MBO 3050+4060',desc:'Compactas MBO con mejor precio',priceRange:'desde 6.495 € + 7.995 €',colorTag:'purple',introText:'Si buscas empezar con impresión UV-LED sin una inversión inicial grande, estas dos compactas de nuestra marca MBO son la mejor opción del mercado. Ideales para negocios que quieren probar la tecnología o complementar su producción:',brandStrip:'mbo',blockType:'product_pair',products:['mbo3050','mbo4060'],includeHero:false,includeSteps:false,visible:true},
+      {id:'block-002',title:'artisJet Compactas Young+3000Pro',desc:'Personalización a producción pro',priceRange:'9.300 € + 13.900 €',colorTag:'blue',introText:'Nuestra gama compacta de artisJet cubre desde la personalización en punto de venta (Young) hasta la producción profesional con Freebird para objetos 3D (3000Pro). Ambas ocupan poco espacio y son fáciles de integrar en cualquier entorno de trabajo:',brandStrip:'artisjet',blockType:'product_pair',products:['young','3000pro'],includeHero:false,includeSteps:false,visible:true},
+      {id:'block-003',title:'artisJet Producción Proud+5000U',desc:'Tarjetas y formato A3+',priceRange:'21.500 € + 18.900 €',colorTag:'blue',introText:'Para entornos que requieren producción continua o especialización: la Proud está diseñada para tarjetas, carnets y artículos promocionales en volúmenes industriales, y la 5000U es el salto a formato A3+ para negocios en crecimiento:',brandStrip:'artisjet',blockType:'product_pair',products:['proud','5000u'],includeHero:false,includeSteps:false,visible:true},
+      {id:'block-004',title:'artisJet Medio+Gran Formato 5000U+6090Trust',desc:'Formato A3+ e industrial',priceRange:'18.900 € + 20.900 €',colorTag:'blue',introText:'Cuando necesitas saltar a formatos mayores sin perder versatilidad. La 5000U es perfecta para personalización A3+ y la 6090 Trust para producción industrial de señalización, placas y paneles decorativos. Velocidad, precisión y productividad industrial:',brandStrip:'artisjet',blockType:'product_pair',products:['5000u','6090trust'],includeHero:false,includeSteps:false,visible:true},
+      {id:'block-005',title:'MBO Semiformato+Industrial 6090+1015',desc:'Producción profesional multicolor',priceRange:'14.500 € + desde 21.500 €',colorTag:'purple',introText:'La pareja de MBO para producción a escala profesional. La 6090 es el punto de entrada a formato grande con 3 cabezales, y la 1015 es el caballo de batalla para tiradas industriales de gran formato. CMYK+W+Barniz disponibles:',brandStrip:'mbo',blockType:'product_pair',products:['mbo6090','mbo1015'],includeHero:false,includeSteps:false,visible:true},
+      {id:'block-006',title:'Mix Formato Medio 3000Pro+MBO6090',desc:'Cross-brand: versatilidad artisJet + potencia MBO',priceRange:'13.900 € + 14.500 €',colorTag:'gray',introText:'Una combinación híbrida perfecta para estudios que necesitan versatilidad (la 3000Pro con Freebird) + producción en volumen (la MBO 6090). Dos filosofías de impresión complementarias, diferente software pero máxima cobertura de mercado:',brandStrip:'none',blockType:'product_pair',products:['3000pro','mbo6090'],includeHero:false,includeSteps:false,visible:true},
+      {id:'block-007',title:'Mix Gran Formato 6090Trust+MBO1015',desc:'industrial: artisJet premium + MBO heavy duty',priceRange:'20.900 € + desde 21.500 €',colorTag:'gray',introText:'La élite del gran formato: la 6090 Trust de artisJet (con Freebird integrado) para máxima precisión + la MBO 1015 para volumen bruto. Dos máquinas de la liga de 100 × 150 cm, filosofías complementarias, presupuesto robusto:',brandStrip:'none',blockType:'product_pair',products:['6090trust','mbo1015'],includeHero:false,includeSteps:false,visible:true},
+      {id:'block-008',title:'MBO Gran Formato Industrial UV1612G+UV1812+UV2513',desc:'Línea de producción masiva',priceRange:'desde 26.500 € + 27.500 € + 34.000 €',colorTag:'purple',introText:'Cuando necesitas línea de producción real: el dúo UV1612G+UV1812 para volumen medio-alto, o el salto a la UV2513 para producción masiva (250×130 cm). Cabezales de alta velocidad, rígidos y flexibles, CMYK+W+Barniz. Esto es factorización industrial:',brandStrip:'mbo',blockType:'product_trio',products:['uv1612g','uv1812','uv2513'],includeHero:false,includeSteps:false,visible:true},
+      {id:'block-009',title:'PimPam Vending CaseBox+Custom',desc:'Autoservicio impreso 24/7',priceRange:'Consultar',colorTag:'orange',introText:'PimPam es el vending con personalización UV-LED integrada. Sin operario. El cliente elige, personaliza su funda, paga y se la lleva en 30 segundos. CaseBox para retail/interiores, Custom para branding completo con tus vinilos y campañas temporales:',brandStrip:'pimpam',blockType:'product_pair',products:['casebox','custom'],includeHero:true,includeSteps:false,visible:true},
+      {id:'block-010',title:'Complemento Vending artisJet Young',desc:'Impresión manual + autoservicio híbrido',priceRange:'9.300 €',colorTag:'orange',introText:'Para negocios que quieren combinar: una Young en mostrador (operario imprime en el acto) + una PimPam en zona común (autoservicio). Máxima flexibilidad, dos modelos de negocio en paralelo, tiempos rápidos, márgenes altos:',brandStrip:'none',blockType:'product_single',products:['young'],includeHero:false,includeSteps:false,visible:true},
+      {id:'block-011',title:'Proceso PimPam 4 Pasos',desc:'El viaje del cliente en 30 segundos',priceRange:'-',colorTag:'orange',introText:'Esto es lo que ve el cliente: selecciona diseño, personaliza, paga, y se va con su funda. Sin esperas, sin complicaciones, sin personal. El "por qué" de PimPam. Aquí se convierte en negocio rentable.',brandStrip:'pimpam',blockType:'product_single',products:['young'],includeHero:false,includeSteps:true,visible:true},
     ],
     prewrittenTexts: [
-      {id:'text-001',name:'Intro UV-LED',icon:'💡',text:'Hola,\n\nTras nuestra conversación, te envío información sobre algunas de nuestras impresoras UV-LED que creo que encajan con lo que necesitas.\n\nLa tecnología UV-LED permite imprimir directamente sobre casi cualquier material (plástico, madera, metal, vidrio, cerámica…) con secado instantáneo y calidad fotorrealista en CMYK + blanco.'},
-      {id:'text-002',name:'Transición a MBO',icon:'▶',text:'En nuestra línea MBO (marca propia, excelente relación calidad-precio) también tenemos opciones interesantes:'},
-      {id:'text-003',name:'Transición a PimPam',icon:'🔹',text:'Y si te interesa el concepto de vending con personalización automática, tenemos PimPam — máquinas que imprimen fundas de móvil al momento, sin operario:'},
-      {id:'text-004',name:'Mención Freebird',icon:'✨',text:'Por cierto, varios de estos equipos incluyen tecnología Freebird — un sensor láser que ajusta automáticamente la altura del cabezal para imprimir sobre objetos 3D irregulares:'},
-      {id:'text-005',name:'Cierre comercial',icon:'👋',text:'Si quieres, podemos organizar una demo (presencial o videollamada) para que veas cualquiera de estos equipos en funcionamiento. También te puedo enviar muestras impresas sin compromiso.\n\n¡Quedo a tu disposición!\nUn saludo,'},
+      {id:'text-001',name:'Intro UV-LED',icon:'💡',text:'Hola,\n\nTras nuestra conversación, te envío información sobre algunas de nuestras impresoras UV-LED que creo que encajan con lo que necesitas.\n\nLa tecnología UV-LED permite imprimir directamente sobre casi cualquier material (plástico, madera, metal, vidrio, cerámica…) con secado instantáneo y calidad fotorrealista en CMYK + blanco.',visible:true},
+      {id:'text-002',name:'Transición a MBO',icon:'▶',text:'En nuestra línea MBO (marca propia, excelente relación calidad-precio) también tenemos opciones interesantes:',visible:true},
+      {id:'text-003',name:'Transición a PimPam',icon:'🔹',text:'Y si te interesa el concepto de vending con personalización automática, tenemos PimPam — máquinas que imprimen fundas de móvil al momento, sin operario:',visible:true},
+      {id:'text-004',name:'Mención Freebird',icon:'✨',text:'Por cierto, varios de estos equipos incluyen tecnología Freebird — un sensor láser que ajusta automáticamente la altura del cabezal para imprimir sobre objetos 3D irregulares:',visible:true},
+      {id:'text-005',name:'Cierre comercial',icon:'👋',text:'Si quieres, podemos organizar una demo (presencial o videollamada) para que veas cualquiera de estos equipos en funcionamiento. También te puedo enviar muestras impresas sin compromiso.\n\n¡Quedo a tu disposición!\nUn saludo,',visible:true},
     ],
     templates: [
-      {id:'tpl-001',name:'Compactas UV-LED',colorClass:'blue',blocks:['text-001','block-001','text-002','block-002','text-005']},
-      {id:'tpl-002',name:'PimPam Vending',colorClass:'orange',blocks:['text-003','block-009','block-011','text-005']},
-      {id:'tpl-003',name:'Formatos varios',colorClass:'purple',blocks:['text-001','block-004','text-004','text-002','block-005','text-005']},
-      {id:'tpl-004',name:'Bloques modulares',colorClass:'gray',blocks:['text-001','block-001','block-002','block-003','block-004','block-005','block-006','block-007','block-008','block-009','block-010','block-011','text-005']},
+      {id:'tpl-001',name:'Compactas UV-LED',colorClass:'blue',blocks:['text-001','block-001','text-002','block-002','text-005'],visible:true},
+      {id:'tpl-002',name:'PimPam Vending',colorClass:'orange',blocks:['text-003','block-009','block-011','text-005'],visible:true},
+      {id:'tpl-003',name:'Formatos varios',colorClass:'purple',blocks:['text-001','block-004','text-004','text-002','block-005','text-005'],visible:true},
+      {id:'tpl-004',name:'Bloques modulares',colorClass:'gray',blocks:['text-001','block-001','block-002','block-003','block-004','block-005','block-006','block-007','block-008','block-009','block-010','block-011','text-005'],visible:true},
     ],
     standaloneBlocks: [
-      {id:'sb-001',title:'Brand artisJet',desc:'Logo + enlace artisJet',icon:'aJ',iconBg:'#dbeafe',section:'otros',blockType:'brand_strip',config:{brand:'artisjet'}},
-      {id:'sb-002',title:'Brand MBO',desc:'Logo + enlace MBO',icon:'MBO',iconBg:'#ede9fe',section:'otros',blockType:'brand_strip',config:{brand:'mbo'}},
-      {id:'sb-003',title:'Brand PimPam',desc:'Logo + enlace PimPam',icon:'PP',iconBg:'#ffedd5',section:'otros',blockType:'brand_strip',config:{brand:'pimpam'}},
-      {id:'sb-004',title:'Vídeo Freebird',desc:'Banner con vídeo YouTube',icon:'▶',iconBg:'#1e3a8a',iconColor:'#fff',section:'otros',blockType:'video',config:{youtubeUrl:'https://www.youtube.com/watch?v=gp-x_jRBRcE',thumbnailOverride:''}},
-      {id:'sb-005',title:'1 Producto',desc:'Individual con selector',icon:'📦',iconBg:'#dcfce7',section:'otros',blockType:'product_single',config:{defaultProduct:'young'}},
-      {id:'sb-006',title:'2 Productos',desc:'Par con selectores',icon:'📦📦',iconBg:'#dcfce7',section:'otros',blockType:'product_pair',config:{defaultProduct1:'young',defaultProduct2:'3000pro'}},
-      {id:'sb-007',title:'3 Productos',desc:'Trío con selectores',icon:'📦³',iconBg:'#dcfce7',section:'otros',blockType:'product_trio',config:{defaultProduct1:'uv1612g',defaultProduct2:'uv1812',defaultProduct3:'uv2513'}},
-      {id:'sb-008',title:'PimPam Hero',desc:'Banner vending',icon:'🖼',iconBg:'#ffedd5',section:'otros',blockType:'pimpam_hero',config:{}},
-      {id:'sb-009',title:'PimPam 4 Pasos',desc:'Proceso en 4 pasos',icon:'1234',iconBg:'#ffedd5',section:'otros',blockType:'pimpam_steps',config:{}},
+      {id:'sb-001',title:'Brand artisJet',desc:'Logo + enlace artisJet',icon:'aJ',iconBg:'#dbeafe',section:'otros',blockType:'brand_strip',config:{brand:'artisjet'},visible:true},
+      {id:'sb-002',title:'Brand MBO',desc:'Logo + enlace MBO',icon:'MBO',iconBg:'#ede9fe',section:'otros',blockType:'brand_strip',config:{brand:'mbo'},visible:true},
+      {id:'sb-003',title:'Brand PimPam',desc:'Logo + enlace PimPam',icon:'PP',iconBg:'#ffedd5',section:'otros',blockType:'brand_strip',config:{brand:'pimpam'},visible:true},
+      {id:'sb-004',title:'Vídeo Freebird',desc:'Banner con vídeo YouTube',icon:'▶',iconBg:'#1e3a8a',iconColor:'#fff',section:'otros',blockType:'video',config:{youtubeUrl:'https://www.youtube.com/watch?v=gp-x_jRBRcE',thumbnailOverride:''},visible:true},
+      {id:'sb-005',title:'1 Producto',desc:'Individual con selector',icon:'📦',iconBg:'#dcfce7',section:'otros',blockType:'product_single',config:{defaultProduct:'young'},visible:true},
+      {id:'sb-006',title:'2 Productos',desc:'Par con selectores',icon:'📦📦',iconBg:'#dcfce7',section:'otros',blockType:'product_pair',config:{defaultProduct1:'young',defaultProduct2:'3000pro'},visible:true},
+      {id:'sb-007',title:'3 Productos',desc:'Trío con selectores',icon:'📦³',iconBg:'#dcfce7',section:'otros',blockType:'product_trio',config:{defaultProduct1:'uv1612g',defaultProduct2:'uv1812',defaultProduct3:'uv2513'},visible:true},
+      {id:'sb-008',title:'PimPam Hero',desc:'Banner vending',icon:'🖼',iconBg:'#ffedd5',section:'otros',blockType:'pimpam_hero',config:{},visible:true},
+      {id:'sb-009',title:'PimPam 4 Pasos',desc:'Proceso en 4 pasos',icon:'1234',iconBg:'#ffedd5',section:'otros',blockType:'pimpam_steps',config:{},visible:true},
     ],
   };
 }
@@ -499,7 +499,7 @@ function ChevronDown(){return e('svg',{width:14,height:14,viewBox:"0 0 24 24",fi
 // ─── PRODUCT SELECT ──────────────────────────────────────────
 function ProductSelect(props) {
   return e('select', {value:props.value, onChange:function(ev){props.onChange(ev.target.value)}, className:'form-select'},
-    props.products.map(function(p){
+    props.products.filter(function(p){return p.visible !== false}).map(function(p){
       return e('option', {key:p.id, value:p.id, disabled:p.id===props.exclude||p.id===props.exclude2}, p.name + ' — ' + p.price);
     })
   );
@@ -1324,6 +1324,14 @@ function EmailComposer() {
     }
   }
 
+  function toggleProductVisible(id) {
+    var products = appState.products.map(function(p) {
+      if (p.id === id) return Object.assign({}, p, {visible: !p.visible});
+      return p;
+    });
+    persistState(Object.assign({}, appState, {products: products}));
+  }
+
   // Block management
   function saveComposedBlock(block) {
     var blocks = appState.composedBlocks.slice();
@@ -1342,6 +1350,14 @@ function EmailComposer() {
       var blocks = appState.composedBlocks.filter(function(b){return b.id!==id});
       persistState(Object.assign({}, appState, {composedBlocks:blocks}));
     }
+  }
+
+  function toggleComposedBlockVisible(id) {
+    var blocks = appState.composedBlocks.map(function(b) {
+      if (b.id === id) return Object.assign({}, b, {visible: !b.visible});
+      return b;
+    });
+    persistState(Object.assign({}, appState, {composedBlocks: blocks}));
   }
 
   // Text management
@@ -1364,6 +1380,14 @@ function EmailComposer() {
     }
   }
 
+  function toggleTextVisible(id) {
+    var texts = appState.prewrittenTexts.map(function(t) {
+      if (t.id === id) return Object.assign({}, t, {visible: !t.visible});
+      return t;
+    });
+    persistState(Object.assign({}, appState, {prewrittenTexts: texts}));
+  }
+
   // Template management
   function saveTemplate(template) {
     var templates = appState.templates.slice();
@@ -1384,6 +1408,14 @@ function EmailComposer() {
     }
   }
 
+  function toggleTemplateVisible(id) {
+    var templates = appState.templates.map(function(t) {
+      if (t.id === id) return Object.assign({}, t, {visible: !t.visible});
+      return t;
+    });
+    persistState(Object.assign({}, appState, {templates: templates}));
+  }
+
   // Standalone blocks management
   function saveStandaloneBlock(block) {
     var blocks = appState.standaloneBlocks.slice();
@@ -1402,6 +1434,14 @@ function EmailComposer() {
       var blocks = appState.standaloneBlocks.filter(function(b){return b.id!==id});
       persistState(Object.assign({}, appState, {standaloneBlocks:blocks}));
     }
+  }
+
+  function toggleStandaloneBlockVisible(id) {
+    var blocks = appState.standaloneBlocks.map(function(b) {
+      if (b.id === id) return Object.assign({}, b, {visible: !b.visible});
+      return b;
+    });
+    persistState(Object.assign({}, appState, {standaloneBlocks: blocks}));
   }
 
   var fullHtml = generateFullHtml(blocks, appState.products);
@@ -1433,7 +1473,7 @@ function EmailComposer() {
 
           // PLANTILLAS RÁPIDAS
           e(SidebarSection, {title:'PLANTILLAS RÁPIDAS'},
-            appState.templates.map(function(tpl) {
+            appState.templates.filter(function(tpl){return tpl.visible !== false}).map(function(tpl) {
               var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
               return e('button', {key:tpl.id, className:'add-btn', onClick:function(){loadTemplate(tpl)}},
                 e('span', {className:'add-btn-icon', style:{background:colorMap[tpl.colorClass]||'#f3f4f6'}}, '⚡'),
@@ -1454,7 +1494,7 @@ function EmailComposer() {
                 e('div', {className:'add-btn-desc'}, 'Bloque vacío editable')
               )
             ),
-            appState.prewrittenTexts.map(function(txt) {
+            appState.prewrittenTexts.filter(function(txt){return txt.visible !== false}).map(function(txt) {
               return e('button', {key:txt.id, className:'add-btn', onClick:function(){addPrewrittenText(txt)}},
                 e('span', {className:'add-btn-icon', style:{background:"#f0fdf4"}}, txt.icon || '📝'),
                 e('div', null,
@@ -1467,7 +1507,7 @@ function EmailComposer() {
 
           // BLOQUES DE PRODUCTO (composed blocks from backoffice)
           e(SidebarSection, {title:'BLOQUES DE PRODUCTO'},
-            appState.composedBlocks.map(function(cb) {
+            appState.composedBlocks.filter(function(cb){return cb.visible !== false}).map(function(cb) {
               var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
               var iconMap = {blue:'aJ',purple:'MBO',orange:'🧃',gray:'Mix'};
               return e('button', {key:cb.id, className:'add-btn', onClick:function(){addComposedBlock(cb)}},
@@ -1482,7 +1522,7 @@ function EmailComposer() {
 
           // OTROS BLOQUES (standalone, data-driven)
           e(SidebarSection, {title:'OTROS BLOQUES'},
-            appState.standaloneBlocks.filter(function(sb){return sb.section==='otros'}).map(function(sb) {
+            appState.standaloneBlocks.filter(function(sb){return sb.section==='otros' && sb.visible !== false}).map(function(sb) {
               return e('button', {key:sb.id, className:'add-btn', onClick:function(){addStandaloneBlock(sb)}},
                 e('span', {className:'add-btn-icon', style:{background:sb.iconBg, color:sb.iconColor||'#000'}}, sb.icon),
                 e('div', null,
@@ -1619,6 +1659,7 @@ function EmailComposer() {
                   e('td', null, p.brand),
                   e('td', null, p.price),
                   e('td', null,
+                    e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:p.visible !== false?'#dcfce7':'#f3f4f6',color:p.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleProductVisible(p.id)}, title:p.visible !== false?'Visible':'Oculto'}, p.visible !== false?'👁':'👁‍🗨'),
                     e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingProduct(p)}}, 'Editar'),
                     e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteProduct(p.id)}, style:{marginLeft:'4px'}}, 'Borrar')
                   )
@@ -1635,7 +1676,7 @@ function EmailComposer() {
           ),
           e('div', null,
             appState.composedBlocks.map(function(b){
-              return e('div', {key:b.id, className:'block-list-item'},
+              return e('div', {key:b.id, className:'block-list-item', style:{opacity:b.visible !== false?1:0.5}},
                 e('div', {className:'block-list-content'},
                   e('div', {className:'block-list-title'},
                     e('span', {className:'color-tag ' + b.colorTag}),
@@ -1644,6 +1685,7 @@ function EmailComposer() {
                   e('div', {className:'block-list-desc'}, b.desc)
                 ),
                 e('div', {className:'list-item-actions'},
+                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:b.visible !== false?'#dcfce7':'#f3f4f6',color:b.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleComposedBlockVisible(b.id)}, title:b.visible !== false?'Visible':'Oculto'}, b.visible !== false?'👁':'👁‍🗨'),
                   e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingBlock(b)}}, 'Editar'),
                   e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteComposedBlock(b.id)}}, 'Borrar')
                 )
@@ -1659,12 +1701,13 @@ function EmailComposer() {
           ),
           e('div', null,
             appState.prewrittenTexts.map(function(t){
-              return e('div', {key:t.id, className:'list-item'},
+              return e('div', {key:t.id, className:'list-item', style:{opacity:t.visible !== false?1:0.5}},
                 e('div', {className:'list-item-info'},
                   e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.icon + ' ' + t.name),
                   e('div', {style:{fontSize:'11px',color:'#6b7280'}}, t.text.substring(0,60) + '...')
                 ),
                 e('div', {className:'list-item-actions'},
+                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:t.visible !== false?'#dcfce7':'#f3f4f6',color:t.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleTextVisible(t.id)}, title:t.visible !== false?'Visible':'Oculto'}, t.visible !== false?'👁':'👁‍🗨'),
                   e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingText(t)}}, 'Editar'),
                   e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteText(t.id)}}, 'Borrar')
                 )
@@ -1680,12 +1723,13 @@ function EmailComposer() {
           ),
           e('div', null,
             appState.templates.map(function(t){
-              return e('div', {key:t.id, className:'list-item'},
+              return e('div', {key:t.id, className:'list-item', style:{opacity:t.visible !== false?1:0.5}},
                 e('div', {className:'list-item-info'},
                   e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.name),
                   e('div', {style:{fontSize:'11px',color:'#6b7280'}}, t.blocks.length + ' bloque(s)')
                 ),
                 e('div', {className:'list-item-actions'},
+                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:t.visible !== false?'#dcfce7':'#f3f4f6',color:t.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleTemplateVisible(t.id)}, title:t.visible !== false?'Visible':'Oculto'}, t.visible !== false?'👁':'👁‍🗨'),
                   e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingTemplate(t)}}, 'Editar'),
                   e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteTemplate(t.id)}}, 'Borrar')
                 )
@@ -1701,12 +1745,13 @@ function EmailComposer() {
           ),
           e('div', null,
             appState.standaloneBlocks.map(function(sb){
-              return e('div', {key:sb.id, className:'list-item'},
+              return e('div', {key:sb.id, className:'list-item', style:{opacity:sb.visible !== false?1:0.5}},
                 e('div', {className:'list-item-info'},
                   e('div', {style:{fontWeight:600,marginBottom:'4px'}}, sb.icon + ' ' + sb.title),
                   e('div', {style:{fontSize:'11px',color:'#6b7280'}}, sb.desc + ' · ' + sb.section)
                 ),
                 e('div', {className:'list-item-actions'},
+                  e('button', {className:'btn btn-sm', style:{fontSize:'14px',padding:'4px 8px',borderRadius:'6px',border:'none',cursor:'pointer',marginRight:'6px',backgroundColor:sb.visible !== false?'#dcfce7':'#f3f4f6',color:sb.visible !== false?'#16a34a':'#9ca3af'}, onClick:function(){toggleStandaloneBlockVisible(sb.id)}, title:sb.visible !== false?'Visible':'Oculto'}, sb.visible !== false?'👁':'👁‍🗨'),
                   e('button', {className:'btn btn-sm btn-ghost', onClick:function(){setEditingStandaloneBlock(sb)}}, 'Editar'),
                   e('button', {className:'btn btn-sm btn-danger', onClick:function(){deleteStandaloneBlock(sb.id)}}, 'Borrar')
                 )
