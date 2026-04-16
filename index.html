@@ -2540,7 +2540,7 @@ function EmailComposer() {
 
           // PLANTILLAS RÁPIDAS
           e(SidebarSection, {title:'PLANTILLAS RÁPIDAS'},
-            appState.templates.filter(function(tpl){return tpl.visible !== false && isAvailableInLang(tpl, lang)}).map(function(tpl) {
+            appState.templates.filter(function(tpl){return tpl.visible !== false && isAvailableInLang(tpl, lang) && (sidebarBrandFilter.length===0 || sidebarBrandFilter.indexOf(tpl.brand||'mix')>=0 || (sidebarBrandFilter.indexOf('none')>=0 && (!tpl.brand || tpl.brand==='mix')))}).map(function(tpl) {
               var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
               return e('button', {key:tpl.id, className:'add-btn', onClick:function(){loadTemplate(tpl)}},
                 e('span', {className:'add-btn-icon', style:{background:colorMap[tpl.colorClass]||'#f3f4f6'}}, '⚡'),
@@ -2561,7 +2561,7 @@ function EmailComposer() {
                 e('div', {className:'add-btn-desc'}, 'Bloque vacío editable')
               )
             ),
-            appState.prewrittenTexts.filter(function(txt){return txt.visible !== false && isAvailableInLang(txt, lang)}).map(function(txt) {
+            appState.prewrittenTexts.filter(function(txt){return txt.visible !== false && isAvailableInLang(txt, lang) && (sidebarBrandFilter.length===0 || sidebarBrandFilter.indexOf(txt.brand||'mix')>=0 || (sidebarBrandFilter.indexOf('none')>=0 && (!txt.brand || txt.brand==='mix')))}).map(function(txt) {
               return e('button', {key:txt.id, className:'add-btn', onClick:function(){addPrewrittenText(txt)}},
                 e('span', {className:'add-btn-icon', style:{background:"#f0fdf4"}}, txt.icon || '📝'),
                 e('div', null,
@@ -2572,13 +2572,15 @@ function EmailComposer() {
             })
           ),
 
+          // FILTRO DE MARCA GLOBAL SIDEBAR
+          e('div', {className:'brand-filter-bar', style:{marginBottom:'8px',padding:'4px 0'}},
+            e('button', {className:'brand-filter-btn' + (sidebarBrandFilter.length===0?' active':''), onClick:function(){setSidebarBrandFilter([])}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Todos'),
+            (appState.brands||[]).filter(function(br){return br.visible !== false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (sidebarBrandFilter.indexOf(br.id)>=0?' active':''), onClick:function(){setSidebarBrandFilter(function(prev){ return prev.indexOf(br.id)>=0 ? prev.filter(function(x){return x!==br.id}) : prev.concat([br.id]); })}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
+            e('button', {className:'brand-filter-btn' + (sidebarBrandFilter.indexOf('none')>=0?' active':''), onClick:function(){setSidebarBrandFilter(function(prev){ return prev.indexOf('none')>=0 ? prev.filter(function(x){return x!=='none'}) : prev.concat(['none']); })}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
+          ),
+
           // BLOQUES DE PRODUCTO (composed blocks from backoffice)
           e(SidebarSection, {title:'BLOQUES DE PRODUCTO'},
-            e('div', {className:'brand-filter-bar', style:{marginBottom:'8px'}},
-              e('button', {className:'brand-filter-btn' + (sidebarBrandFilter.length===0?' active':''), onClick:function(){setSidebarBrandFilter([])}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Todos'),
-              (appState.brands||[]).filter(function(br){return br.visible !== false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (sidebarBrandFilter.indexOf(br.id)>=0?' active':''), onClick:function(){setSidebarBrandFilter(function(prev){ return prev.indexOf(br.id)>=0 ? prev.filter(function(x){return x!==br.id}) : prev.concat([br.id]); })}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
-              e('button', {className:'brand-filter-btn' + (sidebarBrandFilter.indexOf('none')>=0?' active':''), onClick:function(){setSidebarBrandFilter(function(prev){ return prev.indexOf('none')>=0 ? prev.filter(function(x){return x!=='none'}) : prev.concat(['none']); })}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
-            ),
             appState.composedBlocks.filter(function(cb){return cb.visible !== false && isAvailableInLang(cb, lang) && (sidebarBrandFilter.length===0 || sidebarBrandFilter.indexOf(cb.brandStrip)>=0 || (sidebarBrandFilter.indexOf('none')>=0 && (!cb.brandStrip || cb.brandStrip==='none')))}).map(function(cb) {
               var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6'};
               var iconMap = {blue:'aJ',purple:'MBO',orange:'🧃',gray:'Mix'};
@@ -2594,7 +2596,7 @@ function EmailComposer() {
 
           // OTROS BLOQUES (standalone, data-driven)
           e(SidebarSection, {title:'OTROS BLOQUES'},
-            appState.standaloneBlocks.filter(function(sb){return sb.section==='otros' && sb.visible !== false && isAvailableInLang(sb, lang)}).map(function(sb) {
+            appState.standaloneBlocks.filter(function(sb){return sb.section==='otros' && sb.visible !== false && isAvailableInLang(sb, lang) && (sidebarBrandFilter.length===0 || sidebarBrandFilter.indexOf(sb.brand||'mix')>=0 || (sidebarBrandFilter.indexOf('none')>=0 && (!sb.brand || sb.brand==='mix')))}).map(function(sb) {
               return e('button', {key:sb.id, className:'add-btn', onClick:function(){addStandaloneBlock(sb)}},
                 e('span', {className:'add-btn-icon', style:{background:sb.iconBg, color:sb.iconColor||'#000'}}, sb.icon),
                 e('div', null,
