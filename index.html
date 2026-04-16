@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bomedia Email Composer</title>
+<title>Bomedia Email Composer v2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -1445,8 +1445,7 @@ function EmailComposer() {
   function updateAppState(key, value) {
     var newState = Object.assign({}, appState);
     newState[key] = value;
-    setAppState(newState);
-    saveStorageData(newState);
+    persistState(newState);
   }
 
   function persistState(newState) {
@@ -1478,8 +1477,7 @@ function EmailComposer() {
       reader.onload = function(evt) {
         try {
           var data = JSON.parse(evt.target.result);
-          setAppState(data);
-          saveStorageData(data);
+          persistState(data);
           alert('Configuración importada correctamente');
         } catch(err) {
           alert('Error al importar JSON: ' + err.message);
@@ -1493,8 +1491,7 @@ function EmailComposer() {
   function resetToDefaults() {
     if(window.confirm('¿Restaurar configuración original? Se perderán todos los cambios.')) {
       var defaultState = getDefaultState();
-      setAppState(defaultState);
-      saveStorageData(defaultState);
+      persistState(defaultState);
     }
   }
 
