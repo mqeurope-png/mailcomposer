@@ -493,8 +493,12 @@ function brandStripHtml(key, lang, brands) {
   if(!b) return '';
   var url = (typeof b.url === 'object') ? (b.url[lang] || b.url.es) : b.url;
   var urlLabel = (typeof b.urlLabel === 'object') ? (b.urlLabel[lang] || b.urlLabel.es) : b.urlLabel;
+  var logoBgStyle = b.logoBg ? 'background:' + b.logoBg + ';padding:6px 12px;border-radius:6px;display:inline-block' : '';
+  var logoHtml = b.logoBg
+    ? '<span style="' + logoBgStyle + '"><img src="' + b.logo + '" height="' + b.logoHeight + '" alt="' + b.label + '" style="max-width:140px;width:auto;display:block"></span>'
+    : '<img src="' + b.logo + '" height="' + b.logoHeight + '" alt="' + b.label + '" style="max-width:140px;width:auto">';
   return '<tr><td style="padding:16px 8px 8px"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>' +
-    '<td valign="middle"><img src="' + b.logo + '" height="' + b.logoHeight + '" alt="' + b.label + '" style="max-width:140px;width:auto"></td>' +
+    '<td valign="middle">' + logoHtml + '</td>' +
     '<td valign="middle" align="right"><a href="' + url + '" style="font-size:11px;font-weight:700;color:' + b.color + ';text-decoration:none">' + urlLabel + '</a></td>' +
     '</tr></table><div style="height:1px;background:' + b.divider + ';margin-top:8px"></div></td></tr>';
 }
