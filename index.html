@@ -2043,8 +2043,14 @@ function EmailComposer() {
   var _brandFilter = useState('all');
   var brandFilter = _brandFilter[0], setBrandFilter = _brandFilter[1];
 
-  var _sidebarBrandFilter = useState([]);
-  var sidebarBrandFilter = _sidebarBrandFilter[0], setSidebarBrandFilter = _sidebarBrandFilter[1];
+  var _filterTpl = useState([]);
+  var filterTpl = _filterTpl[0], setFilterTpl = _filterTpl[1];
+  var _filterTxt = useState([]);
+  var filterTxt = _filterTxt[0], setFilterTxt = _filterTxt[1];
+  var _filterBlk = useState([]);
+  var filterBlk = _filterBlk[0], setFilterBlk = _filterBlk[1];
+  var _filterOtr = useState([]);
+  var filterOtr = _filterOtr[0], setFilterOtr = _filterOtr[1];
 
   // OpenAI API key (stored in localStorage only, never in Supabase)
   var _openaiKey = useState(function(){ try { return localStorage.getItem('bomedia_openai_key') || ''; } catch(e){ return ''; } });
@@ -2296,8 +2302,8 @@ function EmailComposer() {
       reader.onload = function(evt) {
         try {
           var data = JSON.parse(evt.target.result);
-          var mode = window.confirm('¿Fusionar con datos existentes?\n\nAceptar = Fusionar (añade lo nuevo, actualiza duplicados)\nCancelar = Reemplazar todo');
-          if (mode) {
+          var choice = window.prompt('¿Qué quieres hacer?\n\n1 = Fusionar (añade lo nuevo, actualiza duplicados)\n2 = Reemplazar todo\n\nEscribe 1 o 2 (o vacío para cancelar):');
+          if (choice === '1') {
             // Merge mode: combine arrays by id
             var merged = Object.assign({}, appState);
             merged.brands = mergeArrayById(merged.brands || [], data.brands);
@@ -2315,9 +2321,11 @@ function EmailComposer() {
             if (data.standaloneBlocks && data.standaloneBlocks.length) counts.push(data.standaloneBlocks.length + ' bloques sueltos');
             if (data.templates && data.templates.length) counts.push(data.templates.length + ' plantillas');
             alert('Fusión completada: ' + counts.join(', '));
-          } else {
+          } else if (choice === '2') {
             persistState(data);
             alert('Configuración reemplazada correctamente');
+          } else {
+            alert('Importación cancelada');
           }
         } catch(err) {
           alert('Error al importar JSON: ' + err.message);
@@ -2540,9 +2548,18 @@ function EmailComposer() {
       e('div', {className:'main'},
         e('div', {className:'sidebar'},
 
+          // Helper: brand filter bar for a section
+          // renderBrandBar(filterState, setFilterState) returns a div with brand buttons
+          // matchesBrand(filterArr, brandValue) returns true if item matches filter
+
           // PLANTILLAS RÁPIDAS
           e(SidebarSection, {title:'PLANTILLAS RÁPIDAS'},
-            appState.templates.filter(function(tpl){return tpl.visible !== false && isAvailableInLang(tpl, lang) && (sidebarBrandFilter.length===0 || sidebarBrandFilter.indexOf(tpl.brand||'mix')>=0 || (sidebarBrandFilter.indexOf('none')>=0 && (!tpl.brand || tpl.brand==='mix')))}).map(function(tpl) {
+            e('div', {className:'brand-filter-bar', style:{marginBottom:'6px'}},
+              e('button', {className:'brand-filter-btn' + (filterTpl.length===0?' active':''), onClick:function(){setFilterTpl([])}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Todos'),
+              (appState.brands||[]).filter(function(br){return br.visible!==false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (filterTpl.indexOf(br.id)>=0?' active':''), onClick:function(){setFilterTpl(function(p){ return p.indexOf(br.id)>=0?p.filter(function(x){return x!==br.id}):p.concat([br.id]); })}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
+              e('button', {className:'brand-filter-btn' + (filterTpl.indexOf('mix')>=0?' active':''), onClick:function(){setFilterTpl(function(p){ return p.indexOf('mix')>=0?p.filter(function(x){return x!=='mix'}):p.concat(['mix']); })}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
+            ),
+            appState.templates.filter(function(tpl){return tpl.visible !== false && isAvailableInLang(tpl, lang) && (filterTpl.length===0 || filterTpl.indexOf(tpl.brand||'mix')>=0)}).map(function(tpl) {
               var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6',cyan:'#cffafe'};
               return e('button', {key:tpl.id, className:'add-btn', onClick:function(){loadTemplate(tpl)}},
                 e('span', {className:'add-btn-icon', style:{background:colorMap[tpl.colorClass]||'#f3f4f6'}}, '⚡'),
@@ -2556,6 +2573,11 @@ function EmailComposer() {
 
           // BLOQUES DE TEXTO
           e(SidebarSection, {title:'BLOQUES DE TEXTO'},
+            e('div', {className:'brand-filter-bar', style:{marginBottom:'6px'}},
+              e('button', {className:'brand-filter-btn' + (filterTxt.length===0?' active':''), onClick:function(){setFilterTxt([])}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Todos'),
+              (appState.brands||[]).filter(function(br){return br.visible!==false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (filterTxt.indexOf(br.id)>=0?' active':''), onClick:function(){setFilterTxt(function(p){ return p.indexOf(br.id)>=0?p.filter(function(x){return x!==br.id}):p.concat([br.id]); })}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
+              e('button', {className:'brand-filter-btn' + (filterTxt.indexOf('mix')>=0?' active':''), onClick:function(){setFilterTxt(function(p){ return p.indexOf('mix')>=0?p.filter(function(x){return x!=='mix'}):p.concat(['mix']); })}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
+            ),
             e('button', {className:'add-btn', onClick:function(){addBlock("text")}},
               e('span', {className:'add-btn-icon', style:{background:"#f1f5f9"}},'A'),
               e('div', null,
@@ -2563,7 +2585,7 @@ function EmailComposer() {
                 e('div', {className:'add-btn-desc'}, 'Bloque vacío editable')
               )
             ),
-            appState.prewrittenTexts.filter(function(txt){return txt.visible !== false && isAvailableInLang(txt, lang) && (sidebarBrandFilter.length===0 || sidebarBrandFilter.indexOf(txt.brand||'mix')>=0 || (sidebarBrandFilter.indexOf('none')>=0 && (!txt.brand || txt.brand==='mix')))}).map(function(txt) {
+            appState.prewrittenTexts.filter(function(txt){return txt.visible !== false && isAvailableInLang(txt, lang) && (filterTxt.length===0 || filterTxt.indexOf(txt.brand||'mix')>=0)}).map(function(txt) {
               return e('button', {key:txt.id, className:'add-btn', onClick:function(){addPrewrittenText(txt)}},
                 e('span', {className:'add-btn-icon', style:{background:"#f0fdf4"}}, txt.icon || '📝'),
                 e('div', null,
@@ -2574,16 +2596,14 @@ function EmailComposer() {
             })
           ),
 
-          // FILTRO DE MARCA GLOBAL SIDEBAR
-          e('div', {className:'brand-filter-bar', style:{marginBottom:'8px',padding:'4px 0'}},
-            e('button', {className:'brand-filter-btn' + (sidebarBrandFilter.length===0?' active':''), onClick:function(){setSidebarBrandFilter([])}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Todos'),
-            (appState.brands||[]).filter(function(br){return br.visible !== false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (sidebarBrandFilter.indexOf(br.id)>=0?' active':''), onClick:function(){setSidebarBrandFilter(function(prev){ return prev.indexOf(br.id)>=0 ? prev.filter(function(x){return x!==br.id}) : prev.concat([br.id]); })}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
-            e('button', {className:'brand-filter-btn' + (sidebarBrandFilter.indexOf('none')>=0?' active':''), onClick:function(){setSidebarBrandFilter(function(prev){ return prev.indexOf('none')>=0 ? prev.filter(function(x){return x!=='none'}) : prev.concat(['none']); })}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
-          ),
-
           // BLOQUES DE PRODUCTO (composed blocks from backoffice)
           e(SidebarSection, {title:'BLOQUES DE PRODUCTO'},
-            appState.composedBlocks.filter(function(cb){return cb.visible !== false && isAvailableInLang(cb, lang) && (sidebarBrandFilter.length===0 || sidebarBrandFilter.indexOf(cb.brandStrip)>=0 || (sidebarBrandFilter.indexOf('none')>=0 && (!cb.brandStrip || cb.brandStrip==='none')))}).map(function(cb) {
+            e('div', {className:'brand-filter-bar', style:{marginBottom:'6px'}},
+              e('button', {className:'brand-filter-btn' + (filterBlk.length===0?' active':''), onClick:function(){setFilterBlk([])}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Todos'),
+              (appState.brands||[]).filter(function(br){return br.visible!==false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (filterBlk.indexOf(br.id)>=0?' active':''), onClick:function(){setFilterBlk(function(p){ return p.indexOf(br.id)>=0?p.filter(function(x){return x!==br.id}):p.concat([br.id]); })}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
+              e('button', {className:'brand-filter-btn' + (filterBlk.indexOf('mix')>=0?' active':''), onClick:function(){setFilterBlk(function(p){ return p.indexOf('mix')>=0?p.filter(function(x){return x!=='mix'}):p.concat(['mix']); })}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
+            ),
+            appState.composedBlocks.filter(function(cb){var cbBrand = (!cb.brandStrip || cb.brandStrip==='none') ? 'mix' : cb.brandStrip; return cb.visible !== false && isAvailableInLang(cb, lang) && (filterBlk.length===0 || filterBlk.indexOf(cbBrand)>=0)}).map(function(cb) {
               var colorMap = {blue:'#dbeafe',purple:'#ede9fe',orange:'#ffedd5',gray:'#f3f4f6',cyan:'#cffafe'};
               var iconMap = {blue:'aJ',purple:'MBO',orange:'🧃',gray:'Mix',cyan:'FL'};
               return e('button', {key:cb.id, className:'add-btn', onClick:function(){addComposedBlock(cb)}},
@@ -2598,7 +2618,12 @@ function EmailComposer() {
 
           // OTROS BLOQUES (standalone, data-driven)
           e(SidebarSection, {title:'OTROS BLOQUES'},
-            appState.standaloneBlocks.filter(function(sb){return sb.section==='otros' && sb.visible !== false && isAvailableInLang(sb, lang) && (sidebarBrandFilter.length===0 || sidebarBrandFilter.indexOf(sb.brand||'mix')>=0 || (sidebarBrandFilter.indexOf('none')>=0 && (!sb.brand || sb.brand==='mix')))}).map(function(sb) {
+            e('div', {className:'brand-filter-bar', style:{marginBottom:'6px'}},
+              e('button', {className:'brand-filter-btn' + (filterOtr.length===0?' active':''), onClick:function(){setFilterOtr([])}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Todos'),
+              (appState.brands||[]).filter(function(br){return br.visible!==false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (filterOtr.indexOf(br.id)>=0?' active':''), onClick:function(){setFilterOtr(function(p){ return p.indexOf(br.id)>=0?p.filter(function(x){return x!==br.id}):p.concat([br.id]); })}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
+              e('button', {className:'brand-filter-btn' + (filterOtr.indexOf('mix')>=0?' active':''), onClick:function(){setFilterOtr(function(p){ return p.indexOf('mix')>=0?p.filter(function(x){return x!=='mix'}):p.concat(['mix']); })}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
+            ),
+            appState.standaloneBlocks.filter(function(sb){return sb.section==='otros' && sb.visible !== false && isAvailableInLang(sb, lang) && (filterOtr.length===0 || filterOtr.indexOf(sb.brand||'mix')>=0)}).map(function(sb) {
               return e('button', {key:sb.id, className:'add-btn', onClick:function(){addStandaloneBlock(sb)}},
                 e('span', {className:'add-btn-icon', style:{background:sb.iconBg, color:sb.iconColor||'#000'}}, sb.icon),
                 e('div', null,
