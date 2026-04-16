@@ -126,6 +126,18 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 .brand-filter-btn{padding:4px 12px;border-radius:16px;border:1px solid #e5e7eb;background:#fff;font-size:12px;cursor:pointer;transition:all .15s;color:#6b7280}
 .brand-filter-btn:hover{background:#f3f4f6}
 .brand-filter-btn.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+.ai-prompt-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:1100}
+.ai-prompt-box{background:#fff;border-radius:12px;padding:24px;width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.ai-prompt-box h3{margin:0 0 12px;font-size:16px;font-weight:700}
+.ai-prompt-box textarea{width:100%;min-height:80px;border:1.5px solid #d1d5db;border-radius:8px;padding:10px;font-size:13px;font-family:inherit;resize:vertical;outline:none}
+.ai-prompt-box textarea:focus{border-color:#93c5fd;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.ai-prompt-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.ai-btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none}
+.ai-btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.ai-btn-primary:hover{opacity:.9}
+.ai-btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.ai-btn-ghost{background:#f3f4f6;color:#374151}
+.ai-btn-ghost:hover{background:#e5e7eb}
 .lang-btn{border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;background:#f3f4f6;color:#6b7280}
 .lang-btn.active{background:#2563eb;color:#fff}
 .lang-btn:hover:not(.active){background:#e5e7eb}
@@ -1423,11 +1435,20 @@ function BlockEditor(props) {
 
   var body;
   if (block.type === 'text') {
-    body = e('textarea', {
-      value: block.text,
-      onChange: function(ev) { props.onChange(Object.assign({}, block, {text: ev.target.value})); },
-      placeholder: "Escribe tu texto aquí..."
-    });
+    body = e('div', null,
+      e('textarea', {
+        value: block.text,
+        onChange: function(ev) { props.onChange(Object.assign({}, block, {text: ev.target.value})); },
+        placeholder: "Escribe tu texto aquí..."
+      }),
+      e('button', {
+        style:{fontSize:'10px',padding:'3px 8px',marginTop:'4px',borderRadius:'12px',border:'1px solid #d1d5db',background:'#f9fafb',cursor:'pointer',color:'#6b7280',display:'inline-flex',alignItems:'center',gap:'4px'},
+        onClick: function(){
+          if (props.onAiAssist) props.onAiAssist(block.id);
+        },
+        title:'Redactar con IA'
+      }, '✨ IA')
+    );
   } else if (block.type === 'product_single') {
     body = e('div', {className:'prod-selectors'},
       e('label', null, 'Producto: ', e(ProductSelect, {value:block.product1, onChange:function(v){props.onChange(Object.assign({},block,{product1:v}))}, products:props.products}))
@@ -1621,6 +1642,45 @@ function EmailComposer() {
 
   var _sidebarBrandFilter = useState('all');
   var sidebarBrandFilter = _sidebarBrandFilter[0], setSidebarBrandFilter = _sidebarBrandFilter[1];
+
+  // OpenAI API key (stored in localStorage only, never in Supabase)
+  var _openaiKey = useState(function(){ try { return localStorage.getItem('bomedia_openai_key') || ''; } catch(e){ return ''; } });
+  var openaiKey = _openaiKey[0], setOpenaiKey = _openaiKey[1];
+  function saveOpenaiKey(key) { setOpenaiKey(key); try { localStorage.setItem('bomedia_openai_key', key); } catch(e){} }
+
+  // AI writing assistant state
+  var _aiPromptOpen = useState(null); // {target:'compositor', blockId:123} or {target:'modal-text'} or {target:'modal-block'}
+  var aiPromptOpen = _aiPromptOpen[0], setAiPromptOpen = _aiPromptOpen[1];
+  var _aiPromptText = useState('');
+  var aiPromptText = _aiPromptText[0], setAiPromptText = _aiPromptText[1];
+  var _aiLoading = useState(false);
+  var aiLoading = _aiLoading[0], setAiLoading = _aiLoading[1];
+
+  var langNameMap = {es:'español',fr:'français',de:'Deutsch',en:'English',nl:'Nederlands'};
+
+  function callOpenAI(notes, lang, callback) {
+    if (!openaiKey) { alert('Configura tu API key de OpenAI en Backoffice → Ajustes'); return; }
+    setAiLoading(true);
+    var langName = langNameMap[lang] || 'español';
+    var systemPrompt = 'Eres un copywriter comercial experto en maquinaria de impresión UV-LED. Redactas textos breves, naturales y persuasivos para emails B2B. No uses emojis. No uses formato markdown. Escribe en ' + langName + '. Sé directo y profesional pero cercano.';
+    var userPrompt = 'Redacta un párrafo comercial breve (2-4 frases) para un email de ventas a partir de estos puntos clave:\n\n' + notes + '\n\nIdioma: ' + langName;
+
+    fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + openaiKey },
+      body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{role:'system',content:systemPrompt},{role:'user',content:userPrompt}], max_tokens: 300, temperature: 0.7 })
+    }).then(function(r){ return r.json(); }).then(function(data) {
+      setAiLoading(false);
+      if (data.choices && data.choices[0] && data.choices[0].message) {
+        callback(data.choices[0].message.content.trim());
+      } else if (data.error) {
+        alert('Error OpenAI: ' + (data.error.message || JSON.stringify(data.error)));
+      }
+    }).catch(function(err) {
+      setAiLoading(false);
+      alert('Error de conexión: ' + err.message);
+    });
+  }
 
   // Compositor handlers
   function addBlock(type) { setBlocks(function(prev){return prev.concat([createBlock(type)])}); }
@@ -2072,7 +2132,8 @@ function EmailComposer() {
                     onMoveUp: function(){moveBlock(block.id,-1)},
                     onMoveDown: function(){moveBlock(block.id,1)},
                     isFirst: idx===0,
-                    isLast: idx===blocks.length-1
+                    isLast: idx===blocks.length-1,
+                    onAiAssist: function(blockId){ setAiPromptOpen({target:'compositor', blockId:blockId}); setAiPromptText(''); }
                   });
                 })
           )
@@ -2125,6 +2186,28 @@ function EmailComposer() {
             e('button', {className:'btn btn-primary', onClick:submitBoPassword}, 'Entrar')
           )
         )
+      ),
+
+      // AI WRITING ASSISTANT MODAL
+      aiPromptOpen && e('div', {className:'ai-prompt-overlay', onClick:function(){if(!aiLoading){setAiPromptOpen(null)}}},
+        e('div', {className:'ai-prompt-box', onClick:function(ev){ev.stopPropagation()}},
+          e('h3', null, '✨ Asistente de redacción IA'),
+          e('p', {style:{fontSize:'12px',color:'#6b7280',marginBottom:'12px'}}, 'Escribe los puntos clave o ideas sueltas y la IA redactará un párrafo comercial en ' + (langNameMap[selectedLang]||'español') + '.'),
+          e('textarea', {className:'', value:aiPromptText, onChange:function(ev){setAiPromptText(ev.target.value)}, placeholder:'Ej: impresora compacta, ideal para tiendas, precio competitivo, incluye formación...', autoFocus:true, disabled:aiLoading, style:{width:'100%',minHeight:'80px',border:'1.5px solid #d1d5db',borderRadius:'8px',padding:'10px',fontSize:'13px',fontFamily:'inherit',resize:'vertical',outline:'none'}}),
+          e('div', {className:'ai-prompt-actions'},
+            e('button', {className:'ai-btn ai-btn-ghost', onClick:function(){setAiPromptOpen(null)}, disabled:aiLoading}, 'Cancelar'),
+            e('button', {className:'ai-btn ai-btn-primary', disabled:aiLoading || !aiPromptText.trim(), onClick:function(){
+              callOpenAI(aiPromptText, selectedLang, function(result) {
+                if (aiPromptOpen.target === 'compositor') {
+                  var bid = aiPromptOpen.blockId;
+                  setBlocks(function(prev){ return prev.map(function(b){ return b.id === bid ? Object.assign({}, b, {text: (b.text ? b.text + '\n\n' : '') + result}) : b; }); });
+                }
+                setAiPromptOpen(null);
+                setAiPromptText('');
+              });
+            }}, aiLoading ? 'Generando...' : 'Redactar')
+          )
+        )
       )
     );
   }
@@ -2158,7 +2241,8 @@ function EmailComposer() {
         e('button', {className:'backoffice-tab ' + (backofficeTab==='blocks'?'active':''), onClick:function(){setBackofficeTab('blocks')}}, 'Bloques'),
         e('button', {className:'backoffice-tab ' + (backofficeTab==='texts'?'active':''), onClick:function(){setBackofficeTab('texts')}}, 'Textos'),
         e('button', {className:'backoffice-tab ' + (backofficeTab==='templates'?'active':''), onClick:function(){setBackofficeTab('templates')}}, 'Plantillas'),
-        e('button', {className:'backoffice-tab ' + (backofficeTab==='sueltos'?'active':''), onClick:function(){setBackofficeTab('sueltos')}}, 'Sueltos')
+        e('button', {className:'backoffice-tab ' + (backofficeTab==='sueltos'?'active':''), onClick:function(){setBackofficeTab('sueltos')}}, 'Sueltos'),
+        e('button', {className:'backoffice-tab ' + (backofficeTab==='settings'?'active':''), onClick:function(){setBackofficeTab('settings')}, style:{marginLeft:'auto'}}, '⚙ Ajustes')
       ),
 
       e('div', {className:'backoffice-content'},
@@ -2325,6 +2409,17 @@ function EmailComposer() {
                 )
               );
             })
+          )
+        ),
+
+        // AJUSTES
+        backofficeTab === 'settings' && e('div', {style:{maxWidth:'500px'}},
+          e('h3', {style:{fontSize:'16px',fontWeight:700,marginBottom:'16px'}}, 'Ajustes'),
+          e('div', {style:{marginBottom:'24px'}},
+            e('label', {className:'form-label', style:{marginBottom:'6px',display:'block',fontWeight:600}}, 'OpenAI API Key'),
+            e('p', {style:{fontSize:'12px',color:'#6b7280',marginBottom:'8px'}}, 'Se guarda solo en tu navegador (localStorage). Necesaria para el asistente de redacción con IA en los bloques de texto.'),
+            e('input', {className:'form-input', type:'password', value:openaiKey, onChange:function(ev){saveOpenaiKey(ev.target.value)}, placeholder:'sk-...', style:{fontFamily:'monospace'}}),
+            openaiKey && e('div', {style:{marginTop:'8px',fontSize:'12px',color:'#16a34a',fontWeight:500}}, '✓ API key configurada')
           )
         )
       )
