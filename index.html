@@ -1393,6 +1393,34 @@ function EmailComposer() {
       e('div', {className:'footer'},
         e('span', null, blocks.length + ' bloque' + (blocks.length!==1?'s':'')),
         e('span', null, sizeKb + ' KB')
+      ),
+
+      // PASSWORD MODAL (compositor mode)
+      showBoLogin && e('div', {className:'modal-overlay', onClick:function(){setShowBoLogin(false)}},
+        e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}, style:{maxWidth:'360px'}},
+          e('div', {className:'modal-header'},
+            e('span', null, '🔒 Acceso Backoffice'),
+            e('button', {className:'modal-close', onClick:function(){setShowBoLogin(false)}}, '✕')
+          ),
+          e('div', {style:{padding:'20px'}},
+            e('p', {style:{fontSize:'13px',color:'#6b7280',marginBottom:'16px'}}, 'Introduce la contraseña para acceder al panel de administración.'),
+            e('input', {
+              className:'form-input',
+              type:'password',
+              placeholder:'Contraseña',
+              value:boPass,
+              onChange:function(ev){setBoPass(ev.target.value); setBoPassError(false)},
+              onKeyDown:function(ev){if(ev.key==='Enter') submitBoPassword()},
+              style: boPassError ? {borderColor:'#ef4444'} : {},
+              autoFocus: true
+            }),
+            boPassError && e('p', {style:{color:'#ef4444',fontSize:'12px',marginTop:'8px'}}, 'Contraseña incorrecta')
+          ),
+          e('div', {className:'modal-footer'},
+            e('button', {className:'btn btn-ghost', onClick:function(){setShowBoLogin(false)}}, 'Cancelar'),
+            e('button', {className:'btn btn-primary', onClick:submitBoPassword}, 'Entrar')
+          )
+        )
       )
     );
   }
@@ -1555,35 +1583,7 @@ function EmailComposer() {
       texts: appState.prewrittenTexts,
       onClose: function(){setEditingTemplate(null)},
       onSave: saveTemplate
-    }),
-
-    // PASSWORD MODAL
-    showBoLogin && e('div', {className:'modal-overlay', onClick:function(){setShowBoLogin(false)}},
-      e('div', {className:'modal-panel', onClick:function(ev){ev.stopPropagation()}, style:{maxWidth:'360px'}},
-        e('div', {className:'modal-header'},
-          e('span', null, '🔒 Acceso Backoffice'),
-          e('button', {className:'modal-close', onClick:function(){setShowBoLogin(false)}}, '✕')
-        ),
-        e('div', {style:{padding:'20px'}},
-          e('p', {style:{fontSize:'13px',color:'#6b7280',marginBottom:'16px'}}, 'Introduce la contraseña para acceder al panel de administración.'),
-          e('input', {
-            className:'form-input',
-            type:'password',
-            placeholder:'Contraseña',
-            value:boPass,
-            onChange:function(ev){setBoPass(ev.target.value); setBoPassError(false)},
-            onKeyDown:function(ev){if(ev.key==='Enter') submitBoPassword()},
-            style: boPassError ? {borderColor:'#ef4444'} : {},
-            autoFocus: true
-          }),
-          boPassError && e('p', {style:{color:'#ef4444',fontSize:'12px',marginTop:'8px'}}, 'Contraseña incorrecta')
-        ),
-        e('div', {className:'modal-footer'},
-          e('button', {className:'btn btn-ghost', onClick:function(){setShowBoLogin(false)}}, 'Cancelar'),
-          e('button', {className:'btn btn-primary', onClick:submitBoPassword}, 'Entrar')
-        )
-      )
-    )
+    })
   );
 }
 
