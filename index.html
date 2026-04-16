@@ -23,13 +23,13 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 .footer{background:#fff;border-top:1px solid #e5e7eb;padding:5px 16px;display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;flex-shrink:0}
 
 /* Sidebar */
-.sidebar{width:200px;background:#fff;border-right:1px solid #e5e7eb;padding:12px;overflow-y:auto;flex-shrink:0}
+.sidebar{width:230px;background:#fff;border-right:1px solid #e5e7eb;padding:12px;overflow-y:auto;flex-shrink:0}
 .sidebar-title{font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
-.add-btn{width:100%;display:flex;align-items:center;gap:8px;padding:6px 8px;border:none;background:transparent;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s}
+.add-btn{width:100%;display:flex;align-items:center;gap:8px;padding:7px 8px;border:none;background:transparent;border-radius:8px;cursor:pointer;text-align:left;transition:background .15s}
 .add-btn:hover{background:#f3f4f6}
-.add-btn-icon{font-size:14px;opacity:.7}
+.add-btn-icon{width:32px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
 .add-btn-label{font-size:11px;font-weight:600;color:#374151}
-.add-btn-desc{font-size:10px;color:#9ca3af}
+.add-btn-desc{font-size:9px;color:#9ca3af;line-height:1.3;margin-top:1px}
 
 .template-section{margin-top:16px;padding-top:12px;border-top:1px solid #f3f4f6}
 .tpl-btn{width:100%;padding:8px;border:none;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:4px;transition:all .15s}
@@ -88,7 +88,7 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 
 /* Responsive */
 @media(max-width:900px){
-  .sidebar{width:160px}
+  .sidebar{width:180px}
   .preview-panel{display:none}
 }
 </style>
@@ -124,15 +124,15 @@ const BRAND_STRIPS = {
 };
 
 const BLOCK_TYPES = [
-  { type:"text", label:"Texto libre", icon:"\u{1F4DD}", desc:"Párrafo editable", cardClass:"" },
-  { type:"brand_artisjet", label:"Brand artisJet", icon:"\u{1F535}", desc:"Cabecera de marca", cardClass:"blue" },
-  { type:"brand_mbo", label:"Brand MBO", icon:"\u{1F7E3}", desc:"Cabecera de marca", cardClass:"purple" },
-  { type:"brand_pimpam", label:"Brand PimPam", icon:"\u{1F7E0}", desc:"Cabecera de marca", cardClass:"orange" },
-  { type:"product_pair", label:"2 Productos", icon:"\u{1F4E6}", desc:"Par de fichas", cardClass:"green" },
-  { type:"product_single", label:"1 Producto", icon:"\u{1F4E6}", desc:"Ficha individual", cardClass:"green" },
-  { type:"freebird", label:"Freebird vídeo", icon:"\u25B6\uFE0F", desc:"Bloque Freebird", cardClass:"blue" },
-  { type:"pimpam_hero", label:"PimPam Hero", icon:"\u{1F3AF}", desc:"Sección hero", cardClass:"orange" },
-  { type:"pimpam_steps", label:"Pasos PimPam", icon:"1\uFE0F\u20E3", desc:"4 pasos proceso", cardClass:"orange" },
+  { type:"text", label:"Texto libre", icon:"Aa", desc:"Párrafo editable para intro, transición o despedida", cardClass:"", previewBg:"#f1f5f9", previewColor:"#475569" },
+  { type:"brand_artisjet", label:"artisJet", icon:"aJ", desc:"Logo + enlace boprint.net con separador", cardClass:"blue", previewBg:"#dbeafe", previewColor:"#1d4ed8" },
+  { type:"brand_mbo", label:"MBO Printers", icon:"M", desc:"Logo + enlace mboprinters.com con separador", cardClass:"purple", previewBg:"#ede9fe", previewColor:"#6d28d9" },
+  { type:"brand_pimpam", label:"PimPam Vending", icon:"PP", desc:"Logo + enlace pimpam-vending.com con separador", cardClass:"orange", previewBg:"#ffedd5", previewColor:"#ea580c" },
+  { type:"product_pair", label:"2 Productos", icon:"\u{1F4E6}\u{1F4E6}", desc:"Dos fichas lado a lado con foto, specs y precio", cardClass:"green", previewBg:"#dcfce7", previewColor:"#15803d" },
+  { type:"product_single", label:"1 Producto", icon:"\u{1F4E6}", desc:"Ficha individual con foto, specs y precio", cardClass:"green", previewBg:"#dcfce7", previewColor:"#15803d" },
+  { type:"freebird", label:"Vídeo Freebird", icon:"\u25B6", desc:"Banner azul con CTA al vídeo de tecnología Freebird", cardClass:"blue", previewBg:"#1e3a8a", previewColor:"#ffffff" },
+  { type:"pimpam_hero", label:"Hero PimPam", icon:"\u{1F4F1}", desc:"Imagen + texto: personaliza, imprime y vende sin operario", cardClass:"orange", previewBg:"#fff7ed", previewColor:"#ea580c" },
+  { type:"pimpam_steps", label:"4 Pasos PimPam", icon:"1234", desc:"Los 4 pasos del proceso: elige, personaliza, paga, listo", cardClass:"orange", previewBg:"#fff7ed", previewColor:"#ea580c" },
 ];
 
 let blockIdCounter = 0;
@@ -391,7 +391,7 @@ function EmailComposer() {
   function loadTemplate(tpl) {
     if (tpl === 'compactas') {
       setBlocks([
-        createBlock("text"),
+        Object.assign(createBlock("text"), {text:"Hola,\n\nTras nuestra conversación, te envío información sobre algunas de nuestras impresoras UV-LED de formato compacto. Son ideales para empezar o para negocios que buscan personalización en punto de venta sin necesitar gran espacio.\n\nLa tecnología UV-LED permite imprimir directamente sobre casi cualquier material (plástico, madera, metal, cerámica…) con secado instantáneo y calidad fotorrealista en CMYK + blanco.\n\nTe destaco dos opciones de artisJet (marca premium) y dos de MBO (nuestra marca propia con mejor relación calidad-precio):"}),
         Object.assign(createBlock("brand_artisjet")),
         Object.assign(createBlock("product_pair"), {product1:"young",product2:"3000pro"}),
         Object.assign(createBlock("text"), {text:"Y en nuestra línea MBO, tenemos opciones con precios muy competitivos:"}),
@@ -401,24 +401,24 @@ function EmailComposer() {
       ]);
     } else if (tpl === 'pimpam') {
       setBlocks([
-        createBlock("text"),
+        Object.assign(createBlock("text"), {text:"Hola,\n\nTe escribo porque creo que te puede interesar un concepto que está funcionando muy bien: máquinas de vending que imprimen fundas de móvil personalizadas al momento, sin necesidad de operario. Se llama PimPam y combina impresión UV-LED con autoservicio — ideal para centros comerciales, aeropuertos, ferias y retail.\n\nEl cliente elige el diseño en pantalla, paga y recibe su funda impresa en HD en menos de 30 segundos. Te cuento más:"}),
         Object.assign(createBlock("brand_pimpam")),
         createBlock("pimpam_hero"),
         Object.assign(createBlock("product_pair"), {product1:"casebox",product2:"custom"}),
         Object.assign(createBlock("text"), {text:"El proceso para el usuario es muy sencillo — 4 pasos:"}),
         createBlock("pimpam_steps"),
-        Object.assign(createBlock("text"), {text:"Si te interesa, puedo enviarte más detalles.\n\n¡Un saludo!"}),
+        Object.assign(createBlock("text"), {text:"Si te interesa, puedo enviarte más detalles o concertar una demo.\n\n¡Un saludo!"}),
       ]);
     } else if (tpl === 'formatos') {
       setBlocks([
-        createBlock("text"),
+        Object.assign(createBlock("text"), {text:"Hola,\n\nSiguiendo nuestra conversación, te paso información sobre algunas impresoras UV-LED que creo que encajan bien con lo que necesitas. He seleccionado equipos de distintos tamaños — desde formato medio hasta gran formato industrial — para que puedas comparar según tu volumen de producción.\n\nTodas funcionan con tecnología UV-LED: impresión directa sobre cualquier material rígido (plástico, madera, metal, vidrio, cerámica…) con secado instantáneo y calidad fotorrealista en CMYK + blanco.\n\nTe muestro dos de artisJet (marca premium) y dos de MBO (nuestra marca propia, excelente relación calidad-precio):"}),
         Object.assign(createBlock("brand_artisjet")),
         Object.assign(createBlock("product_pair"), {product1:"3000pro",product2:"6090trust"}),
         createBlock("freebird"),
         Object.assign(createBlock("text"), {text:"En nuestra línea MBO, tenemos opciones desde semiformato hasta gran formato industrial:"}),
         Object.assign(createBlock("brand_mbo")),
         Object.assign(createBlock("product_pair"), {product1:"mbo6090",product2:"uv1612g"}),
-        Object.assign(createBlock("text"), {text:"¡Quedo a tu disposición!\nUn saludo,"}),
+        Object.assign(createBlock("text"), {text:"¿Te gustaría organizar una demo sin compromiso?\n\n¡Quedo a tu disposición!\nUn saludo,"}),
       ]);
     }
   }
@@ -450,7 +450,7 @@ function EmailComposer() {
         e('p', {className:'sidebar-title'}, 'Añadir bloque'),
         BLOCK_TYPES.map(function(bt){
           return e('button', {key:bt.type, className:'add-btn', onClick:function(){addBlock(bt.type)}},
-            e('span', {className:'add-btn-icon'}, bt.icon),
+            e('span', {className:'add-btn-icon', style:{background:bt.previewBg, color:bt.previewColor, fontWeight:800, fontSize:bt.icon.length>2?'8px':'11px'}}, bt.icon),
             e('div', null,
               e('div', {className:'add-btn-label'}, bt.label),
               e('div', {className:'add-btn-desc'}, bt.desc)
