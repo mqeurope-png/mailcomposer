@@ -1913,16 +1913,31 @@ function BlockEditor(props) {
     body = e('p', {className:'fixed-msg'}, 'Bloque predefinido');
   }
 
-  return e('div', {className:'block-card ' + info.cardClass},
+  var isDragging = props.isDragging;
+  var dragStyle = isDragging ? {opacity:0.4,border:'2px dashed #93c5fd'} : {};
+  var dragHandleStyle = {cursor:'grab',padding:'0 4px',fontSize:'14px',color:'#9ca3af',userSelect:'none'};
+
+  return e('div', {
+    className:'block-card ' + info.cardClass,
+    style: dragStyle,
+    draggable: true,
+    onDragStart: function(ev){ ev.dataTransfer.effectAllowed='move'; if(props.onDragStart) props.onDragStart(); },
+    onDragOver: function(ev){ ev.preventDefault(); ev.dataTransfer.dropEffect='move'; },
+    onDrop: function(ev){ ev.preventDefault(); if(props.onDrop) props.onDrop(); },
+    onDragEnd: function(){ if(props.onDragEnd) props.onDragEnd(); }
+  },
     e('div', {className:'block-header'},
       e('div', {className:'block-header-left'},
+        e('span', {style:dragHandleStyle, title:'Arrastrar para reordenar'}, '⠿'),
         e('span', {className:'block-type-icon'}, info.icon),
         e('span', {className:'block-type-label'}, info.label)
       ),
       e('div', {className:'block-actions'},
         block.type === 'composed' && e('button', {onClick:props.onUnlink, title:'Desvincular bloque', style:{fontSize:'12px',padding:'2px 4px'}}, '🔓'),
+        e('button', {onClick:props.onMoveToTop, disabled:props.isFirst, title:'Enviar al principio', style:{fontSize:'10px',padding:'2px 4px'}}, '⏫'),
         e('button', {onClick:props.onMoveUp, disabled:props.isFirst, title:'Subir'}, e(ArrowUp)),
         e('button', {onClick:props.onMoveDown, disabled:props.isLast, title:'Bajar'}, e(ArrowDown)),
+        e('button', {onClick:props.onMoveToBottom, disabled:props.isLast, title:'Enviar al final', style:{fontSize:'10px',padding:'2px 4px'}}, '⏬'),
         e('button', {onClick:props.onDelete, className:'del-btn', title:'Eliminar'}, e(XIcon))
       )
     ),
@@ -2151,6 +2166,46 @@ function EmailComposer() {
       return arr;
     });
   }
+  function moveBlockToTop(id) {
+    setBlocks(function(prev){
+      var idx = prev.findIndex(function(b){return b.id===id});
+      if(idx<=0) return prev;
+      var arr = prev.slice();
+      var item = arr.splice(idx,1)[0];
+      arr.unshift(item);
+      return arr;
+    });
+  }
+  function moveBlockToBottom(id) {
+    setBlocks(function(prev){
+      var idx = prev.findIndex(function(b){return b.id===id});
+      if(idx<0||idx>=prev.length-1) return prev;
+      var arr = prev.slice();
+      var item = arr.splice(idx,1)[0];
+      arr.push(item);
+      return arr;
+    });
+  }
+
+  // Drag & drop state
+  var _dragId = useState(null);
+  var dragId = _dragId[0], setDragId = _dragId[1];
+  function handleDragStart(id) { setDragId(id); }
+  function handleDragOver(ev) { ev.preventDefault(); }
+  function handleDrop(targetId) {
+    if (!dragId || dragId === targetId) { setDragId(null); return; }
+    setBlocks(function(prev){
+      var fromIdx = prev.findIndex(function(b){return b.id===dragId});
+      var toIdx = prev.findIndex(function(b){return b.id===targetId});
+      if (fromIdx<0||toIdx<0) return prev;
+      var arr = prev.slice();
+      var item = arr.splice(fromIdx,1)[0];
+      arr.splice(toIdx,0,item);
+      return arr;
+    });
+    setDragId(null);
+  }
+  function handleDragEnd() { setDragId(null); }
 
   function unlinkComposedBlock(blockId) {
     setBlocks(function(prev) {
@@ -2761,6 +2816,12 @@ function EmailComposer() {
                     onDelete: function(){deleteBlock(block.id)},
                     onMoveUp: function(){moveBlock(block.id,-1)},
                     onMoveDown: function(){moveBlock(block.id,1)},
+                    onMoveToTop: function(){moveBlockToTop(block.id)},
+                    onMoveToBottom: function(){moveBlockToBottom(block.id)},
+                    isDragging: dragId === block.id,
+                    onDragStart: function(){handleDragStart(block.id)},
+                    onDrop: function(){handleDrop(block.id)},
+                    onDragEnd: handleDragEnd,
                     isFirst: idx===0,
                     isLast: idx===blocks.length-1,
                     onAiAssist: function(blockId){
