@@ -1490,7 +1490,14 @@ function EmailComposer() {
 
   var _appState = useState(function(){
     var stored = getStorageData();
-    return stored || getDefaultState();
+    if (stored) {
+      var defaults = getDefaultState();
+      if (!stored.brands) stored.brands = defaults.brands;
+      if (!stored.standaloneBlocks) stored.standaloneBlocks = defaults.standaloneBlocks;
+      if (!stored.templates) stored.templates = defaults.templates;
+      return stored;
+    }
+    return getDefaultState();
   });
   var appState = _appState[0], setAppState = _appState[1];
 
@@ -1504,6 +1511,10 @@ function EmailComposer() {
     _loaded.current = true;
     loadFromSupabase().then(function(cloudData) {
       if (cloudData && cloudData.products) {
+        var defaults = getDefaultState();
+        if (!cloudData.brands) cloudData.brands = defaults.brands;
+        if (!cloudData.standaloneBlocks) cloudData.standaloneBlocks = defaults.standaloneBlocks;
+        if (!cloudData.templates) cloudData.templates = defaults.templates;
         setAppState(cloudData);
         saveStorageData(cloudData);
         setSyncStatus('cloud');
@@ -1976,7 +1987,7 @@ function EmailComposer() {
           e(SidebarSection, {title:'BLOQUES DE PRODUCTO'},
             e('div', {className:'brand-filter-bar', style:{marginBottom:'8px'}},
               e('button', {className:'brand-filter-btn' + (sidebarBrandFilter==='all'?' active':''), onClick:function(){setSidebarBrandFilter('all')}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Todos'),
-              appState.brands.filter(function(br){return br.visible !== false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (sidebarBrandFilter===br.id?' active':''), onClick:function(){setSidebarBrandFilter(br.id)}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
+              (appState.brands||[]).filter(function(br){return br.visible !== false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (sidebarBrandFilter===br.id?' active':''), onClick:function(){setSidebarBrandFilter(br.id)}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
               e('button', {className:'brand-filter-btn' + (sidebarBrandFilter==='none'?' active':''), onClick:function(){setSidebarBrandFilter('none')}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
             ),
             appState.composedBlocks.filter(function(cb){return cb.visible !== false && (sidebarBrandFilter==='all' || cb.brandStrip===sidebarBrandFilter)}).map(function(cb) {
@@ -2120,7 +2131,7 @@ function EmailComposer() {
           ),
           e('div', {className:'brand-filter-bar'},
             e('button', {className:'brand-filter-btn' + (brandFilter==='all'?' active':''), onClick:function(){setBrandFilter('all')}}, 'Todos'),
-            appState.brands.map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (brandFilter===br.id?' active':''), onClick:function(){setBrandFilter(br.id)}}, br.label); })
+            (appState.brands||[]).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (brandFilter===br.id?' active':''), onClick:function(){setBrandFilter(br.id)}}, br.label); })
           ),
           e('table', {className:'data-table'},
             e('thead', null,
@@ -2190,7 +2201,7 @@ function EmailComposer() {
           ),
           e('div', {className:'brand-filter-bar'},
             e('button', {className:'brand-filter-btn' + (brandFilter==='all'?' active':''), onClick:function(){setBrandFilter('all')}}, 'Todos'),
-            appState.brands.map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (brandFilter===br.id?' active':''), onClick:function(){setBrandFilter(br.id)}}, br.label); }),
+            (appState.brands||[]).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (brandFilter===br.id?' active':''), onClick:function(){setBrandFilter(br.id)}}, br.label); }),
             e('button', {className:'brand-filter-btn' + (brandFilter==='none'?' active':''), onClick:function(){setBrandFilter('none')}}, 'Mix')
           ),
           e('div', null,
