@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bomedia Email Composer v2</title>
+<title>Bomedia Email Composer v3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -1308,8 +1308,25 @@ function EmailComposer() {
     });
   }, []);
 
-  var _blocks = useState([createBlock("text")]);
+  var _blocks = useState(function(){
+    try {
+      var saved = localStorage.getItem('bomedia_draft_blocks');
+      if (saved) {
+        var parsed = JSON.parse(saved);
+        if (parsed && parsed.length > 0) {
+          blockIdCounter = Math.max.apply(null, parsed.map(function(b){return typeof b.id === 'number' ? b.id : 0})) + 1;
+          return parsed;
+        }
+      }
+    } catch(e) {}
+    return [createBlock("text")];
+  });
   var blocks = _blocks[0], setBlocks = _blocks[1];
+
+  // Auto-save draft blocks
+  useEffect(function(){
+    try { localStorage.setItem('bomedia_draft_blocks', JSON.stringify(blocks)); } catch(e){}
+  }, [blocks]);
 
   var _copied = useState(false);
   var copied = _copied[0], setCopied = _copied[1];
@@ -1645,7 +1662,7 @@ function EmailComposer() {
         e('div', {className:'header-left'},
           e('div', {className:'logo'}, 'B'),
           e('div', null,
-            e('div', {className:'header-title'}, 'Bomedia Email Composer'),
+            e('div', {className:'header-title'}, 'Bomedia Email Composer V3'),
             e('div', {className:'header-sub'}, 'Compón emails con bloques de producto UV-LED')
           )
         ),
@@ -1654,6 +1671,11 @@ function EmailComposer() {
             e('button', {className:'mode-btn active', onClick:function(){setAppMode('compositor')}}, 'Compositor'),
             e('button', {className:'mode-btn', onClick:tryOpenBackoffice}, 'Backoffice')
           ),
+          e('button', {className:'btn btn-ghost', onClick:function(){
+            if(blocks.length <= 1 || window.confirm('¿Empezar un email nuevo? Se borrará el borrador actual.')) {
+              setBlocks([createBlock("text")]);
+            }
+          }, style:{color:'#ef4444'}}, '+ Nuevo email'),
           e('button', {className:'btn ' + (showPreview?'btn-toggle':'btn-toggle off'), onClick:function(){setShowPreview(!showPreview)}}, showPreview?'Preview ON':'Preview OFF'),
           e('button', {className:'btn ' + (copied?'btn-success':'btn-primary'), onClick:copyHtml}, copied?'¡Copiado!':'Copiar HTML')
         )
