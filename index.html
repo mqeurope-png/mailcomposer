@@ -2195,25 +2195,21 @@ function EmailComposer() {
     if (_prevLang.current === lang) return;
     _prevLang.current = lang;
     setBlocks(function(prev){
-      var changed = false;
-      var updated = prev.map(function(b) {
+      return prev.map(function(b) {
         // Re-localize text blocks that have i18n
-        if (b.type === 'text' && b.i18n) {
+        if (b.type === 'text' && b.i18n && Object.keys(b.i18n).length > 0) {
           var nb = Object.assign({}, b);
-          // Save ES text before first localization
           if (!nb._textEs) nb._textEs = nb.text;
           if (!lang || lang === 'es') {
             nb.text = nb._textEs;
           } else {
             nb.text = (b.i18n[lang] && b.i18n[lang].text) || nb._textEs;
           }
-          if (nb.text !== b.text) changed = true;
           return nb;
         }
         // Re-localize hero blocks that have i18n
-        if (b.type === 'pimpam_hero' && b.i18n) {
+        if (b.type === 'pimpam_hero' && b.i18n && Object.keys(b.i18n).length > 0) {
           var nb = Object.assign({}, b);
-          // Save ES originals before first localization
           if (!nb._heroEs) {
             nb._heroEs = { heroTitle: nb.heroTitle, heroSubtitle: nb.heroSubtitle, heroBullets: nb.heroBullets, heroCtaText: nb.heroCtaText };
           }
@@ -2229,13 +2225,12 @@ function EmailComposer() {
             nb.heroBullets = hi.heroBullets || nb._heroEs.heroBullets;
             nb.heroCtaText = hi.heroCtaText || nb._heroEs.heroCtaText;
           }
-          changed = true; return nb;
+          return nb;
         }
         // Re-localize composed block text innerBlocks
         if (b.type === 'composed' && b.innerBlocks) {
-          var ibChanged = false;
           var newIbs = b.innerBlocks.map(function(ib) {
-            if (ib.type === 'text' && ib.i18n) {
+            if (ib.type === 'text' && ib.i18n && Object.keys(ib.i18n).length > 0) {
               var nib = Object.assign({}, ib);
               if (!nib._textEs) nib._textEs = nib.text;
               if (!lang || lang === 'es') {
@@ -2243,16 +2238,14 @@ function EmailComposer() {
               } else {
                 nib.text = (ib.i18n[lang] && ib.i18n[lang].text) || nib._textEs;
               }
-              if (nib.text !== ib.text) ibChanged = true;
               return nib;
             }
             return ib;
           });
-          if (ibChanged) { changed = true; return Object.assign({}, b, {innerBlocks: newIbs}); }
+          return Object.assign({}, b, {innerBlocks: newIbs});
         }
         return b;
       });
-      return changed ? updated : prev;
     });
   }, [lang]);
 
