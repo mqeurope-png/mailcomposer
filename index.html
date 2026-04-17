@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bomedia Email Composer v6</title>
+<title>Bomedia Email Composer v2.0</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -261,6 +261,128 @@ function isAvailableInLang(item, lang) {
   return item.langs.indexOf(lang) >= 0;
 }
 
+// ─── REFERENCE-BASED TEXT LOOKUP ──────────────────────────────
+// Blocks store _sourceType + _sourceId + _overrides instead of copied text.
+// Text is resolved at render time from source definitions.
+
+function getTextInLanguage(block, lang, appState) {
+  // 1. Check _overrides for this language (user edits in compositor)
+  if (block._overrides && block._overrides[lang]) return block._overrides[lang];
+
+  // 2. Look up from source definition
+  if (block._sourceType === 'prewritten' && block._sourceId) {
+    var src = (appState.prewrittenTexts || []).find(function(t){ return t.id === block._sourceId; });
+    if (src) {
+      if (!lang || lang === 'es') return src.text;
+      if (src.i18n && src.i18n[lang] && src.i18n[lang].text) return src.i18n[lang].text;
+      return src.text; // fallback to ES
+    }
+  }
+
+  if (block._sourceType === 'composed_inner' && block._composedSourceId) {
+    var srcCb = (appState.composedBlocks || []).find(function(cb){ return cb.id === block._composedSourceId; });
+    if (srcCb) {
+      // Look for matching innerBlock by index or first text block
+      var innerIdx = typeof block._innerIdx === 'number' ? block._innerIdx : -1;
+      var srcIb = null;
+      if (innerIdx >= 0 && srcCb.innerBlocks && srcCb.innerBlocks[innerIdx]) {
+        srcIb = srcCb.innerBlocks[innerIdx];
+      } else if (srcCb.innerBlocks) {
+        srcIb = srcCb.innerBlocks.find(function(ib){ return ib.type === 'text'; });
+      }
+      if (srcIb) {
+        if (!lang || lang === 'es') return srcIb.text;
+        if (srcIb.i18n && srcIb.i18n[lang] && srcIb.i18n[lang].text) return srcIb.i18n[lang].text;
+        return srcIb.text;
+      }
+      // Fallback: try composedBlock-level i18n (introText pattern)
+      if (!lang || lang === 'es') return srcCb.introText || '';
+      if (srcCb.i18n && srcCb.i18n[lang] && srcCb.i18n[lang].introText) return srcCb.i18n[lang].introText;
+      return srcCb.introText || '';
+    }
+  }
+
+  // 3. Manual blocks: _overrides.es has the ES text, other langs in _overrides too
+  if (block._sourceType === 'manual') {
+    if (block._overrides && block._overrides[lang]) return block._overrides[lang];
+    if (block._overrides && block._overrides.es) return block._overrides.es;
+    return block.text || '';
+  }
+
+  // 4. Backward compat: old-style blocks with i18n/text directly
+  if (block.i18n) return getLocalizedText(block, 'text', lang);
+  return block.text || '';
+}
+
+function getHeroDataInLanguage(block, lang, appState) {
+  var result = {
+    heroTitle: block.heroTitle || '',
+    heroSubtitle: block.heroSubtitle || '',
+    heroBullets: block.heroBullets || [],
+    heroCtaText: block.heroCtaText || '',
+    heroCtaUrl: block.heroCtaUrl || '',
+    heroImage: block.heroImage || '',
+    heroImageLink: block.heroImageLink || '',
+    heroBgColor: block.heroBgColor || '#fff'
+  };
+
+  // Try source definition
+  var srcConfig = null;
+  if (block._sourceType === 'standalone' && block._sourceId) {
+    var srcSb = (appState.standaloneBlocks || []).find(function(sb){ return sb.id === block._sourceId; });
+    if (srcSb && srcSb.config) srcConfig = srcSb.config;
+  } else if (block._sourceType === 'composed_inner' && block._composedSourceId) {
+    var srcCb2 = (appState.composedBlocks || []).find(function(cb){ return cb.id === block._composedSourceId; });
+    if (srcCb2) {
+      var innerIdx2 = typeof block._innerIdx === 'number' ? block._innerIdx : -1;
+      if (innerIdx2 >= 0 && srcCb2.innerBlocks && srcCb2.innerBlocks[innerIdx2]) {
+        var srcIb2 = srcCb2.innerBlocks[innerIdx2];
+        if (srcIb2.type === 'pimpam_hero') srcConfig = srcIb2;
+      }
+    }
+  }
+
+  if (srcConfig) {
+    result.heroTitle = srcConfig.heroTitle || result.heroTitle;
+    result.heroSubtitle = srcConfig.heroSubtitle || result.heroSubtitle;
+    result.heroBullets = srcConfig.heroBullets || result.heroBullets;
+    result.heroCtaText = srcConfig.heroCtaText || result.heroCtaText;
+    result.heroCtaUrl = srcConfig.heroCtaUrl || result.heroCtaUrl;
+    result.heroImage = srcConfig.heroImage || result.heroImage;
+    result.heroImageLink = srcConfig.heroImageLink || result.heroImageLink;
+    result.heroBgColor = srcConfig.heroBgColor || result.heroBgColor;
+
+    // Apply i18n from source
+    if (lang && lang !== 'es' && srcConfig.i18n && srcConfig.i18n[lang]) {
+      var hi = srcConfig.i18n[lang];
+      if (hi.heroTitle) result.heroTitle = hi.heroTitle;
+      if (hi.heroSubtitle) result.heroSubtitle = hi.heroSubtitle;
+      if (hi.heroBullets) result.heroBullets = hi.heroBullets;
+      if (hi.heroCtaText) result.heroCtaText = hi.heroCtaText;
+    }
+  } else if (block.i18n && lang && lang !== 'es' && block.i18n[lang]) {
+    // Old-style i18n directly on block
+    var bhi = block.i18n[lang];
+    if (bhi.heroTitle) result.heroTitle = bhi.heroTitle;
+    if (bhi.heroSubtitle) result.heroSubtitle = bhi.heroSubtitle;
+    if (bhi.heroBullets) result.heroBullets = bhi.heroBullets;
+    if (bhi.heroCtaText) result.heroCtaText = bhi.heroCtaText;
+  }
+
+  // Apply _overrides (user edits in compositor)
+  if (block._overrides && block._overrides[lang]) {
+    var ovr = block._overrides[lang];
+    if (typeof ovr === 'object') {
+      if (ovr.heroTitle) result.heroTitle = ovr.heroTitle;
+      if (ovr.heroSubtitle) result.heroSubtitle = ovr.heroSubtitle;
+      if (ovr.heroBullets) result.heroBullets = ovr.heroBullets;
+      if (ovr.heroCtaText) result.heroCtaText = ovr.heroCtaText;
+    }
+  }
+
+  return result;
+}
+
 // Brands moved to appState.brands in getDefaultState()
 
 // Merge i18n translations from defaults into loaded data (so Supabase/localStorage data gets translations)
@@ -516,7 +638,7 @@ let blockIdCounter = 0;
 function createBlock(type) {
   var id = ++blockIdCounter;
   switch(type) {
-    case "text": return { id:id, type:type, text:"Hola,\n\nEscribe aquí tu texto personalizado." };
+    case "text": return { id:id, type:type, _sourceType:'manual', _overrides:{es:"Hola,\n\nEscribe aquí tu texto personalizado."} };
     case "brand_artisjet": return { id:id, type:type, brand:"artisjet" };
     case "brand_mbo": return { id:id, type:type, brand:"mbo" };
     case "brand_pimpam": return { id:id, type:type, brand:"pimpam" };
@@ -760,13 +882,32 @@ var CSS_BLOCK = '<style>' +
   '}' +
   '</style>';
 
-function generateFullHtml(blocks, products, lang, brands) {
+function generateFullHtml(blocks, products, lang, brands, appState) {
   lang = lang || 'es';
+  appState = appState || {};
   var rows = '';
+
+  function resolveText(block) {
+    // Reference-based: use getTextInLanguage if _sourceType exists
+    if (block._sourceType) return getTextInLanguage(block, lang, appState);
+    // Backward compat: old-style blocks
+    if (block.i18n) return getLocalizedText(block, 'text', lang);
+    return block.text || '';
+  }
+
+  function resolveHero(block) {
+    if (block._sourceType) return getHeroDataInLanguage(block, lang, appState);
+    // Backward compat: build config with i18n applied via pimpamHeroHtml
+    return block;
+  }
+
   for (var i = 0; i < blocks.length; i++) {
     var b = blocks[i];
     switch(b.type) {
-      case 'text': rows += textBlockHtml(b.i18n ? getLocalizedText(b, 'text', lang) : b.text); break;
+      case 'text':
+        var resolvedText = resolveText(b);
+        if (resolvedText) rows += textBlockHtml(resolvedText);
+        break;
       case 'brand_artisjet': rows += brandStripHtml('artisjet', lang, brands); break;
       case 'brand_mbo': rows += brandStripHtml('mbo', lang, brands); break;
       case 'brand_pimpam': rows += brandStripHtml('pimpam', lang, brands); break;
@@ -787,7 +928,15 @@ function generateFullHtml(blocks, products, lang, brands) {
         if(pt1&&pt2&&pt3) { pt1 = getLocalizedProduct(pt1, lang); pt2 = getLocalizedProduct(pt2, lang); pt3 = getLocalizedProduct(pt3, lang); rows += productTrioHtml(pt1,pt2,pt3,lang); }
         break;
       case 'freebird': rows += freebirdHtml(b, lang); break;
-      case 'pimpam_hero': rows += pimpamHeroHtml(b, lang); break;
+      case 'pimpam_hero':
+        var heroData = resolveHero(b);
+        if (heroData === b) {
+          rows += pimpamHeroHtml(b, lang);
+        } else {
+          // heroData is resolved — build a config obj for pimpamHeroHtml (skip i18n since already resolved)
+          rows += pimpamHeroHtml(heroData, null);
+        }
+        break;
       case 'pimpam_steps': rows += pimpamStepsHtml(b, lang); break;
       case 'composed':
         var ibs = b.innerBlocks || [];
@@ -804,12 +953,17 @@ function generateFullHtml(blocks, products, lang, brands) {
         }
         ibs.forEach(function(ib) {
           if (ib.type === 'text') {
-            var ibText = getLocalizedText(ib, 'text', lang);
+            var ibText = resolveText(ib);
             if (ibText) rows += textBlockHtml(ibText);
           } else if (ib.type === 'brand_strip' && ib.brand) {
             rows += brandStripHtml(ib.brand, lang, brands);
           } else if (ib.type === 'pimpam_hero') {
-            rows += pimpamHeroHtml(ib.heroImage ? ib : b, lang);
+            var ibHero = resolveHero(ib);
+            if (ibHero === ib) {
+              rows += pimpamHeroHtml(ib.heroImage ? ib : b, lang);
+            } else {
+              rows += pimpamHeroHtml(ibHero, null);
+            }
           } else if (ib.type === 'pimpam_steps') {
             rows += pimpamStepsHtml(ib.steps ? ib : b, lang);
           } else if (ib.type === 'separator') {
@@ -1933,14 +2087,32 @@ function BlockEditor(props) {
   };
   info = typeMap[block.type] || info;
 
+  var blockLang = props.lang || 'es';
+  var blockAppState = props.appState || {};
+
   var body;
   if (block.type === 'text') {
+    // Resolve display text from reference or overrides
+    var displayText = block._sourceType
+      ? getTextInLanguage(block, blockLang, blockAppState)
+      : (block.text || '');
     body = e('div', null,
       e('textarea', {
-        value: block.text,
-        onChange: function(ev) { props.onChange(Object.assign({}, block, {text: ev.target.value})); },
+        value: displayText,
+        onChange: function(ev) {
+          var newVal = ev.target.value;
+          if (block._sourceType) {
+            // Save edit to _overrides for current language
+            var newOverrides = Object.assign({}, block._overrides || {});
+            newOverrides[blockLang] = newVal;
+            props.onChange(Object.assign({}, block, {_overrides: newOverrides}));
+          } else {
+            props.onChange(Object.assign({}, block, {text: newVal}));
+          }
+        },
         placeholder: "Escribe tu texto aquí..."
       }),
+      block._sourceType === 'prewritten' && e('span', {style:{fontSize:'9px',color:'#9ca3af',marginLeft:'4px'}}, '📎 ' + (block._sourceId || '')),
       e('button', {
         style:{fontSize:'10px',padding:'3px 8px',marginTop:'4px',borderRadius:'12px',border:'1px solid #d1d5db',background:'#f9fafb',cursor:'pointer',color:'#6b7280',display:'inline-flex',alignItems:'center',gap:'4px'},
         onClick: function(){
@@ -1989,16 +2161,31 @@ function BlockEditor(props) {
     var textBlockIdx = -1;
     iBlocks.forEach(function(ib,i){ if(ib.type==='text' && textBlockIdx===-1) textBlockIdx = i; });
     var badgeStyle = {fontSize:'10px',padding:'2px 6px',borderRadius:'4px'};
+    // Resolve display text for the inline text editor
+    var composedDisplayText = '';
+    if (textBlockIdx >= 0) {
+      var ibRef = iBlocks[textBlockIdx];
+      composedDisplayText = ibRef._sourceType
+        ? getTextInLanguage(ibRef, blockLang, blockAppState)
+        : (ibRef.text || '');
+    }
     body = e('div', null,
       block.title && e('div', {style:{fontWeight:600,fontSize:'12px',marginBottom:'6px',color:'#374151'}}, block.title),
       // Show inline editor for first text block if present
       textBlockIdx >= 0 && e('div', null,
         e('textarea', {
-          value: iBlocks[textBlockIdx].text || '',
+          value: composedDisplayText,
           onChange: function(ev) {
+            var newVal = ev.target.value;
             var newIbs = iBlocks.map(function(ib,i){
               if (i !== textBlockIdx) return ib;
-              return Object.assign({}, ib, {text: ev.target.value});
+              if (ib._sourceType) {
+                // Save edit to _overrides for current language
+                var newOvr = Object.assign({}, ib._overrides || {});
+                newOvr[blockLang] = newVal;
+                return Object.assign({}, ib, {_overrides: newOvr});
+              }
+              return Object.assign({}, ib, {text: newVal});
             });
             props.onChange(Object.assign({}, block, {innerBlocks: newIbs}));
           },
@@ -2193,86 +2380,8 @@ function EmailComposer() {
     try { localStorage.setItem('bomedia_draft_blocks', JSON.stringify(blocks)); } catch(e){}
   }, [blocks]);
 
-  // Helper: get the ES text from a block reliably
-  function getEsText(block) {
-    // 1. Explicit _textEs (set when block was added)
-    if (block._textEs) return block._textEs;
-    // 2. From i18n.es.text if exists
-    if (block.i18n && block.i18n.es && block.i18n.es.text) return block.i18n.es.text;
-    // 3. Try to find source in appState
-    if (block._sourceId) {
-      var src = (appState.prewrittenTexts || []).find(function(t){ return t.id === block._sourceId; });
-      if (src) return src.text;
-    }
-    // 4. If composed block, find source
-    if (block.composedRef) {
-      var srcCb = (appState.composedBlocks || []).find(function(cb){ return cb.id === block.composedRef; });
-      if (srcCb && srcCb.innerBlocks) {
-        var srcText = srcCb.innerBlocks.find(function(ib){ return ib.type === 'text'; });
-        if (srcText) return srcText.text;
-      }
-    }
-    // 5. Fallback: current text (might not be ES, but best we have)
-    return block.text;
-  }
-
-  // Re-localize a text item (block or innerBlock)
-  function relocalizeText(item) {
-    var n = Object.assign({}, item);
-    if (!n._textEs) n._textEs = getEsText(item);
-    if (!lang || lang === 'es') {
-      n.text = n._textEs;
-    } else {
-      n.text = (item.i18n && item.i18n[lang] && item.i18n[lang].text) || n._textEs;
-    }
-    return n;
-  }
-
-  // Re-localize blocks when language changes
-  var _prevLang = useRef(lang);
-  useEffect(function(){
-    if (_prevLang.current === lang) return;
-    _prevLang.current = lang;
-    setBlocks(function(prev){
-      return prev.map(function(b) {
-        // Re-localize text blocks that have i18n
-        if (b.type === 'text' && b.i18n && Object.keys(b.i18n).length > 0) {
-          return relocalizeText(b);
-        }
-        // Re-localize hero blocks that have i18n
-        if (b.type === 'pimpam_hero' && b.i18n && Object.keys(b.i18n).length > 0) {
-          var nb = Object.assign({}, b);
-          if (!nb._heroEs) {
-            nb._heroEs = { heroTitle: nb.heroTitle, heroSubtitle: nb.heroSubtitle, heroBullets: nb.heroBullets, heroCtaText: nb.heroCtaText };
-          }
-          if (!lang || lang === 'es') {
-            nb.heroTitle = nb._heroEs.heroTitle;
-            nb.heroSubtitle = nb._heroEs.heroSubtitle;
-            nb.heroBullets = nb._heroEs.heroBullets;
-            nb.heroCtaText = nb._heroEs.heroCtaText;
-          } else {
-            var hi = b.i18n[lang] || {};
-            nb.heroTitle = hi.heroTitle || nb._heroEs.heroTitle;
-            nb.heroSubtitle = hi.heroSubtitle || nb._heroEs.heroSubtitle;
-            nb.heroBullets = hi.heroBullets || nb._heroEs.heroBullets;
-            nb.heroCtaText = hi.heroCtaText || nb._heroEs.heroCtaText;
-          }
-          return nb;
-        }
-        // Re-localize composed block text innerBlocks
-        if (b.type === 'composed' && b.innerBlocks) {
-          var newIbs = b.innerBlocks.map(function(ib) {
-            if (ib.type === 'text' && ib.i18n && Object.keys(ib.i18n).length > 0) {
-              return relocalizeText(ib);
-            }
-            return ib;
-          });
-          return Object.assign({}, b, {innerBlocks: newIbs});
-        }
-        return b;
-      });
-    });
-  }, [lang]);
+  // Reference-based architecture: text is resolved at render time via getTextInLanguage/getHeroDataInLanguage.
+  // No language-change useEffect needed — blocks store references, not copied text.
 
   var _copied = useState('');
   var copied = _copied[0], setCopied = _copied[1];
@@ -2450,7 +2559,11 @@ function EmailComposer() {
             if (b.includeSteps) ibs.push({type:'pimpam_steps'});
           }
           ibs.forEach(function(ib) {
-            if (ib.type === 'text') result.push({id: ++blockIdCounter, type:'text', text: ib.text||''});
+            if (ib.type === 'text') {
+              // Preserve reference info when unlinking, or resolve text for manual block
+              var unlinkedText = ib._sourceType ? {id: ++blockIdCounter, type:'text', _sourceType:ib._sourceType, _sourceId:ib._sourceId, _composedSourceId:ib._composedSourceId, _innerIdx:ib._innerIdx, _overrides:ib._overrides||{}} : {id: ++blockIdCounter, type:'text', text: ib.text||''};
+              result.push(unlinkedText);
+            }
             else if (ib.type === 'brand_strip') result.push({id: ++blockIdCounter, type:'brand_' + ib.brand, brand: ib.brand});
             else if (ib.type === 'pimpam_hero') result.push({id: ++blockIdCounter, type:'pimpam_hero'});
             else if (ib.type === 'pimpam_steps') result.push({id: ++blockIdCounter, type:'pimpam_steps'});
@@ -2467,26 +2580,35 @@ function EmailComposer() {
   }
 
   function addComposedBlock(composedBlock) {
-    // Localize text inner blocks + preserve ES originals
-    var localizedInnerBlocks = (composedBlock.innerBlocks || []).map(function(ib) {
+    // Build reference-based innerBlocks — don't copy text, store references
+    var refInnerBlocks = (composedBlock.innerBlocks || []).map(function(ib, idx) {
       var nib = Object.assign({}, ib);
       if (ib.type === 'text') {
-        nib._textEs = ib.text; // Always save the ES version (ib.text is always ES from JSON)
-        nib.text = getLocalizedText(ib, 'text', lang);
+        nib._sourceType = 'composed_inner';
+        nib._composedSourceId = composedBlock.id;
+        nib._innerIdx = idx;
+        nib._overrides = {};
+        delete nib.text; // Don't copy text — resolve at render
+        delete nib.i18n; // i18n lives in source definition
+      }
+      if (ib.type === 'pimpam_hero') {
+        nib._sourceType = 'composed_inner';
+        nib._composedSourceId = composedBlock.id;
+        nib._innerIdx = idx;
+        nib._overrides = {};
       }
       return nib;
     });
     // Legacy support: build innerBlocks from old fields
-    if (localizedInnerBlocks.length === 0 && (composedBlock.introText || composedBlock.blockType)) {
-      var introText = getLocalizedText(composedBlock, 'introText', lang);
-      if (introText) localizedInnerBlocks.push({type:'text', text:introText});
-      if (composedBlock.brandStrip && composedBlock.brandStrip !== 'none') localizedInnerBlocks.push({type:'brand_strip', brand:composedBlock.brandStrip});
-      if (composedBlock.includeHero) localizedInnerBlocks.push({type:'pimpam_hero'});
+    if (refInnerBlocks.length === 0 && (composedBlock.introText || composedBlock.blockType)) {
+      refInnerBlocks.push({type:'text', _sourceType:'composed_inner', _composedSourceId:composedBlock.id, _innerIdx:-1, _overrides:{}});
+      if (composedBlock.brandStrip && composedBlock.brandStrip !== 'none') refInnerBlocks.push({type:'brand_strip', brand:composedBlock.brandStrip});
+      if (composedBlock.includeHero) refInnerBlocks.push({type:'pimpam_hero', _sourceType:'composed_inner', _composedSourceId:composedBlock.id, _innerIdx:-2, _overrides:{}});
       var prods = composedBlock.products || [];
-      if (composedBlock.blockType === 'product_trio' && prods.length >= 3) localizedInnerBlocks.push({type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
-      else if (composedBlock.blockType === 'product_pair' && prods.length >= 2) localizedInnerBlocks.push({type:'product_pair', product1:prods[0], product2:prods[1]});
-      else if (composedBlock.blockType === 'product_single' && prods.length >= 1) localizedInnerBlocks.push({type:'product_single', product1:prods[0]});
-      if (composedBlock.includeSteps) localizedInnerBlocks.push({type:'pimpam_steps'});
+      if (composedBlock.blockType === 'product_trio' && prods.length >= 3) refInnerBlocks.push({type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
+      else if (composedBlock.blockType === 'product_pair' && prods.length >= 2) refInnerBlocks.push({type:'product_pair', product1:prods[0], product2:prods[1]});
+      else if (composedBlock.blockType === 'product_single' && prods.length >= 1) refInnerBlocks.push({type:'product_single', product1:prods[0]});
+      if (composedBlock.includeSteps) refInnerBlocks.push({type:'pimpam_steps'});
     }
     var newBlock = {
       id: ++blockIdCounter,
@@ -2494,17 +2616,19 @@ function EmailComposer() {
       composedRef: composedBlock.id,
       title: composedBlock.title,
       brandStrip: composedBlock.brandStrip || 'none',
-      innerBlocks: localizedInnerBlocks
+      innerBlocks: refInnerBlocks
     };
     setBlocks(function(prev){ return prev.concat([newBlock]); });
   }
 
   function addPrewrittenText(textObj) {
-    var localizedText = getLocalizedText(textObj, 'text', lang);
-    var block = {id: ++blockIdCounter, type:'text', text: localizedText};
-    // Preserve i18n + original ES text for multi-language templates
-    if (textObj.i18n) block.i18n = textObj.i18n;
-    if (textObj.text) block._textEs = textObj.text;
+    var block = {
+      id: ++blockIdCounter,
+      type: 'text',
+      _sourceType: 'prewritten',
+      _sourceId: textObj.id,
+      _overrides: {}
+    };
     setBlocks(function(prev){ return prev.concat([block]); });
   }
 
@@ -2517,7 +2641,7 @@ function EmailComposer() {
       case 'product_single': newBlock = {id: ++blockIdCounter, type:'product_single', product1: cfg.defaultProduct || 'young'}; break;
       case 'product_pair': newBlock = {id: ++blockIdCounter, type:'product_pair', product1: cfg.defaultProduct1 || 'young', product2: cfg.defaultProduct2 || '3000pro'}; break;
       case 'product_trio': newBlock = {id: ++blockIdCounter, type:'product_trio', product1: cfg.defaultProduct1 || 'uv1612g', product2: cfg.defaultProduct2 || 'uv1812', product3: cfg.defaultProduct3 || 'uv2513'}; break;
-      case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'pimpam_hero', heroImage: cfg.heroImage||'', heroTitle: cfg.heroTitle||'', heroSubtitle: cfg.heroSubtitle||'', heroBullets: cfg.heroBullets||[], heroImageLink: cfg.heroImageLink||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#fff'}; if(cfg.i18n) newBlock.i18n = cfg.i18n; break;
+      case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'pimpam_hero', _sourceType:'standalone', _sourceId:sb.id, _overrides:{}, heroImage: cfg.heroImage||'', heroTitle: cfg.heroTitle||'', heroSubtitle: cfg.heroSubtitle||'', heroBullets: cfg.heroBullets||[], heroImageLink: cfg.heroImageLink||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#fff'}; break;
       case 'pimpam_steps': newBlock = {id: ++blockIdCounter, type:'pimpam_steps', steps: cfg.steps||[], stepsBgColor: cfg.stepsBgColor||'#fff7ed', stepsBorderColor: cfg.stepsBorderColor||'#fed7aa'}; break;
       default: newBlock = {id: ++blockIdCounter, type: sb.blockType}; break;
     }
@@ -2525,29 +2649,19 @@ function EmailComposer() {
   }
 
   function loadTemplate(template) {
-    // New format: compositorBlocks stores blocks with i18n
+    // New format: compositorBlocks stores blocks with reference data
     if (template.compositorBlocks && template.compositorBlocks.length > 0) {
       var newBlocks = template.compositorBlocks.map(function(b) {
         var clone = Object.assign({}, b, {id: ++blockIdCounter});
-        // Localize text to current language
-        if (clone.type === 'text') {
-          clone.text = getLocalizedText(clone, 'text', lang);
-        }
-        // Localize composed innerBlocks texts
+        // No localization at load time — text is resolved at render via references
+        // Ensure _overrides exists for reference-based blocks
+        if (clone._sourceType && !clone._overrides) clone._overrides = {};
         if (clone.type === 'composed' && clone.innerBlocks) {
           clone.innerBlocks = clone.innerBlocks.map(function(ib) {
             var nib = Object.assign({}, ib);
-            if (nib.type === 'text') nib.text = getLocalizedText(nib, 'text', lang);
+            if (nib._sourceType && !nib._overrides) nib._overrides = {};
             return nib;
           });
-        }
-        // Localize hero
-        if (clone.type === 'pimpam_hero' && clone.i18n && clone.i18n[lang]) {
-          var hi = clone.i18n[lang];
-          if (hi.heroTitle) clone.heroTitle = hi.heroTitle;
-          if (hi.heroSubtitle) clone.heroSubtitle = hi.heroSubtitle;
-          if (hi.heroBullets) clone.heroBullets = hi.heroBullets;
-          if (hi.heroCtaText) clone.heroCtaText = hi.heroCtaText;
         }
         return clone;
       });
@@ -2559,23 +2673,29 @@ function EmailComposer() {
     (template.blocks || []).forEach(function(refId) {
       var composed = appState.composedBlocks.find(function(b){return b.id===refId});
       if (composed) {
-        var introText = getLocalizedText(composed, 'introText', lang);
-        newBlocks.push({
-          id: ++blockIdCounter,
-          type: 'composed',
-          composedRef: composed.id,
-          title: composed.title,
-          introText: introText || '',
-          brandStrip: composed.brandStrip || 'none',
-          products: composed.products || [],
-          blockType: composed.blockType || 'product_pair',
-          includeHero: composed.includeHero || false,
-          includeSteps: composed.includeSteps || false,
-          showSeparators: composed.showSeparators || false
+        // Build reference-based composed block inline (same logic as addComposedBlock)
+        var refIbs = (composed.innerBlocks || []).map(function(ib, idx) {
+          var nib = Object.assign({}, ib);
+          if (ib.type === 'text') { nib._sourceType='composed_inner'; nib._composedSourceId=composed.id; nib._innerIdx=idx; nib._overrides={}; delete nib.text; delete nib.i18n; }
+          if (ib.type === 'pimpam_hero') { nib._sourceType='composed_inner'; nib._composedSourceId=composed.id; nib._innerIdx=idx; nib._overrides={}; }
+          return nib;
         });
+        if (refIbs.length === 0 && (composed.introText || composed.blockType)) {
+          refIbs.push({type:'text', _sourceType:'composed_inner', _composedSourceId:composed.id, _innerIdx:-1, _overrides:{}});
+          if (composed.brandStrip && composed.brandStrip !== 'none') refIbs.push({type:'brand_strip', brand:composed.brandStrip});
+          if (composed.includeHero) refIbs.push({type:'pimpam_hero', _sourceType:'composed_inner', _composedSourceId:composed.id, _innerIdx:-2, _overrides:{}});
+          var prods = composed.products || [];
+          if (composed.blockType === 'product_trio' && prods.length >= 3) refIbs.push({type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
+          else if (composed.blockType === 'product_pair' && prods.length >= 2) refIbs.push({type:'product_pair', product1:prods[0], product2:prods[1]});
+          else if (composed.blockType === 'product_single' && prods.length >= 1) refIbs.push({type:'product_single', product1:prods[0]});
+          if (composed.includeSteps) refIbs.push({type:'pimpam_steps'});
+        }
+        newBlocks.push({id: ++blockIdCounter, type:'composed', composedRef:composed.id, title:composed.title, brandStrip:composed.brandStrip||'none', innerBlocks:refIbs});
       } else {
         var textObj = appState.prewrittenTexts.find(function(t){return t.id===refId});
-        if (textObj) newBlocks.push({id: ++blockIdCounter, type:'text', text: getLocalizedText(textObj, 'text', lang)});
+        if (textObj) {
+          newBlocks.push({id: ++blockIdCounter, type:'text', _sourceType:'prewritten', _sourceId:textObj.id, _overrides:{}});
+        }
       }
     });
     setBlocks(newBlocks);
@@ -2595,41 +2715,38 @@ function EmailComposer() {
     var brand = (brandIdx >= 0 && brandIdx < brandOptions.length) ? brandOptions[brandIdx] : 'mix';
     var colorClassMap = {artisjet:'blue', mbo:'purple', pimpam:'orange', flux:'cyan', mix:'gray'};
 
-    // Save blocks enriched with i18n data from sources
+    // Save blocks: keep reference metadata so templates work with reference-based architecture
     var compositorBlocks = blocks.map(function(b) {
       var clone = Object.assign({}, b);
       delete clone.id; // will get new id on load
 
-      // Enrich text blocks: restore ES text + i18n from source if missing
-      if (clone.type === 'text' && !clone.i18n) {
-        // Try to find matching prewritten text by current text content
-        var matchedText = appState.prewrittenTexts.find(function(t) {
-          return t.text === clone.text || (clone._textEs && t.text === clone._textEs) ||
-            (t.i18n && Object.keys(t.i18n).some(function(l){ return t.i18n[l] && t.i18n[l].text === clone.text; }));
-        });
-        if (matchedText) {
-          clone.text = matchedText.text; // ES version
-          if (matchedText.i18n) clone.i18n = matchedText.i18n;
+      // For reference-based text blocks: store _sourceType, _sourceId, _overrides
+      // Also expand i18n from source for backward compat when loading without source defs
+      if (clone.type === 'text' && clone._sourceType === 'prewritten' && clone._sourceId) {
+        var src = (appState.prewrittenTexts || []).find(function(t){ return t.id === clone._sourceId; });
+        if (src) {
+          clone.text = src.text; // Store ES text as fallback
+          if (src.i18n) clone.i18n = src.i18n;
         }
       }
-      delete clone._textEs;
+      if (clone.type === 'text' && clone._sourceType === 'manual') {
+        clone.text = (clone._overrides && clone._overrides.es) || clone.text || '';
+      }
 
-      // Enrich composed blocks: grab full innerBlocks with i18n from source
+      // For composed blocks: store full innerBlocks from source for backward compat
       if (clone.type === 'composed' && clone.composedRef) {
         var srcComposed = appState.composedBlocks.find(function(cb){return cb.id===clone.composedRef});
         if (srcComposed && srcComposed.innerBlocks) {
-          clone.innerBlocks = srcComposed.innerBlocks;
+          // Store source innerBlocks with i18n for backward compat
+          clone._sourceInnerBlocks = srcComposed.innerBlocks;
         }
       }
 
-      // Enrich hero blocks: grab i18n from standalone source
-      if (clone.type === 'pimpam_hero' && !clone.i18n) {
-        var matchedHero = appState.standaloneBlocks.find(function(sb) {
-          return sb.blockType === 'pimpam_hero' && sb.config &&
-            (sb.config.heroImage === clone.heroImage || sb.config.heroTitle === clone.heroTitle);
-        });
-        if (matchedHero && matchedHero.config && matchedHero.config.i18n) {
-          clone.i18n = matchedHero.config.i18n;
+      // For hero blocks: store i18n from standalone source
+      if (clone.type === 'pimpam_hero' && clone._sourceType === 'standalone' && clone._sourceId) {
+        var srcSb = (appState.standaloneBlocks || []).find(function(sb){ return sb.id === clone._sourceId; });
+        if (srcSb && srcSb.config && srcSb.config.i18n) {
+          clone.i18n = srcSb.config.i18n;
         }
       }
 
@@ -2693,7 +2810,7 @@ function EmailComposer() {
 
   function copyHtml() {
     var campaign = generateCampaignName(blocks, lang);
-    var html = generateFullHtml(blocks, appState.products, lang, appState.brands);
+    var html = generateFullHtml(blocks, appState.products, lang, appState.brands, appState);
     html = addUtmParams(html, campaign, lang);
     try {
       navigator.clipboard.write([
@@ -3069,7 +3186,7 @@ function EmailComposer() {
     persistState(Object.assign({}, appState, {standaloneBlocks: blocks}));
   }
 
-  var fullHtml = generateFullHtml(blocks, appState.products, lang, appState.brands);
+  var fullHtml = generateFullHtml(blocks, appState.products, lang, appState.brands, appState);
   var sizeKb = (new Blob([fullHtml]).size / 1024).toFixed(1);
 
   // COMPOSITOR MODE RENDER
@@ -3079,8 +3196,8 @@ function EmailComposer() {
         e('div', {className:'header-left'},
           e('div', {className:'logo'}, 'B'),
           e('div', null,
-            e('div', {className:'header-title'}, 'Bomedia Email Composer'),
-            e('div', {className:'header-sub'}, 'Compón emails con bloques de producto UV-LED')
+            e('div', {className:'header-title'}, 'Bomedia Email Composer v2.0'),
+            e('div', {className:'header-sub'}, 'App desarrollada por Edu Riera (Bomedia SL)')
           )
         ),
         e('div', {className:'header-right'},
@@ -3207,6 +3324,8 @@ function EmailComposer() {
                     key: block.id,
                     block: block,
                     products: appState.products,
+                    lang: lang,
+                    appState: appState,
                     onChange: function(u){updateBlock(block.id,u)},
                     onDelete: function(){deleteBlock(block.id)},
                     onMoveUp: function(){moveBlock(block.id,-1)},
@@ -3223,10 +3342,10 @@ function EmailComposer() {
                       var existingText = '';
                       blocks.forEach(function(b){
                         if(b.id === blockId) {
-                          existingText = b.text || '';
+                          existingText = b._sourceType ? getTextInLanguage(b, lang, appState) : (b.text || '');
                           // For composed blocks, find first text inner block
                           if (b.type === 'composed' && b.innerBlocks) {
-                            b.innerBlocks.forEach(function(ib){ if(ib.type==='text' && !existingText) existingText = ib.text||''; });
+                            b.innerBlocks.forEach(function(ib){ if(ib.type==='text' && !existingText) existingText = ib._sourceType ? getTextInLanguage(ib, lang, appState) : (ib.text||''); });
                           }
                         }
                       });
@@ -3321,9 +3440,10 @@ function EmailComposer() {
                     if (b.id !== bid) return b;
                     if (b.type === 'composed' && b.innerBlocks) {
                       var found = false;
-                      var nibs = b.innerBlocks.map(function(ib){ if(ib.type==='text' && !found){ found=true; return Object.assign({},ib,{text:(ib.text||'')+'\n\n'+aiResult}); } return ib; });
+                      var nibs = b.innerBlocks.map(function(ib){ if(ib.type==='text' && !found){ found=true; var curText = ib._sourceType ? getTextInLanguage(ib, lang, appState) : (ib.text||''); if(ib._sourceType){var no=Object.assign({},ib._overrides||{});no[lang]=curText+'\n\n'+aiResult;return Object.assign({},ib,{_overrides:no});} return Object.assign({},ib,{text:curText+'\n\n'+aiResult}); } return ib; });
                       return Object.assign({}, b, {innerBlocks: nibs});
                     }
+                    if(b._sourceType){var no2=Object.assign({},b._overrides||{});var ct=getTextInLanguage(b,lang,appState);no2[lang]=ct+'\n\n'+aiResult;return Object.assign({},b,{_overrides:no2});}
                     return Object.assign({}, b, {text: (b.text||'') + '\n\n' + aiResult});
                   }); });
                 }
@@ -3336,9 +3456,10 @@ function EmailComposer() {
                     if (b.id !== bid) return b;
                     if (b.type === 'composed' && b.innerBlocks) {
                       var found = false;
-                      var nibs = b.innerBlocks.map(function(ib){ if(ib.type==='text' && !found){ found=true; return Object.assign({},ib,{text:aiResult}); } return ib; });
+                      var nibs = b.innerBlocks.map(function(ib){ if(ib.type==='text' && !found){ found=true; if(ib._sourceType){var no=Object.assign({},ib._overrides||{});no[lang]=aiResult;return Object.assign({},ib,{_overrides:no});} return Object.assign({},ib,{text:aiResult}); } return ib; });
                       return Object.assign({}, b, {innerBlocks: nibs});
                     }
+                    if(b._sourceType){var no3=Object.assign({},b._overrides||{});no3[lang]=aiResult;return Object.assign({},b,{_overrides:no3});}
                     return Object.assign({}, b, {text: aiResult});
                   }); });
                 }
@@ -3385,8 +3506,8 @@ function EmailComposer() {
       e('div', {className:'header-left'},
         e('div', {className:'logo'}, 'B'),
         e('div', null,
-          e('div', {className:'header-title'}, 'Bomedia Admin Panel'),
-          e('div', {className:'header-sub'}, 'Gestiona productos, bloques, textos y plantillas')
+          e('div', {className:'header-title'}, 'Bomedia Admin Panel v2.0'),
+          e('div', {className:'header-sub'}, 'App desarrollada por Edu Riera (Bomedia SL)')
         )
       ),
       e('div', {className:'header-right'},
