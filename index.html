@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bomedia Email Composer V2</title>
+<title>Bomedia Email Composer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -1996,8 +1996,9 @@ function EmailComposer() {
   var _boPassError = useState(false);
   var boPassError = _boPassError[0], setBoPassError = _boPassError[1];
 
-  var DEFAULT_BO_PASS = 'bomedia-edu';
-  var DEFAULT_DATA_PASS = 'bomedia-data';
+  // Default password hashes (not stored in clear text)
+  var DEFAULT_BO_HASH = 'h_tntwgw';
+  var DEFAULT_DATA_HASH = 'h_3vqgao';
 
   // Simple hash for password storage (not crypto-grade, but sufficient for client-side app)
   function simpleHash(str) {
@@ -2010,9 +2011,10 @@ function EmailComposer() {
     return 'h_' + Math.abs(hash).toString(36);
   }
 
-  function checkPassword(input, storedHash, defaultPass) {
-    if (!storedHash) return input === defaultPass;
-    return simpleHash(input) === storedHash;
+  function checkPassword(input, storedHash, defaultHash) {
+    var inputHash = simpleHash(input);
+    if (storedHash) return inputHash === storedHash;
+    return inputHash === defaultHash;
   }
 
   function tryOpenBackoffice() {
@@ -2023,7 +2025,7 @@ function EmailComposer() {
   }
 
   function submitBoPassword() {
-    if (checkPassword(boPass, appState.boPasswordHash, DEFAULT_BO_PASS)) {
+    if (checkPassword(boPass, appState.boPasswordHash, DEFAULT_BO_HASH)) {
       setBoUnlocked(true);
       setShowBoLogin(false);
       setAppMode('backoffice');
@@ -2037,7 +2039,7 @@ function EmailComposer() {
   function requireDataPassword(action) {
     var pass = window.prompt('Esta acción requiere el password de datos:');
     if (!pass) return false;
-    if (checkPassword(pass, appState.dataPasswordHash, DEFAULT_DATA_PASS)) return true;
+    if (checkPassword(pass, appState.dataPasswordHash, DEFAULT_DATA_HASH)) return true;
     alert('Password de datos incorrecto.');
     return false;
   }
@@ -2103,6 +2105,52 @@ function EmailComposer() {
   useEffect(function(){
     try { localStorage.setItem('bomedia_draft_blocks', JSON.stringify(blocks)); } catch(e){}
   }, [blocks]);
+
+  // Re-localize blocks when language changes
+  var _prevLang = useRef(lang);
+  useEffect(function(){
+    if (_prevLang.current === lang) return;
+    _prevLang.current = lang;
+    setBlocks(function(prev){
+      var changed = false;
+      var updated = prev.map(function(b) {
+        // Re-localize text blocks that have i18n
+        if (b.type === 'text' && b.i18n) {
+          var newText = getLocalizedText(b, 'text', lang);
+          if (newText && newText !== b.text) { changed = true; return Object.assign({}, b, {text: newText}); }
+        }
+        // Re-localize hero blocks that have i18n
+        if (b.type === 'pimpam_hero' && b.i18n) {
+          var hi = (lang && lang !== 'es' && b.i18n[lang]) ? b.i18n[lang] : null;
+          var nb = Object.assign({}, b);
+          if (hi) {
+            if (hi.heroTitle) nb.heroTitle = hi.heroTitle;
+            if (hi.heroSubtitle) nb.heroSubtitle = hi.heroSubtitle;
+            if (hi.heroBullets) nb.heroBullets = hi.heroBullets;
+            if (hi.heroCtaText) nb.heroCtaText = hi.heroCtaText;
+          } else {
+            // Back to ES defaults from i18n source — use original config fields
+            // (originals are the direct fields set when block was first created in ES)
+          }
+          changed = true; return nb;
+        }
+        // Re-localize composed block text innerBlocks
+        if (b.type === 'composed' && b.innerBlocks) {
+          var ibChanged = false;
+          var newIbs = b.innerBlocks.map(function(ib) {
+            if (ib.type === 'text' && ib.i18n) {
+              var newText = getLocalizedText(ib, 'text', lang);
+              if (newText && newText !== ib.text) { ibChanged = true; return Object.assign({}, ib, {text: newText}); }
+            }
+            return ib;
+          });
+          if (ibChanged) { changed = true; return Object.assign({}, b, {innerBlocks: newIbs}); }
+        }
+        return b;
+      });
+      return changed ? updated : prev;
+    });
+  }, [lang]);
 
   var _copied = useState('');
   var copied = _copied[0], setCopied = _copied[1];
@@ -2576,8 +2624,57 @@ function EmailComposer() {
     return merged;
   }
 
+  function autoBackup(reason) {
+    try {
+      var backupKey = 'bomedia_backup_' + Date.now();
+      var backupData = JSON.stringify(appState);
+      localStorage.setItem(backupKey, backupData);
+      // Keep max 5 backups, delete oldest
+      var allKeys = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('bomedia_backup_') === 0) allKeys.push(k);
+      }
+      allKeys.sort();
+      while (allKeys.length > 5) { localStorage.removeItem(allKeys.shift()); }
+      console.log('Auto-backup created: ' + backupKey + ' (' + reason + ')');
+      return backupKey;
+    } catch(e) {
+      console.error('Auto-backup failed:', e);
+      return null;
+    }
+  }
+
+  function restoreBackup() {
+    if (!requireDataPassword()) return;
+    var allKeys = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('bomedia_backup_') === 0) allKeys.push(k);
+    }
+    if (allKeys.length === 0) { alert('No hay backups disponibles.'); return; }
+    allKeys.sort().reverse();
+    var msg = 'Backups disponibles:\n\n' + allKeys.map(function(k, idx) {
+      var ts = parseInt(k.replace('bomedia_backup_', ''));
+      var d = new Date(ts);
+      return (idx+1) + ' — ' + d.toLocaleString();
+    }).join('\n') + '\n\nEscribe el número para restaurar (o vacío para cancelar):';
+    var choice = window.prompt(msg);
+    if (!choice) return;
+    var idx = parseInt(choice) - 1;
+    if (idx < 0 || idx >= allKeys.length) { alert('Opción no válida.'); return; }
+    try {
+      var data = JSON.parse(localStorage.getItem(allKeys[idx]));
+      if (data && window.confirm('¿Restaurar backup del ' + new Date(parseInt(allKeys[idx].replace('bomedia_backup_',''))).toLocaleString() + '?')) {
+        persistState(data);
+        alert('Backup restaurado.');
+      }
+    } catch(e) { alert('Error al restaurar: ' + e.message); }
+  }
+
   function importJSON() {
     if (!requireDataPassword()) return;
+    autoBackup('pre-import');
     var input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/json';
@@ -2624,6 +2721,7 @@ function EmailComposer() {
   function resetToDefaults() {
     if (!requireDataPassword()) return;
     if(window.confirm('¿Restaurar configuración original? Se perderán todos los cambios.')) {
+      autoBackup('pre-reset');
       var defaultState = getDefaultState();
       persistState(defaultState);
     }
@@ -3095,6 +3193,34 @@ function EmailComposer() {
     );
   }
 
+  // i18n coverage indicator: shows flag badges for each language
+  function i18nBadges(item, type) {
+    // type: 'product' | 'text' | 'hero' | 'composed'
+    var badges = LANGS.filter(function(l){return l !== 'es'}).map(function(l) {
+      var has = false;
+      if (type === 'product' || type === 'text') {
+        has = item.i18n && item.i18n[l] && Object.keys(item.i18n[l]).length > 0;
+      } else if (type === 'hero') {
+        var cfg = item.config || item;
+        has = cfg.i18n && cfg.i18n[l] && (cfg.i18n[l].heroTitle || cfg.i18n[l].heroSubtitle);
+      } else if (type === 'composed') {
+        has = item.i18n && item.i18n[l];
+        // Also check innerBlocks
+        if (!has && item.innerBlocks) {
+          has = item.innerBlocks.some(function(ib) {
+            return ib.i18n && ib.i18n[l];
+          });
+        }
+      }
+      var flag = {fr:'🇫🇷',de:'🇩🇪',en:'🇬🇧',nl:'🇳🇱'}[l] || l;
+      return e('span', {key:l, title: l.toUpperCase() + (has?' ✓':' ✗'), style:{
+        fontSize:'11px', opacity: has ? 1 : 0.25, filter: has ? 'none' : 'grayscale(1)',
+        marginRight:'1px'
+      }}, flag);
+    });
+    return e('span', {style:{display:'inline-flex',gap:'1px',marginLeft:'6px'}}, badges);
+  }
+
   // BACKOFFICE MODE RENDER
   return e('div', {className:'app'},
     e('div', {className:'header'},
@@ -3113,6 +3239,7 @@ function EmailComposer() {
         syncStatus === 'saved' && e('span', {style:{color:'#16a34a',fontSize:'11px',fontWeight:600}}, '☁ Guardado'),
         e('button', {className:'btn btn-primary btn-sm', onClick:exportJSON}, 'Exportar JSON'),
         e('button', {className:'btn btn-primary btn-sm', onClick:importJSON}, 'Importar JSON'),
+        e('button', {className:'btn btn-ghost btn-sm', onClick:restoreBackup, title:'Restaurar un backup automático'}, 'Backup'),
         e('button', {className:'btn btn-ghost btn-sm', onClick:resetToDefaults}, 'Restaurar')
       )
     ),
@@ -3160,7 +3287,7 @@ function EmailComposer() {
                 var pPrice = boLangFilter !== 'all' && p.i18n && p.i18n[boLangFilter] && p.i18n[boLangFilter].price ? p.i18n[boLangFilter].price : p.price;
                 return e('tr', {key:p.id},
                   e('td', null, p.img && e('img', {src:p.img, className:'product-thumb', alt:pName, onError:function(ev){ev.target.style.display='none'}})),
-                  e('td', null, pName),
+                  e('td', null, pName, i18nBadges(p, 'product')),
                   e('td', null, p.brand),
                   e('td', null, pPrice),
                   e('td', null,
@@ -3224,7 +3351,7 @@ function EmailComposer() {
                 e('div', {className:'block-list-content'},
                   e('div', {className:'block-list-title'},
                     e('span', {className:'color-tag ' + b.colorTag}),
-                    b.title
+                    b.title, i18nBadges(b, 'composed')
                   ),
                   e('div', {className:'block-list-desc'}, b.desc)
                 ),
@@ -3254,7 +3381,7 @@ function EmailComposer() {
               var tText = boLangFilter !== 'all' && t.i18n && t.i18n[boLangFilter] && t.i18n[boLangFilter].text ? t.i18n[boLangFilter].text : t.text;
               return e('div', {key:t.id, className:'list-item', style:{opacity:tVis?1:0.5}},
                 e('div', {className:'list-item-info'},
-                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.icon + ' ' + t.name, t.brand && t.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, t.brand) : null),
+                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, t.icon + ' ' + t.name, i18nBadges(t, 'text'), t.brand && t.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, t.brand) : null),
                   e('div', {style:{fontSize:'11px',color:'#6b7280'}}, tText.substring(0,80) + '...')
                 ),
                 e('div', {className:'list-item-actions'},
@@ -3310,7 +3437,7 @@ function EmailComposer() {
               var sbVis = isVisibleForLang(sb, boLangFilter);
               return e('div', {key:sb.id, className:'list-item', style:{opacity:sbVis?1:0.5}},
                 e('div', {className:'list-item-info'},
-                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, sb.icon + ' ' + sb.title, sb.brand && sb.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, sb.brand) : null),
+                  e('div', {style:{fontWeight:600,marginBottom:'4px'}}, sb.icon + ' ' + sb.title, i18nBadges(sb, sb.blockType === 'pimpam_hero' ? 'hero' : 'text'), sb.brand && sb.brand !== 'mix' ? e('span', {style:{fontSize:'10px',marginLeft:'6px',padding:'1px 6px',borderRadius:'4px',background:'#e0e7ff',color:'#4338ca'}}, sb.brand) : null),
                   e('div', {style:{fontSize:'11px',color:'#6b7280'}}, sb.desc + ' · ' + sb.section)
                 ),
                 e('div', {className:'list-item-actions'},
@@ -3341,7 +3468,7 @@ function EmailComposer() {
               e('button', {className:'btn btn-primary btn-sm', onClick:function(){
                 var current = window.prompt('Password actual de backoffice:');
                 if (!current) return;
-                if (!checkPassword(current, appState.boPasswordHash, DEFAULT_BO_PASS)) { alert('Password incorrecto.'); return; }
+                if (!checkPassword(current, appState.boPasswordHash, DEFAULT_BO_HASH)) { alert('Password incorrecto.'); return; }
                 var newPass = window.prompt('Nuevo password de backoffice:');
                 if (!newPass || !newPass.trim()) { alert('Cancelado.'); return; }
                 var confirm2 = window.prompt('Repite el nuevo password:');
@@ -3353,7 +3480,7 @@ function EmailComposer() {
               e('button', {className:'btn btn-primary btn-sm', onClick:function(){
                 var current = window.prompt('Password actual de datos:');
                 if (!current) return;
-                if (!checkPassword(current, appState.dataPasswordHash, DEFAULT_DATA_PASS)) { alert('Password incorrecto.'); return; }
+                if (!checkPassword(current, appState.dataPasswordHash, DEFAULT_DATA_HASH)) { alert('Password incorrecto.'); return; }
                 var newPass = window.prompt('Nuevo password de datos:');
                 if (!newPass || !newPass.trim()) { alert('Cancelado.'); return; }
                 var confirm2 = window.prompt('Repite el nuevo password:');
