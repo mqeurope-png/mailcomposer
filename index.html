@@ -296,6 +296,32 @@ function mergeI18nFromDefaults(loadedData) {
       return t;
     });
   }
+  // Merge standaloneBlocks i18n (hero blocks with config.i18n)
+  if (loadedData.standaloneBlocks && defaults.standaloneBlocks) {
+    var sbMap = {};
+    defaults.standaloneBlocks.forEach(function(dsb){ sbMap[dsb.id] = dsb; });
+    loadedData.standaloneBlocks = loadedData.standaloneBlocks.map(function(sb) {
+      var dsb = sbMap[sb.id];
+      if (dsb && dsb.config && dsb.config.i18n && sb.config && !sb.config.i18n) { sb.config.i18n = dsb.config.i18n; }
+      return sb;
+    });
+  }
+  // Merge composedBlocks innerBlocks i18n (hero/text innerBlocks)
+  if (loadedData.composedBlocks && defaults.composedBlocks) {
+    var cbMap = {};
+    defaults.composedBlocks.forEach(function(dcb){ cbMap[dcb.id] = dcb; });
+    loadedData.composedBlocks = loadedData.composedBlocks.map(function(cb) {
+      var dcb = cbMap[cb.id];
+      if (dcb && dcb.innerBlocks && cb.innerBlocks) {
+        cb.innerBlocks = cb.innerBlocks.map(function(ib, idx) {
+          var dib = dcb.innerBlocks[idx];
+          if (dib && dib.i18n && !ib.i18n) { ib.i18n = dib.i18n; }
+          return ib;
+        });
+      }
+      return cb;
+    });
+  }
   return loadedData;
 }
 
@@ -569,15 +595,16 @@ function freebirdHtml(config, lang) {
 
 function pimpamHeroHtml(config, lang) {
   var cfg = config || {};
-  var hi = (lang && cfg.i18n && cfg.i18n[lang]) ? cfg.i18n[lang] : null;
-  var imgUrl = (hi && hi.heroImage) || cfg.heroImage || 'https://pimpam-vending.com/wp-content/uploads/2026/01/ChatGPT-Image-22-ene-2026-16_17_36.png';
+  // Apply i18n overrides if available
+  var hi = (cfg.i18n && lang && lang !== 'es' && cfg.i18n[lang]) ? cfg.i18n[lang] : null;
+  var imgUrl = cfg.heroImage || 'https://pimpam-vending.com/wp-content/uploads/2026/01/ChatGPT-Image-22-ene-2026-16_17_36.png';
   var title = (hi && hi.heroTitle) || cfg.heroTitle || 'Personaliza, imprime y vende… sin operario';
   var subtitle = (hi && hi.heroSubtitle) || cfg.heroSubtitle || 'Impresión UV-LED directa sobre fundas de móvil en autoservicio completo.';
   var bullets = (hi && hi.heroBullets) || cfg.heroBullets || ['Autoservicio 100% — sin personal','Pago con tarjeta, móvil o QR','Funda impresa en HD en 30 segundos','Compatible con +600 modelos de móvil'];
-  var imgLink = (hi && hi.heroImageLink) || cfg.heroImageLink || '';
+  var imgLink = cfg.heroImageLink || '';
   var ctaText = (hi && hi.heroCtaText) || cfg.heroCtaText || '';
-  var ctaUrl = (hi && hi.heroCtaUrl) || cfg.heroCtaUrl || '';
-  var bgColor = (hi && hi.heroBgColor) || cfg.heroBgColor || '#fff';
+  var ctaUrl = (hi && hi.heroCtaUrl) || cfg.heroCtaUrl || cfg.heroCtaUrl || '';
+  var bgColor = cfg.heroBgColor || '#fff';
 
   // Detect dark background: parse hex and check luminance
   var isDark = false;
@@ -663,7 +690,7 @@ function generateFullHtml(blocks, products, lang, brands) {
   for (var i = 0; i < blocks.length; i++) {
     var b = blocks[i];
     switch(b.type) {
-      case 'text': rows += textBlockHtml(b.text); break;
+      case 'text': rows += textBlockHtml(b.i18n ? getLocalizedText(b, 'text', lang) : b.text); break;
       case 'brand_artisjet': rows += brandStripHtml('artisjet', lang, brands); break;
       case 'brand_mbo': rows += brandStripHtml('mbo', lang, brands); break;
       case 'brand_pimpam': rows += brandStripHtml('pimpam', lang, brands); break;
@@ -2319,14 +2346,10 @@ function EmailComposer() {
         // Localize hero
         if (clone.type === 'pimpam_hero' && clone.i18n && clone.i18n[lang]) {
           var hi = clone.i18n[lang];
-          if (hi.heroImage) clone.heroImage = hi.heroImage;
           if (hi.heroTitle) clone.heroTitle = hi.heroTitle;
           if (hi.heroSubtitle) clone.heroSubtitle = hi.heroSubtitle;
           if (hi.heroBullets) clone.heroBullets = hi.heroBullets;
-          if (hi.heroImageLink) clone.heroImageLink = hi.heroImageLink;
           if (hi.heroCtaText) clone.heroCtaText = hi.heroCtaText;
-          if (hi.heroCtaUrl) clone.heroCtaUrl = hi.heroCtaUrl;
-          if (hi.heroBgColor) clone.heroBgColor = hi.heroBgColor;
         }
         return clone;
       });
