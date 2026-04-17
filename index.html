@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bomedia Email Composer</title>
+<title>Bomedia Email Composer V2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -1996,7 +1996,24 @@ function EmailComposer() {
   var _boPassError = useState(false);
   var boPassError = _boPassError[0], setBoPassError = _boPassError[1];
 
-  var BO_PASSWORD = 'bomedia-edu';
+  var DEFAULT_BO_PASS = 'bomedia-edu';
+  var DEFAULT_DATA_PASS = 'bomedia-data';
+
+  // Simple hash for password storage (not crypto-grade, but sufficient for client-side app)
+  function simpleHash(str) {
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+      var ch = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + ch;
+      hash = hash & hash; // Convert to 32-bit int
+    }
+    return 'h_' + Math.abs(hash).toString(36);
+  }
+
+  function checkPassword(input, storedHash, defaultPass) {
+    if (!storedHash) return input === defaultPass;
+    return simpleHash(input) === storedHash;
+  }
 
   function tryOpenBackoffice() {
     if (boUnlocked) { setAppMode('backoffice'); return; }
@@ -2006,7 +2023,7 @@ function EmailComposer() {
   }
 
   function submitBoPassword() {
-    if (boPass === BO_PASSWORD) {
+    if (checkPassword(boPass, appState.boPasswordHash, DEFAULT_BO_PASS)) {
       setBoUnlocked(true);
       setShowBoLogin(false);
       setAppMode('backoffice');
@@ -2015,6 +2032,14 @@ function EmailComposer() {
     } else {
       setBoPassError(true);
     }
+  }
+
+  function requireDataPassword(action) {
+    var pass = window.prompt('Esta acción requiere el password de datos:');
+    if (!pass) return false;
+    if (checkPassword(pass, appState.dataPasswordHash, DEFAULT_DATA_PASS)) return true;
+    alert('Password de datos incorrecto.');
+    return false;
   }
 
   var _appState = useState(function(){
@@ -2531,6 +2556,7 @@ function EmailComposer() {
   }
 
   function exportJSON() {
+    if (!requireDataPassword()) return;
     var dataStr = JSON.stringify(appState, null, 2);
     var blob = new Blob([dataStr], {type:'application/json'});
     var url = URL.createObjectURL(blob);
@@ -2551,6 +2577,7 @@ function EmailComposer() {
   }
 
   function importJSON() {
+    if (!requireDataPassword()) return;
     var input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/json';
@@ -2595,6 +2622,7 @@ function EmailComposer() {
   }
 
   function resetToDefaults() {
+    if (!requireDataPassword()) return;
     if(window.confirm('¿Restaurar configuración original? Se perderán todos los cambios.')) {
       var defaultState = getDefaultState();
       persistState(defaultState);
@@ -3304,6 +3332,39 @@ function EmailComposer() {
             e('p', {style:{fontSize:'12px',color:'#6b7280',marginBottom:'8px'}}, 'Se guarda solo en tu navegador. Necesaria para el asistente IA.'),
             e('input', {className:'form-input', type:'password', value:openaiKey, onChange:function(ev){saveOpenaiKey(ev.target.value)}, placeholder:'sk-...', style:{fontFamily:'monospace'}}),
             openaiKey && e('div', {style:{marginTop:'8px',fontSize:'12px',color:'#16a34a',fontWeight:500}}, '✓ API key configurada')
+          ),
+
+          e('div', {style:{marginBottom:'24px',padding:'16px',background:'#f9fafb',borderRadius:'10px',border:'1px solid #e5e7eb'}},
+            e('label', {className:'form-label', style:{marginBottom:'6px',display:'block',fontWeight:600}}, 'Contraseñas'),
+            e('p', {style:{fontSize:'12px',color:'#6b7280',marginBottom:'12px'}}, 'Cambia el password de backoffice o el de datos (importar/exportar/restaurar). Introduce el password actual y el nuevo.'),
+            e('div', {style:{display:'flex',gap:'12px',flexWrap:'wrap'}},
+              e('button', {className:'btn btn-primary btn-sm', onClick:function(){
+                var current = window.prompt('Password actual de backoffice:');
+                if (!current) return;
+                if (!checkPassword(current, appState.boPasswordHash, DEFAULT_BO_PASS)) { alert('Password incorrecto.'); return; }
+                var newPass = window.prompt('Nuevo password de backoffice:');
+                if (!newPass || !newPass.trim()) { alert('Cancelado.'); return; }
+                var confirm2 = window.prompt('Repite el nuevo password:');
+                if (newPass !== confirm2) { alert('No coinciden.'); return; }
+                var newState = Object.assign({}, appState, {boPasswordHash: simpleHash(newPass)});
+                persistState(newState);
+                alert('Password de backoffice cambiado.');
+              }}, 'Cambiar pass backoffice'),
+              e('button', {className:'btn btn-primary btn-sm', onClick:function(){
+                var current = window.prompt('Password actual de datos:');
+                if (!current) return;
+                if (!checkPassword(current, appState.dataPasswordHash, DEFAULT_DATA_PASS)) { alert('Password incorrecto.'); return; }
+                var newPass = window.prompt('Nuevo password de datos:');
+                if (!newPass || !newPass.trim()) { alert('Cancelado.'); return; }
+                var confirm2 = window.prompt('Repite el nuevo password:');
+                if (newPass !== confirm2) { alert('No coinciden.'); return; }
+                var newState = Object.assign({}, appState, {dataPasswordHash: simpleHash(newPass)});
+                persistState(newState);
+                alert('Password de datos cambiado.');
+              }}, 'Cambiar pass datos'),
+              appState.boPasswordHash && e('span', {style:{fontSize:'11px',color:'#16a34a',alignSelf:'center'}}, '✓ Pass backoffice personalizado'),
+              appState.dataPasswordHash && e('span', {style:{fontSize:'11px',color:'#16a34a',alignSelf:'center'}}, '✓ Pass datos personalizado')
+            )
           ),
 
           e('div', {style:{marginBottom:'24px'}},
