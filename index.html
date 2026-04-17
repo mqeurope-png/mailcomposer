@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bomedia Email Composer v5</title>
+<title>Bomedia Email Composer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -2809,12 +2809,12 @@ function EmailComposer() {
   }
 
   function importJSON() {
-    if (!requireDataPassword()) return;
-    autoBackup('pre-import');
     var input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/json';
     input.onchange = function(e) {
+      if (!requireDataPassword()) return;
+      autoBackup('pre-import');
       var file = e.target.files[0];
       var reader = new FileReader();
       reader.onload = function(evt) {
