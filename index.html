@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bomedia Email Composer</title>
+<title>Bomedia Email Composer v3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -374,6 +374,76 @@ function saveToSupabase(data) {
     .catch(function() {
       // Silent fail — localStorage is primary
     });
+}
+
+// ─── SUPABASE BACKUPS ───────────────────────────────────────
+function supabaseBackupFetch(method, rowId, body) {
+  var url = SUPABASE_URL + '/rest/v1/' + SUPABASE_TABLE;
+  if (method === 'GET') {
+    url += '?select=id,updated_at&id=like.backup_%&order=updated_at.desc&limit=10';
+  } else if (method === 'POST') {
+    // Insert new row — use Prefer: return=minimal
+  } else {
+    url += '?id=eq.' + rowId;
+  }
+  var opts = {
+    method: method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=minimal' : (method === 'GET' ? '' : 'return=minimal')
+    }
+  };
+  if (method === 'GET') { delete opts.headers['Prefer']; }
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(url, opts);
+}
+
+function saveBackupToSupabase(data, reason) {
+  var backupId = 'backup_' + Date.now();
+  var body = { id: backupId, data: data, updated_at: new Date().toISOString() };
+  supabaseBackupFetch('POST', null, body).then(function(r) {
+    if (!r.ok) {
+      // If POST fails (row might exist), silently fail
+      console.log('Supabase backup save status:', r.status);
+    } else {
+      console.log('Supabase backup saved:', backupId, '(' + reason + ')');
+    }
+    // Cleanup: keep max 5 backups in Supabase
+    pruneSupabaseBackups();
+  }).catch(function(e) { console.error('Supabase backup error:', e); });
+  return backupId;
+}
+
+function pruneSupabaseBackups() {
+  supabaseBackupFetch('GET').then(function(r){ return r.json(); }).then(function(rows) {
+    if (rows && rows.length > 5) {
+      var toDelete = rows.slice(5);
+      toDelete.forEach(function(row) {
+        var delUrl = SUPABASE_URL + '/rest/v1/' + SUPABASE_TABLE + '?id=eq.' + row.id;
+        fetch(delUrl, { method:'DELETE', headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY} });
+      });
+    }
+  }).catch(function(){});
+}
+
+function listSupabaseBackups() {
+  return supabaseBackupFetch('GET').then(function(r){ return r.json(); }).then(function(rows) {
+    return (rows || []).map(function(row) {
+      return { id: row.id, date: row.updated_at };
+    });
+  }).catch(function(){ return []; });
+}
+
+function loadSupabaseBackup(backupId) {
+  var url = SUPABASE_URL + '/rest/v1/' + SUPABASE_TABLE + '?select=data&id=eq.' + backupId;
+  return fetch(url, {
+    headers: {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+  }).then(function(r){ return r.json(); }).then(function(rows) {
+    if (rows && rows.length > 0 && rows[0].data) return rows[0].data;
+    return null;
+  }).catch(function(){ return null; });
 }
 
 // ─── LOCAL STORAGE ───────────────────────────────────────────
@@ -2626,10 +2696,10 @@ function EmailComposer() {
 
   function autoBackup(reason) {
     try {
+      // Save to localStorage
       var backupKey = 'bomedia_backup_' + Date.now();
       var backupData = JSON.stringify(appState);
       localStorage.setItem(backupKey, backupData);
-      // Keep max 5 backups, delete oldest
       var allKeys = [];
       for (var i = 0; i < localStorage.length; i++) {
         var k = localStorage.key(i);
@@ -2637,6 +2707,8 @@ function EmailComposer() {
       }
       allKeys.sort();
       while (allKeys.length > 5) { localStorage.removeItem(allKeys.shift()); }
+      // Save to Supabase too
+      saveBackupToSupabase(appState, reason);
       console.log('Auto-backup created: ' + backupKey + ' (' + reason + ')');
       return backupKey;
     } catch(e) {
@@ -2647,29 +2719,62 @@ function EmailComposer() {
 
   function restoreBackup() {
     if (!requireDataPassword()) return;
-    var allKeys = [];
+    // Gather local backups
+    var localKeys = [];
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
-      if (k && k.indexOf('bomedia_backup_') === 0) allKeys.push(k);
+      if (k && k.indexOf('bomedia_backup_') === 0) localKeys.push(k);
     }
-    if (allKeys.length === 0) { alert('No hay backups disponibles.'); return; }
-    allKeys.sort().reverse();
-    var msg = 'Backups disponibles:\n\n' + allKeys.map(function(k, idx) {
-      var ts = parseInt(k.replace('bomedia_backup_', ''));
-      var d = new Date(ts);
-      return (idx+1) + ' — ' + d.toLocaleString();
-    }).join('\n') + '\n\nEscribe el número para restaurar (o vacío para cancelar):';
-    var choice = window.prompt(msg);
-    if (!choice) return;
-    var idx = parseInt(choice) - 1;
-    if (idx < 0 || idx >= allKeys.length) { alert('Opción no válida.'); return; }
-    try {
-      var data = JSON.parse(localStorage.getItem(allKeys[idx]));
-      if (data && window.confirm('¿Restaurar backup del ' + new Date(parseInt(allKeys[idx].replace('bomedia_backup_',''))).toLocaleString() + '?')) {
-        persistState(data);
-        alert('Backup restaurado.');
+    localKeys.sort().reverse();
+    // Also fetch Supabase backups
+    listSupabaseBackups().then(function(sbBackups) {
+      var entries = [];
+      // Add local backups
+      localKeys.forEach(function(k) {
+        var ts = parseInt(k.replace('bomedia_backup_', ''));
+        entries.push({source:'local', key:k, ts:ts, label:new Date(ts).toLocaleString() + ' (local)'});
+      });
+      // Add Supabase backups (avoid duplicates by timestamp)
+      sbBackups.forEach(function(sb) {
+        var ts = parseInt(sb.id.replace('backup_', ''));
+        var isDupe = entries.some(function(e){ return Math.abs(e.ts - ts) < 2000; });
+        if (!isDupe) {
+          entries.push({source:'supabase', key:sb.id, ts:ts, label:new Date(ts).toLocaleString() + ' (nube)'});
+        } else {
+          // Mark existing local entry as also in cloud
+          entries.forEach(function(e){ if (Math.abs(e.ts - ts) < 2000) e.label = e.label.replace(' (local)', ' (local+nube)'); });
+        }
+      });
+      entries.sort(function(a,b){ return b.ts - a.ts; });
+      if (entries.length === 0) { alert('No hay backups disponibles.'); return; }
+      var msg = 'Backups disponibles:\n\n' + entries.map(function(e, idx) {
+        return (idx+1) + ' — ' + e.label;
+      }).join('\n') + '\n\nEscribe el número para restaurar (o vacío para cancelar):';
+      var choice = window.prompt(msg);
+      if (!choice) return;
+      var idx = parseInt(choice) - 1;
+      if (idx < 0 || idx >= entries.length) { alert('Opción no válida.'); return; }
+      var entry = entries[idx];
+      if (entry.source === 'local') {
+        try {
+          var data = JSON.parse(localStorage.getItem(entry.key));
+          if (data && window.confirm('¿Restaurar backup del ' + new Date(entry.ts).toLocaleString() + '?')) {
+            persistState(data);
+            alert('Backup restaurado.');
+          }
+        } catch(e) { alert('Error: ' + e.message); }
+      } else {
+        // Load from Supabase
+        loadSupabaseBackup(entry.key).then(function(data) {
+          if (data && window.confirm('¿Restaurar backup del ' + new Date(entry.ts).toLocaleString() + ' (nube)?')) {
+            persistState(data);
+            alert('Backup restaurado desde la nube.');
+          } else if (!data) {
+            alert('No se pudo cargar el backup de la nube.');
+          }
+        });
       }
-    } catch(e) { alert('Error al restaurar: ' + e.message); }
+    });
   }
 
   function importJSON() {
