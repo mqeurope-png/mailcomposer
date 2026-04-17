@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bomedia Email Composer</title>
+<title>Bomedia Email Composer v5</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
@@ -533,11 +533,13 @@ function createBlock(type) {
 
 // ─── HTML GENERATORS ─────────────────────────────────────────
 function productCardHtml(p, lang) {
+  var areaLabel = lang==='fr'?'Surface':lang==='de'?'Fläche':lang==='en'?'Area':lang==='nl'?'Oppervlak':'Área';
+  var altLabel = lang==='fr'?'Haut. max.':lang==='de'?'Max. Höhe':lang==='en'?'Max. height':lang==='nl'?'Max. hoogte':'Alt. máx.';
   var areaBlock = '';
   if (p.area !== '-') {
     areaBlock = '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0">' +
-      '<tr><td width="38%" style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">Área</td><td style="font-size:10px;font-weight:700;color:#334155">' + p.area + '</td></tr>' +
-      (p.alt !== '-' ? '<tr><td style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">Alt. máx.</td><td style="font-size:10px;font-weight:700;color:#334155">' + p.alt + '</td></tr>' : '') +
+      '<tr><td width="38%" style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">' + areaLabel + '</td><td style="font-size:10px;font-weight:700;color:#334155">' + p.area + '</td></tr>' +
+      (p.alt !== '-' ? '<tr><td style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase">' + altLabel + '</td><td style="font-size:10px;font-weight:700;color:#334155">' + p.alt + '</td></tr>' : '') +
       '</table>';
   }
   var priceExtra = p.price !== 'Consultar' && p.price !== 'Sur demande' && p.price !== 'Auf Anfrage' && p.price !== 'On request' && p.price !== 'Op aanvraag' ? ' <span style="font-size:10px;font-weight:500;color:#475569">' + (lang==='fr'?'+ TVA':lang==='de'?'+ MwSt':lang==='en'?'+ VAT':lang==='nl'?'+ BTW':'+ IVA') + '</span>' : '';
@@ -560,11 +562,13 @@ function productCardHtml(p, lang) {
 }
 
 function productCardCompactHtml(p, lang) {
+  var areaLabel = lang==='fr'?'Surface':lang==='de'?'Fläche':lang==='en'?'Area':lang==='nl'?'Oppervlak':'Área';
+  var altLabel = lang==='fr'?'Haut.':lang==='de'?'Höhe':lang==='en'?'Height':lang==='nl'?'Hoogte':'Alt';
   var areaBlock = '';
   if (p.area !== '-') {
     areaBlock = '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:4px 0">' +
-      '<tr><td style="font-size:7px;font-weight:700;color:#94a3b8;text-transform:uppercase">Área: ' + p.area + '</td></tr>' +
-      (p.alt !== '-' ? '<tr><td style="font-size:7px;font-weight:700;color:#94a3b8;text-transform:uppercase">Alt: ' + p.alt + '</td></tr>' : '') +
+      '<tr><td style="font-size:7px;font-weight:700;color:#94a3b8;text-transform:uppercase">' + areaLabel + ': ' + p.area + '</td></tr>' +
+      (p.alt !== '-' ? '<tr><td style="font-size:7px;font-weight:700;color:#94a3b8;text-transform:uppercase">' + altLabel + ': ' + p.alt + '</td></tr>' : '') +
       '</table>';
   }
   var priceExtra = p.price !== 'Consultar' && p.price !== 'Sur demande' && p.price !== 'Auf Anfrage' && p.price !== 'On request' && p.price !== 'Op aanvraag' ? ' <span style="font-size:8px;font-weight:500;color:#475569">(' + (lang==='fr'?'+ TVA':lang==='de'?'+ MwSt':lang==='en'?'+ VAT':lang==='nl'?'+ BTW':'+ IVA') + ')</span>' : '';
