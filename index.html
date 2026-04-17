@@ -619,11 +619,13 @@ function pimpamHeroHtml(config, lang) {
   var ctaBg = isDark ? (cfg.heroCtaColor || '#00d4ff') : '#ea580c';
   var ctaTextColor = isDark ? '#0f172a' : '#fff';
 
-  // Build image cell — fill the space, no gap below
-  var imgHtml = '<img src="' + imgUrl + '" width="260" alt="Hero" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:10px 0 0 10px">';
+  // Build image cell — square container, image fills via object-fit:cover
+  var imgInner = '<img src="' + imgUrl + '" alt="Hero" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:10px 0 0 10px">';
   if (imgLink) {
-    imgHtml = '<a href="' + imgLink + '" target="_blank" style="text-decoration:none;display:block;height:100%">' + imgHtml + '</a>';
+    imgInner = '<a href="' + imgLink + '" target="_blank" style="text-decoration:none;display:block;position:absolute;top:0;left:0;width:100%;height:100%">' + imgInner + '</a>';
   }
+  // Square wrapper: padding-bottom:100% creates a 1:1 aspect ratio box
+  var imgHtml = '<div style="position:relative;width:100%;padding-bottom:100%;overflow:hidden;border-radius:10px 0 0 10px">' + imgInner + '</div>';
 
   // Build bullets
   var bulletsHtml = '';
@@ -638,7 +640,7 @@ function pimpamHeroHtml(config, lang) {
   }
 
   return '<tr><td style="padding:12px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + bgColor + ';border-radius:10px;overflow:hidden"><tr>' +
-    '<td class="pp-img-cell" width="45%" valign="middle" style="padding:0;font-size:0;line-height:0">' + imgHtml + '</td>' +
+    '<td class="pp-img-cell" width="45%" valign="top" style="padding:0;font-size:0;line-height:0">' + imgHtml + '</td>' +
     '<td class="pp-body-cell" valign="top" style="padding:16px 18px 16px 16px">' +
     '<p style="font-size:14px;font-weight:900;color:' + titleColor + ';margin:0 0 8px">' + title + '</p>' +
     '<p style="font-size:11px;color:' + subColor + ';margin:0 0 10px;line-height:1.5">' + subtitle + '</p>' +
