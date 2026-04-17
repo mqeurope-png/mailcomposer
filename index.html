@@ -2079,7 +2079,7 @@ function EmailComposer() {
     try { localStorage.setItem('bomedia_draft_blocks', JSON.stringify(blocks)); } catch(e){}
   }, [blocks]);
 
-  var _copied = useState(false);
+  var _copied = useState('');
   var copied = _copied[0], setCopied = _copied[1];
 
   var _showPreview = useState(true);
@@ -2463,8 +2463,42 @@ function EmailComposer() {
     }
   }
 
+  // UTM helpers
+  function detectCampaignBrand(blocks) {
+    var brandCounts = {};
+    blocks.forEach(function(b) {
+      var m = (b.type || '').match(/^brand_(.+)$/);
+      if (m) { brandCounts[m[1]] = (brandCounts[m[1]]||0) + 1; }
+      if (b.brandStrip && b.brandStrip !== 'none') { brandCounts[b.brandStrip] = (brandCounts[b.brandStrip]||0) + 1; }
+    });
+    var top = 'mix'; var max = 0;
+    for (var k in brandCounts) { if (brandCounts[k] > max) { max = brandCounts[k]; top = k; } }
+    return top;
+  }
+
+  function generateCampaignName(blocks, lang) {
+    var now = new Date();
+    var yy = String(now.getFullYear());
+    var mm = String(now.getMonth()+1).padStart(2,'0');
+    var dd = String(now.getDate()).padStart(2,'0');
+    var brand = detectCampaignBrand(blocks);
+    return yy + mm + dd + '-' + brand + '-' + lang;
+  }
+
+  function addUtmParams(html, campaign, lang) {
+    var utmBase = 'utm_source=email&utm_medium=bomedia&utm_campaign=' + encodeURIComponent(campaign) + '&utm_term=' + encodeURIComponent(lang);
+    return html.replace(/<a\s([^>]*?)href="([^"]+)"([^>]*?)>/gi, function(match, pre, url, post) {
+      // Skip mailto:, tel:, and # links
+      if (/^(mailto:|tel:|#)/.test(url)) return match;
+      var separator = url.indexOf('?') >= 0 ? '&' : '?';
+      return '<a ' + pre + 'href="' + url + separator + utmBase + '"' + post + '>';
+    });
+  }
+
   function copyHtml() {
+    var campaign = generateCampaignName(blocks, lang);
     var html = generateFullHtml(blocks, appState.products, lang, appState.brands);
+    html = addUtmParams(html, campaign, lang);
     try {
       navigator.clipboard.write([
         new ClipboardItem({
@@ -2472,11 +2506,11 @@ function EmailComposer() {
           'text/plain': new Blob([html], {type:'text/plain'})
         })
       ]).then(function(){
-        setCopied(true); setTimeout(function(){setCopied(false)}, 2500);
+        setCopied(campaign); setTimeout(function(){setCopied('')}, 3500);
       });
     } catch(err) {
       navigator.clipboard.writeText(html).then(function(){
-        setCopied(true); setTimeout(function(){setCopied(false)}, 2500);
+        setCopied(campaign); setTimeout(function(){setCopied('')}, 3500);
       });
     }
   }
@@ -2782,7 +2816,7 @@ function EmailComposer() {
           }, style:{color:'#ef4444'}}, '+ Nuevo email'),
           e('button', {className:'btn btn-ghost', onClick:saveCurrentAsTemplate, style:{color:'#6366f1'}}, '💾 Guardar plantilla'),
           e('button', {className:'btn ' + (showPreview?'btn-toggle':'btn-toggle off'), onClick:function(){setShowPreview(!showPreview)}}, showPreview?'Preview ON':'Preview OFF'),
-          e('button', {className:'btn ' + (copied?'btn-success':'btn-primary'), onClick:copyHtml}, copied?'¡Copiado!':'Copiar HTML')
+          e('button', {className:'btn ' + (copied?'btn-success':'btn-primary'), onClick:copyHtml}, copied?('✓ ' + copied):'Copiar HTML')
         )
       ),
 
