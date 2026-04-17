@@ -1327,7 +1327,20 @@ function BlockEditorModal(props) {
         e('div', {style:{display:'flex',gap:'6px',alignItems:'center'}}, e('span',{style:{fontSize:'10px',color:'#999',width:'18px'}},'3:'), e(ProductSelect, {value:ib.product3||'', products:props.products||[], exclude:ib.product1, exclude2:ib.product2, onChange:function(v){updateInnerBlock(idx,'product3',v)}}))
       );
     } else if (ib.type === 'pimpam_hero') {
-      content = e('div', {style:{fontSize:'11px',color:'#666'}}, ib.heroTitle ? '🖼 ' + ib.heroTitle : '(Hero por defecto)');
+      if (editLang === 'es') {
+        content = e('div', {style:{display:'flex',flexDirection:'column',gap:'6px'}},
+          e('input', {className:'form-input', value:ib.heroTitle||'', onChange:function(ev){updateInnerBlock(idx,'heroTitle',ev.target.value)}, placeholder:'Título hero', style:{fontSize:'11px'}}),
+          e('input', {className:'form-input', value:ib.heroSubtitle||'', onChange:function(ev){updateInnerBlock(idx,'heroSubtitle',ev.target.value)}, placeholder:'Subtítulo hero', style:{fontSize:'11px'}}),
+          e('input', {className:'form-input', value:ib.heroCtaText||'', onChange:function(ev){updateInnerBlock(idx,'heroCtaText',ev.target.value)}, placeholder:'Texto CTA (botón)', style:{fontSize:'11px'}})
+        );
+      } else {
+        var hI18n = (ib.i18n && ib.i18n[editLang]) || {};
+        content = e('div', {style:{display:'flex',flexDirection:'column',gap:'6px'}},
+          e('input', {className:'form-input', value:hI18n.heroTitle||'', onChange:function(ev){updateInnerBlockI18n(idx,editLang,'heroTitle',ev.target.value)}, placeholder:ib.heroTitle||'(hereda ES) Título', style:{fontSize:'11px'}}),
+          e('input', {className:'form-input', value:hI18n.heroSubtitle||'', onChange:function(ev){updateInnerBlockI18n(idx,editLang,'heroSubtitle',ev.target.value)}, placeholder:ib.heroSubtitle||'(hereda ES) Subtítulo', style:{fontSize:'11px'}}),
+          e('input', {className:'form-input', value:hI18n.heroCtaText||'', onChange:function(ev){updateInnerBlockI18n(idx,editLang,'heroCtaText',ev.target.value)}, placeholder:ib.heroCtaText||'(hereda ES) CTA', style:{fontSize:'11px'}})
+        );
+      }
     } else if (ib.type === 'pimpam_steps') {
       content = e('div', {style:{fontSize:'11px',color:'#666'}}, (ib.steps||[]).length > 0 ? (ib.steps||[]).map(function(s){return s.t}).join(' → ') : '(Pasos por defecto)');
     } else if (ib.type === 'freebird') {
