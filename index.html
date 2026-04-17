@@ -2193,6 +2193,41 @@ function EmailComposer() {
     try { localStorage.setItem('bomedia_draft_blocks', JSON.stringify(blocks)); } catch(e){}
   }, [blocks]);
 
+  // Helper: get the ES text from a block reliably
+  function getEsText(block) {
+    // 1. Explicit _textEs (set when block was added)
+    if (block._textEs) return block._textEs;
+    // 2. From i18n.es.text if exists
+    if (block.i18n && block.i18n.es && block.i18n.es.text) return block.i18n.es.text;
+    // 3. Try to find source in appState
+    if (block._sourceId) {
+      var src = (appState.prewrittenTexts || []).find(function(t){ return t.id === block._sourceId; });
+      if (src) return src.text;
+    }
+    // 4. If composed block, find source
+    if (block.composedRef) {
+      var srcCb = (appState.composedBlocks || []).find(function(cb){ return cb.id === block.composedRef; });
+      if (srcCb && srcCb.innerBlocks) {
+        var srcText = srcCb.innerBlocks.find(function(ib){ return ib.type === 'text'; });
+        if (srcText) return srcText.text;
+      }
+    }
+    // 5. Fallback: current text (might not be ES, but best we have)
+    return block.text;
+  }
+
+  // Re-localize a text item (block or innerBlock)
+  function relocalizeText(item) {
+    var n = Object.assign({}, item);
+    if (!n._textEs) n._textEs = getEsText(item);
+    if (!lang || lang === 'es') {
+      n.text = n._textEs;
+    } else {
+      n.text = (item.i18n && item.i18n[lang] && item.i18n[lang].text) || n._textEs;
+    }
+    return n;
+  }
+
   // Re-localize blocks when language changes
   var _prevLang = useRef(lang);
   useEffect(function(){
@@ -2202,14 +2237,7 @@ function EmailComposer() {
       return prev.map(function(b) {
         // Re-localize text blocks that have i18n
         if (b.type === 'text' && b.i18n && Object.keys(b.i18n).length > 0) {
-          var nb = Object.assign({}, b);
-          if (!nb._textEs) nb._textEs = nb.text;
-          if (!lang || lang === 'es') {
-            nb.text = nb._textEs;
-          } else {
-            nb.text = (b.i18n[lang] && b.i18n[lang].text) || nb._textEs;
-          }
-          return nb;
+          return relocalizeText(b);
         }
         // Re-localize hero blocks that have i18n
         if (b.type === 'pimpam_hero' && b.i18n && Object.keys(b.i18n).length > 0) {
@@ -2235,14 +2263,7 @@ function EmailComposer() {
         if (b.type === 'composed' && b.innerBlocks) {
           var newIbs = b.innerBlocks.map(function(ib) {
             if (ib.type === 'text' && ib.i18n && Object.keys(ib.i18n).length > 0) {
-              var nib = Object.assign({}, ib);
-              if (!nib._textEs) nib._textEs = nib.text;
-              if (!lang || lang === 'es') {
-                nib.text = nib._textEs;
-              } else {
-                nib.text = (ib.i18n[lang] && ib.i18n[lang].text) || nib._textEs;
-              }
-              return nib;
+              return relocalizeText(ib);
             }
             return ib;
           });
@@ -2446,10 +2467,11 @@ function EmailComposer() {
   }
 
   function addComposedBlock(composedBlock) {
-    // Localize text inner blocks
+    // Localize text inner blocks + preserve ES originals
     var localizedInnerBlocks = (composedBlock.innerBlocks || []).map(function(ib) {
       var nib = Object.assign({}, ib);
       if (ib.type === 'text') {
+        nib._textEs = ib.text; // Always save the ES version (ib.text is always ES from JSON)
         nib.text = getLocalizedText(ib, 'text', lang);
       }
       return nib;
