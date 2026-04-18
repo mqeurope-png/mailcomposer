@@ -343,6 +343,7 @@ function getTextInLanguage(block, lang, appState) {
 }
 
 function getHeroDataInLanguage(block, lang, appState) {
+  // Start with block-level fields (these include user edits from compositor)
   var result = {
     heroTitle: block.heroTitle || '',
     heroSubtitle: block.heroSubtitle || '',
@@ -351,10 +352,12 @@ function getHeroDataInLanguage(block, lang, appState) {
     heroCtaUrl: block.heroCtaUrl || '',
     heroImage: block.heroImage || '',
     heroImageLink: block.heroImageLink || '',
-    heroBgColor: block.heroBgColor || '#fff'
+    heroBgColor: block.heroBgColor || '#fff',
+    heroCtaButtons: block.heroCtaButtons || [],
+    _heroSubRich: block._heroSubRich != null ? block._heroSubRich : null
   };
 
-  // Try source definition
+  // Try source definition — use as DEFAULTS only (block fields = user edits take priority)
   var srcConfig = null;
   if (block._sourceType === 'standalone' && block._sourceId) {
     var srcSb = (appState.standaloneBlocks || []).find(function(sb){ return sb.id === block._sourceId; });
@@ -371,22 +374,25 @@ function getHeroDataInLanguage(block, lang, appState) {
   }
 
   if (srcConfig) {
-    result.heroTitle = srcConfig.heroTitle || result.heroTitle;
-    result.heroSubtitle = srcConfig.heroSubtitle || result.heroSubtitle;
-    result.heroBullets = srcConfig.heroBullets || result.heroBullets;
-    result.heroCtaText = srcConfig.heroCtaText || result.heroCtaText;
-    result.heroCtaUrl = srcConfig.heroCtaUrl || result.heroCtaUrl;
-    result.heroImage = srcConfig.heroImage || result.heroImage;
-    result.heroImageLink = srcConfig.heroImageLink || result.heroImageLink;
-    result.heroBgColor = srcConfig.heroBgColor || result.heroBgColor;
+    // Source config fills EMPTY fields only — block-level values (user edits) take priority
+    result.heroTitle = result.heroTitle || srcConfig.heroTitle || '';
+    result.heroSubtitle = result.heroSubtitle || srcConfig.heroSubtitle || '';
+    result.heroBullets = result.heroBullets.length > 0 ? result.heroBullets : (srcConfig.heroBullets || []);
+    result.heroCtaText = result.heroCtaText || srcConfig.heroCtaText || '';
+    result.heroCtaUrl = result.heroCtaUrl || srcConfig.heroCtaUrl || '';
+    result.heroImage = result.heroImage || srcConfig.heroImage || '';
+    result.heroImageLink = result.heroImageLink || srcConfig.heroImageLink || '';
+    result.heroBgColor = result.heroBgColor || srcConfig.heroBgColor || '#fff';
+    result.heroCtaButtons = result.heroCtaButtons.length > 0 ? result.heroCtaButtons : (srcConfig.heroCtaButtons || []);
 
-    // Apply i18n from source
+    // Apply i18n from source (for non-ES languages)
     if (lang && lang !== 'es' && srcConfig.i18n && srcConfig.i18n[lang]) {
       var hi = srcConfig.i18n[lang];
       if (hi.heroTitle) result.heroTitle = hi.heroTitle;
       if (hi.heroSubtitle) result.heroSubtitle = hi.heroSubtitle;
       if (hi.heroBullets) result.heroBullets = hi.heroBullets;
       if (hi.heroCtaText) result.heroCtaText = hi.heroCtaText;
+      if (hi.heroCtaButtons) result.heroCtaButtons = hi.heroCtaButtons;
     }
   } else if (block.i18n && lang && lang !== 'es' && block.i18n[lang]) {
     // Old-style i18n directly on block
@@ -397,7 +403,7 @@ function getHeroDataInLanguage(block, lang, appState) {
     if (bhi.heroCtaText) result.heroCtaText = bhi.heroCtaText;
   }
 
-  // Apply _overrides (user edits in compositor)
+  // Apply _overrides (user edits in compositor — highest priority)
   if (block._overrides && block._overrides[lang]) {
     var ovr = block._overrides[lang];
     if (typeof ovr === 'object') {
@@ -405,6 +411,7 @@ function getHeroDataInLanguage(block, lang, appState) {
       if (ovr.heroSubtitle) result.heroSubtitle = ovr.heroSubtitle;
       if (ovr.heroBullets) result.heroBullets = ovr.heroBullets;
       if (ovr.heroCtaText) result.heroCtaText = ovr.heroCtaText;
+      if (ovr.heroCtaButtons) result.heroCtaButtons = ovr.heroCtaButtons;
     }
   }
 
@@ -766,6 +773,19 @@ function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// XSS sanitization — must be global so textBlockHtml can access it
+function sanitizeHtml(html) {
+  if (!html) return '';
+  html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  html = html.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+  html = html.replace(/(href|src|action)\s*=\s*(?:"javascript:[^"]*"|'javascript:[^']*')/gi, '$1=""');
+  html = html.replace(/src\s*=\s*(?:"data:[^"]*"|'data:[^']*')/gi, 'src=""');
+  html = html.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+  html = html.replace(/<iframe\b[^>]*\/?>/gi, '');
+  html = html.replace(/<(?:object|embed)\b[^>]*\/?>/gi, '');
+  return html;
+}
+
 function textBlockHtml(text) {
   // Check if text contains HTML tags (from rich text editor)
   if (text && /<[a-z][\s\S]*>/i.test(text)) {
@@ -844,7 +864,9 @@ function pimpamHeroHtml(config, lang) {
   var hi = (cfg.i18n && lang && lang !== 'es' && cfg.i18n[lang]) ? cfg.i18n[lang] : null;
   var imgUrl = cfg.heroImage || 'https://pimpam-vending.com/wp-content/uploads/2026/01/ChatGPT-Image-22-ene-2026-16_17_36.png';
   var title = (hi && hi.heroTitle) || cfg.heroTitle || 'Personaliza, imprime y vende… sin operario';
-  var subtitle = (hi && hi.heroSubtitle) || cfg.heroSubtitle || 'Impresión UV-LED directa sobre fundas de móvil en autoservicio completo.';
+  var subtitleRaw = (hi && hi.heroSubtitle) || cfg.heroSubtitle || 'Impresión UV-LED directa sobre fundas de móvil en autoservicio completo.';
+  var subtitleIsRich = cfg._heroSubRich != null;
+  var subtitle = subtitleIsRich ? cfg._heroSubRich : subtitleRaw;
   var bullets = (hi && hi.heroBullets) || cfg.heroBullets || ['Autoservicio 100% — sin personal','Pago con tarjeta, móvil o QR','Funda impresa en HD en 30 segundos','Compatible con +600 modelos de móvil'];
   var imgLink = cfg.heroImageLink || '';
   var ctaText = (hi && hi.heroCtaText) || cfg.heroCtaText || '';
@@ -909,7 +931,9 @@ function pimpamHeroHtml(config, lang) {
     '<td class="pp-img-cell" width="45%" valign="top" style="padding:0;font-size:0;line-height:0">' + imgHtml + '</td>' +
     '<td class="pp-body-cell" valign="top" style="padding:16px 18px 16px 16px">' +
     '<p style="font-size:14px;font-weight:900;color:' + titleColor + ';margin:0 0 8px">' + title + '</p>' +
-    '<p style="font-size:11px;color:' + subColor + ';margin:0 0 10px;line-height:1.5">' + subtitle + '</p>' +
+    (subtitleIsRich
+      ? '<div style="font-size:11px;color:' + subColor + ';margin:0 0 10px;line-height:1.5">' + sanitizeHtml(subtitle) + '</div>'
+      : '<p style="font-size:11px;color:' + subColor + ';margin:0 0 10px;line-height:1.5">' + subtitle + '</p>') +
     bulletsHtml +
     ctaHtml +
     '</td></tr></table></td></tr>';
@@ -2339,11 +2363,24 @@ function BlockEditor(props) {
             if (isRich) {
               // Switch to plain text
               var plain = block._richHtml ? block._richHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : displayText;
-              props.onChange(Object.assign({}, block, {_richHtml: null, text: plain}));
+              if (block._sourceType) {
+                var newOvr = Object.assign({}, block._overrides || {});
+                newOvr[blockLang] = plain;
+                props.onChange(Object.assign({}, block, {_richHtml: null, text: plain, _overrides: newOvr}));
+              } else {
+                props.onChange(Object.assign({}, block, {_richHtml: null, text: plain}));
+              }
             } else {
               // Switch to rich text — convert plain to HTML paragraphs
-              var html = displayText.split('\n').filter(function(l){return l.trim()}).map(function(l){return '<p>' + escapeHtml(l) + '</p>'}).join('');
-              props.onChange(Object.assign({}, block, {_richHtml: html || '<p></p>'}));
+              var html = (displayText || '').split('\n').filter(function(l){return l.trim()}).map(function(l){return '<p>' + escapeHtml(l) + '</p>'}).join('');
+              html = html || '<p></p>';
+              if (block._sourceType) {
+                var newOvr2 = Object.assign({}, block._overrides || {});
+                newOvr2[blockLang] = html;
+                props.onChange(Object.assign({}, block, {_richHtml: html, _overrides: newOvr2}));
+              } else {
+                props.onChange(Object.assign({}, block, {_richHtml: html}));
+              }
               bumpResetKey();
             }
           },
@@ -2558,11 +2595,22 @@ function BlockEditor(props) {
                 if (i !== textBlockIdx) return ib;
                 if (composedIsRich) {
                   var plain = ib._richHtml ? ib._richHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+                  if (ib._sourceType) {
+                    var newOvr = Object.assign({}, ib._overrides || {});
+                    newOvr[blockLang] = plain;
+                    return Object.assign({}, ib, {_richHtml: null, text: plain, _overrides: newOvr});
+                  }
                   return Object.assign({}, ib, {_richHtml: null, text: plain});
                 } else {
                   var txt = ib.text || composedDisplayText || '';
-                  var html = txt.split('\n').filter(function(l){return l.trim()}).map(function(l){return '<p>'+escapeHtml(l)+'</p>'}).join('');
-                  return Object.assign({}, ib, {_richHtml: html || '<p></p>'});
+                  var html = (txt || '').split('\n').filter(function(l){return l.trim()}).map(function(l){return '<p>'+escapeHtml(l)+'</p>'}).join('');
+                  html = html || '<p></p>';
+                  if (ib._sourceType) {
+                    var newOvr2 = Object.assign({}, ib._overrides || {});
+                    newOvr2[blockLang] = html;
+                    return Object.assign({}, ib, {_richHtml: html, _overrides: newOvr2});
+                  }
+                  return Object.assign({}, ib, {_richHtml: html});
                 }
               });
               props.onChange(Object.assign({}, block, {innerBlocks: newIbs}));
@@ -2662,24 +2710,7 @@ function EmailComposer() {
   var DEFAULT_BO_HASH = 'a1bfe0bf4fa8f02f1969c64276b15f55e455b3dd9f50f11a22fb8c284a9c2f48';
   var DEFAULT_DATA_HASH = '6fab52fdf6384db663c2aae68b921a907422f9bdd102fbd35a90fc71dc8423ea';
 
-  // XSS sanitization for HTML preview
-  function sanitizeHtml(html) {
-    if (!html) return '';
-    // Remove script tags and their content
-    html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    // Remove event handlers (onclick, onerror, onload, onmouseover, etc.)
-    html = html.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
-    // Remove javascript: protocol in href/src/action attributes
-    html = html.replace(/(href|src|action)\s*=\s*(?:"javascript:[^"]*"|'javascript:[^']*')/gi, '$1=""');
-    // Remove data: protocol in src (can be used for XSS)
-    html = html.replace(/src\s*=\s*(?:"data:[^"]*"|'data:[^']*')/gi, 'src=""');
-    // Remove iframe tags
-    html = html.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
-    html = html.replace(/<iframe\b[^>]*\/?>/gi, '');
-    // Remove object/embed tags
-    html = html.replace(/<(?:object|embed)\b[^>]*\/?>/gi, '');
-    return html;
-  }
+  // sanitizeHtml is now global (defined before textBlockHtml)
 
   // Prototype pollution protection for imported JSON
   function sanitizeJsonObj(obj) {
