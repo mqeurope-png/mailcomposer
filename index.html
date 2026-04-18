@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://api.openai.com https://midvgxxndddasxlnstkg.supabase.co; img-src * data: blob:; font-src 'self' https://fonts.gstatic.com; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none';">
 <title>Bomedia Email Composer v2.0</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" integrity="sha384-tMH8h3BGESGckSAVGZ82T9n90ztNXxvdwvdM6UoR56cYcf+0iGXBliJ29D+wZ/x8" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" integrity="sha384-bm7MnzvK++ykSwVJ2tynSE5TRdN+xL418osEVF2DE/L/gfWHj91J2Sphe582B1Bh" crossorigin="anonymous"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;color:#1e293b;overflow:hidden;height:100vh}
@@ -142,6 +143,33 @@ body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#f3f4f6;c
 .lang-btn{border:none;padding:4px 8px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;transition:all .15s;background:#f3f4f6;color:#6b7280}
 .lang-btn.active{background:#2563eb;color:#fff}
 .lang-btn:hover:not(.active){background:#e5e7eb}
+
+/* RICH TEXT EDITOR */
+.rte-toolbar{display:flex;flex-wrap:wrap;gap:2px;padding:4px 6px;background:#f9fafb;border:1px solid #e5e7eb;border-bottom:none;border-radius:8px 8px 0 0}
+.rte-toolbar button,.rte-toolbar select{border:1px solid transparent;background:transparent;cursor:pointer;padding:3px 6px;border-radius:4px;font-size:12px;color:#374151;transition:all .12s;font-family:inherit}
+.rte-toolbar button:hover{background:#e5e7eb}
+.rte-toolbar button.active{background:#2563eb;color:#fff}
+.rte-toolbar select{font-size:10px;padding:2px 4px;border:1px solid #d1d5db;border-radius:4px;background:#fff}
+.rte-toolbar .rte-sep{width:1px;background:#d1d5db;margin:2px 4px;align-self:stretch}
+.rte-content{min-height:80px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:0 0 8px 8px;outline:none;font-size:13px;line-height:1.6;color:#1e293b;background:#fff;overflow-y:auto;max-height:300px}
+.rte-content:focus{border-color:#93c5fd;box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+.rte-content h1{font-size:22px;font-weight:800;margin:0 0 8px;color:#0f172a}
+.rte-content h2{font-size:18px;font-weight:700;margin:0 0 6px;color:#1e293b}
+.rte-content h3{font-size:15px;font-weight:700;margin:0 0 4px;color:#374151}
+.rte-content p{margin:0 0 8px}
+.rte-content ul,.rte-content ol{margin:0 0 8px;padding-left:20px}
+.rte-content a{color:#2563eb;text-decoration:underline}
+
+/* LOCK/UNLOCK BUTTON */
+.lock-btn{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:12px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;color:#6b7280;transition:all .15s}
+.lock-btn:hover{background:#e5e7eb}
+.lock-btn.unlocked{background:#dcfce7;border-color:#86efac;color:#16a34a}
+
+/* TYPE FILTER */
+.type-filter-bar{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:6px}
+.type-filter-btn{border:none;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600;cursor:pointer;transition:all .15s;background:#f3f4f6;color:#6b7280}
+.type-filter-btn:hover{background:#e5e7eb}
+.type-filter-btn.active{background:#2563eb;color:#fff}
 
 /* BACKOFFICE STYLES */
 .backoffice-container{display:flex;flex-direction:column;flex:1;width:100%;overflow:hidden}
@@ -733,11 +761,32 @@ function brandStripHtml(key, lang, brands) {
     '</tr></table><div style="height:1px;background:' + b.divider + ';margin-top:8px"></div></td></tr>';
 }
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function textBlockHtml(text) {
+  // Check if text contains HTML tags (from rich text editor)
+  if (text && /<[a-z][\s\S]*>/i.test(text)) {
+    // Rich HTML mode — sanitize and apply email-safe styles
+    var richHtml = sanitizeHtml(text);
+    // Apply inline styles for email compatibility
+    richHtml = richHtml.replace(/<h1[^>]*>/gi, '<h1 style="font-size:22px;font-weight:800;color:#0f172a;margin:0 0 12px;font-family:system-ui,sans-serif">');
+    richHtml = richHtml.replace(/<h2[^>]*>/gi, '<h2 style="font-size:18px;font-weight:700;color:#1e293b;margin:0 0 10px;font-family:system-ui,sans-serif">');
+    richHtml = richHtml.replace(/<h3[^>]*>/gi, '<h3 style="font-size:15px;font-weight:700;color:#374151;margin:0 0 8px;font-family:system-ui,sans-serif">');
+    richHtml = richHtml.replace(/<p[^>]*>/gi, '<p style="margin:0 0 14px">');
+    richHtml = richHtml.replace(/<ul[^>]*>/gi, '<ul style="margin:0 0 14px;padding-left:20px">');
+    richHtml = richHtml.replace(/<ol[^>]*>/gi, '<ol style="margin:0 0 14px;padding-left:20px">');
+    richHtml = richHtml.replace(/<li[^>]*>/gi, '<li style="margin:0 0 4px">');
+    richHtml = richHtml.replace(/<a /gi, '<a style="color:#2563eb;text-decoration:underline" ');
+    return '<tr><td style="padding:16px 8px;font-size:14px;color:#1e293b;line-height:1.65">\n' + richHtml + '</td></tr>';
+  }
+  // Plain text mode (legacy)
   var lines = text.split('\n');
   var html = '';
   for (var i = 0; i < lines.length; i++) {
-    if (lines[i].trim()) html += '<p style="margin:0 0 14px">' + lines[i] + '</p>\n';
+    if (lines[i].trim()) html += '<p style="margin:0 0 14px">' + escapeHtml(lines[i]) + '</p>\n';
   }
   return '<tr><td style="padding:16px 8px;font-size:14px;color:#1e293b;line-height:1.65">\n' + html + '</td></tr>';
 }
@@ -779,12 +828,12 @@ function freebirdHtml(config, lang) {
   var videoLabel = lang==='fr'?'Voir la vidéo':lang==='de'?'Video ansehen':lang==='en'?'Watch video':lang==='nl'?'Video bekijken':'Ver vídeo';
   return '<tr><td style="padding:8px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-radius:12px;overflow:hidden;background:#0f172a">' +
     '<tr><td style="text-align:center;padding:0">' +
-    '<a href="' + youtubeUrl + '" target="_blank" style="text-decoration:none">' +
+    '<a href="' + youtubeUrl + '" target="_blank" rel="noopener noreferrer" style="text-decoration:none">' +
     '<img src="' + thumbnailUrl + '" alt="Video" width="480" style="width:100%;max-width:480px;display:block;margin:0 auto;opacity:0.85"/>' +
     '</a>' +
     '</td></tr>' +
     '<tr><td style="text-align:center;padding:12px 16px;background:#0f172a">' +
-    '<a href="' + youtubeUrl + '" target="_blank" style="color:#93c5fd;font-size:14px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">▶ ' + videoLabel + '</a>' +
+    '<a href="' + youtubeUrl + '" target="_blank" rel="noopener noreferrer" style="color:#93c5fd;font-size:14px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">▶ ' + videoLabel + '</a>' +
     '</td></tr>' +
     '</table></td></tr>';
 }
@@ -818,7 +867,7 @@ function pimpamHeroHtml(config, lang) {
   // Build image cell — square container, image fills via object-fit:cover
   var imgInner = '<img src="' + imgUrl + '" alt="Hero" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:10px 0 0 10px">';
   if (imgLink) {
-    imgInner = '<a href="' + imgLink + '" target="_blank" style="text-decoration:none;display:block;position:absolute;top:0;left:0;width:100%;height:100%">' + imgInner + '</a>';
+    imgInner = '<a href="' + imgLink + '" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:block;position:absolute;top:0;left:0;width:100%;height:100%">' + imgInner + '</a>';
   }
   // Square wrapper: padding-bottom:100% creates a 1:1 aspect ratio box
   var imgHtml = '<div style="position:relative;width:100%;padding-bottom:100%;overflow:hidden;border-radius:10px 0 0 10px">' + imgInner + '</div>';
@@ -829,10 +878,31 @@ function pimpamHeroHtml(config, lang) {
     bulletsHtml += '<p style="font-size:10px;color:' + bulletColor + ';margin:0 0 3px">✓ ' + bullets[i] + '</p>';
   }
 
-  // Build CTA
+  // Build CTA buttons (support multiple)
   var ctaHtml = '';
-  if (ctaText && ctaUrl) {
-    ctaHtml = '<table cellpadding="0" cellspacing="0" border="0" style="margin-top:10px"><tr><td style="background:' + ctaBg + ';border-radius:6px;padding:8px 18px"><a href="' + ctaUrl + '" target="_blank" style="color:' + ctaTextColor + ';font-size:11px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">' + ctaText + '</a></td></tr></table>';
+  var ctaButtons = cfg.heroCtaButtons || [];
+  // Legacy single CTA support
+  if (ctaButtons.length === 0 && ctaText && ctaUrl) {
+    ctaButtons = [{text: ctaText, url: ctaUrl}];
+  }
+  // Apply i18n to CTA buttons
+  if (hi && hi.heroCtaButtons && hi.heroCtaButtons.length > 0) {
+    ctaButtons = hi.heroCtaButtons;
+  }
+  if (ctaButtons.length > 0) {
+    var btnCells = '';
+    for (var bi = 0; bi < ctaButtons.length; bi++) {
+      var btn = ctaButtons[bi];
+      if (btn.text && btn.url) {
+        var btnBg = btn.bg || ctaBg;
+        var btnTxtC = btn.color || ctaTextColor;
+        if (bi > 0) btnCells += '<td style="width:8px"></td>';
+        btnCells += '<td style="background:' + btnBg + ';border-radius:6px;padding:8px 18px"><a href="' + btn.url + '" target="_blank" rel="noopener noreferrer" style="color:' + btnTxtC + ';font-size:11px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif;white-space:nowrap">' + btn.text + '</a></td>';
+      }
+    }
+    if (btnCells) {
+      ctaHtml = '<table cellpadding="0" cellspacing="0" border="0" style="margin-top:10px"><tr>' + btnCells + '</tr></table>';
+    }
   }
 
   return '<tr><td style="padding:12px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + bgColor + ';border-radius:10px;overflow:hidden"><tr>' +
@@ -888,6 +958,8 @@ function generateFullHtml(blocks, products, lang, brands, appState) {
   var rows = '';
 
   function resolveText(block) {
+    // Rich HTML from editor takes priority
+    if (block._richHtml != null) return block._richHtml;
     // Reference-based: use getTextInLanguage if _sourceType exists
     if (block._sourceType) return getTextInLanguage(block, lang, appState);
     // Backward compat: old-style blocks
@@ -908,10 +980,10 @@ function generateFullHtml(blocks, products, lang, brands, appState) {
         var resolvedText = resolveText(b);
         if (resolvedText) rows += textBlockHtml(resolvedText);
         break;
-      case 'brand_artisjet': rows += brandStripHtml('artisjet', lang, brands); break;
-      case 'brand_mbo': rows += brandStripHtml('mbo', lang, brands); break;
-      case 'brand_pimpam': rows += brandStripHtml('pimpam', lang, brands); break;
-      case 'brand_flux': rows += brandStripHtml('flux', lang, brands); break;
+      case 'brand_artisjet': rows += brandStripHtml(b.brand||'artisjet', lang, brands); break;
+      case 'brand_mbo': rows += brandStripHtml(b.brand||'mbo', lang, brands); break;
+      case 'brand_pimpam': rows += brandStripHtml(b.brand||'pimpam', lang, brands); break;
+      case 'brand_flux': rows += brandStripHtml(b.brand||'flux', lang, brands); break;
       case 'product_single':
         var ps = products.find(function(p){return p.id===b.product1});
         if(ps) { ps = getLocalizedProduct(ps, lang); rows += productSingleHtml(ps, lang); }
@@ -2054,6 +2126,129 @@ function StandaloneBlockEditorModal(props) {
   );
 }
 
+// ─── RICH TEXT EDITOR (contentEditable with toolbar) ─────────
+function RichTextEditor(props) {
+  var editorRef = React.useRef(null);
+  var _colorOpen = useState(false);
+  var colorOpen = _colorOpen[0], setColorOpen = _colorOpen[1];
+
+  var exec = function(cmd, val) {
+    document.execCommand(cmd, false, val || null);
+    if (editorRef.current) editorRef.current.focus();
+    syncContent();
+  };
+
+  var syncContent = function() {
+    if (editorRef.current && props.onChange) {
+      props.onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  var isActive = function(cmd) {
+    try { return document.queryCommandState(cmd); } catch(e) { return false; }
+  };
+
+  var getBlockFormat = function() {
+    try { return document.queryCommandValue('formatBlock') || 'p'; } catch(e) { return 'p'; }
+  };
+
+  var insertLink = function() {
+    var url = window.prompt('URL del enlace:', 'https://');
+    if (url) exec('createLink', url);
+  };
+
+  var removeLink = function() {
+    exec('unlink');
+  };
+
+  var handlePaste = function(ev) {
+    ev.preventDefault();
+    var text = ev.clipboardData.getData('text/html') || ev.clipboardData.getData('text/plain');
+    // Clean pasted HTML: keep only safe tags
+    var tmp = document.createElement('div');
+    tmp.innerHTML = text;
+    // Remove scripts, styles, etc.
+    var unsafe = tmp.querySelectorAll('script,style,meta,link,iframe,object,embed');
+    for (var i = 0; i < unsafe.length; i++) unsafe[i].remove();
+    document.execCommand('insertHTML', false, tmp.innerHTML);
+    syncContent();
+  };
+
+  var _forceUpdate = useState(0);
+  var forceUpdate = function() { _forceUpdate[1](function(n){ return n + 1; }); };
+
+  var handleInput = function() {
+    syncContent();
+    forceUpdate();
+  };
+
+  var handleKeyUp = function() {
+    forceUpdate();
+  };
+
+  var handleMouseUp = function() {
+    forceUpdate();
+  };
+
+  // Set initial content
+  React.useEffect(function() {
+    if (editorRef.current && props.value !== undefined) {
+      if (editorRef.current.innerHTML !== props.value) {
+        editorRef.current.innerHTML = props.value || '';
+      }
+    }
+  }, [props.resetKey]);
+
+  var colors = ['#000000','#dc2626','#ea580c','#d97706','#16a34a','#2563eb','#7c3aed','#be185d','#64748b','#ffffff'];
+
+  return e('div', {style:{marginBottom:'4px'}},
+    e('div', {className:'rte-toolbar'},
+      e('select', {value: getBlockFormat(), onChange: function(ev) { exec('formatBlock', ev.target.value); }, title:'Formato'},
+        e('option', {value:'p'}, 'Normal'),
+        e('option', {value:'h1'}, 'Título H1'),
+        e('option', {value:'h2'}, 'Título H2'),
+        e('option', {value:'h3'}, 'Título H3')
+      ),
+      e('span', {className:'rte-sep'}),
+      e('button', {onClick:function(){exec('bold')}, className:isActive('bold')?'active':'', title:'Negrita', style:{fontWeight:'bold'}}, 'B'),
+      e('button', {onClick:function(){exec('italic')}, className:isActive('italic')?'active':'', title:'Cursiva', style:{fontStyle:'italic'}}, 'I'),
+      e('button', {onClick:function(){exec('underline')}, className:isActive('underline')?'active':'', title:'Subrayado', style:{textDecoration:'underline'}}, 'U'),
+      e('button', {onClick:function(){exec('strikeThrough')}, className:isActive('strikeThrough')?'active':'', title:'Tachado', style:{textDecoration:'line-through'}}, 'S'),
+      e('span', {className:'rte-sep'}),
+      e('button', {onClick:function(){exec('insertUnorderedList')}, title:'Lista de puntos'}, '• —'),
+      e('button', {onClick:function(){exec('insertOrderedList')}, title:'Lista numerada'}, '1.'),
+      e('span', {className:'rte-sep'}),
+      e('button', {onClick:function(){exec('justifyLeft')}, title:'Alinear izquierda'}, '⫷'),
+      e('button', {onClick:function(){exec('justifyCenter')}, title:'Centrar'}, '☰'),
+      e('button', {onClick:function(){exec('justifyRight')}, title:'Alinear derecha'}, '⫸'),
+      e('span', {className:'rte-sep'}),
+      e('div', {style:{position:'relative',display:'inline-block'}},
+        e('button', {onClick:function(){setColorOpen(!colorOpen)}, title:'Color de texto', style:{fontSize:'14px'}}, '🎨'),
+        colorOpen && e('div', {style:{position:'absolute',top:'100%',left:0,zIndex:999,background:'#fff',border:'1px solid #d1d5db',borderRadius:'8px',padding:'6px',display:'flex',flexWrap:'wrap',gap:'3px',width:'120px',boxShadow:'0 4px 12px rgba(0,0,0,.15)'}},
+          colors.map(function(c) {
+            return e('button', {key:c, onClick:function(){exec('foreColor', c); setColorOpen(false);}, style:{width:'20px',height:'20px',borderRadius:'50%',border:c==='#ffffff'?'1px solid #d1d5db':'1px solid transparent',background:c,cursor:'pointer',padding:0}});
+          })
+        )
+      ),
+      e('span', {className:'rte-sep'}),
+      e('button', {onClick:insertLink, title:'Insertar enlace'}, '🔗'),
+      e('button', {onClick:removeLink, title:'Quitar enlace'}, '🚫'),
+      e('span', {className:'rte-sep'}),
+      e('button', {onClick:function(){exec('removeFormat')}, title:'Limpiar formato'}, '✕')
+    ),
+    e('div', {
+      ref: editorRef,
+      className: 'rte-content',
+      contentEditable: true,
+      onInput: handleInput,
+      onKeyUp: handleKeyUp,
+      onMouseUp: handleMouseUp,
+      onPaste: handlePaste,
+      style: props.style || {}
+    })
+  );
+}
+
 // ─── SIDEBAR FOR COMPOSITOR ──────────────────────────────────
 function SidebarSection(props) {
   var _s = useState(true);
@@ -2090,36 +2285,77 @@ function BlockEditor(props) {
   var blockLang = props.lang || 'es';
   var blockAppState = props.appState || {};
 
+  // Lock/unlock state for standalone blocks
+  var _unlocked = useState(false);
+  var isUnlocked = _unlocked[0], setUnlocked = _unlocked[1];
+  var _resetKey = useState(0);
+  var resetKey = _resetKey[0];
+  var bumpResetKey = function() { _resetKey[1](function(n){ return n + 1; }); };
+
+  // Determine if this block comes from a standalone source (needs lock)
+  var isStandalone = block._sourceId && (block._sourceType === 'standalone' || block.type === 'freebird' || block.type.indexOf('brand_') === 0 || block.type === 'pimpam_steps');
+
   var body;
   if (block.type === 'text') {
     // Resolve display text from reference or overrides
     var displayText = block._sourceType
       ? getTextInLanguage(block, blockLang, blockAppState)
-      : (block.text || '');
+      : (block._richHtml != null ? block._richHtml : (block.text || ''));
+    // Use rich text editor
+    var isRich = block._richHtml != null || (displayText && /<[a-z][\s\S]*>/i.test(displayText));
     body = e('div', null,
-      e('textarea', {
-        value: displayText,
-        onChange: function(ev) {
-          var newVal = ev.target.value;
-          if (block._sourceType) {
-            // Save edit to _overrides for current language
-            var newOverrides = Object.assign({}, block._overrides || {});
-            newOverrides[blockLang] = newVal;
-            props.onChange(Object.assign({}, block, {_overrides: newOverrides}));
-          } else {
-            props.onChange(Object.assign({}, block, {text: newVal}));
-          }
-        },
-        placeholder: "Escribe tu texto aquí..."
-      }),
-      block._sourceType === 'prewritten' && e('span', {style:{fontSize:'9px',color:'#9ca3af',marginLeft:'4px'}}, '📎 ' + (block._sourceId || '')),
-      e('button', {
-        style:{fontSize:'10px',padding:'3px 8px',marginTop:'4px',borderRadius:'12px',border:'1px solid #d1d5db',background:'#f9fafb',cursor:'pointer',color:'#6b7280',display:'inline-flex',alignItems:'center',gap:'4px'},
-        onClick: function(){
-          if (props.onAiAssist) props.onAiAssist(block.id);
-        },
-        title:'Redactar con IA'
-      }, '✨ IA')
+      isRich
+        ? e(RichTextEditor, {
+            value: displayText,
+            resetKey: resetKey + '-' + blockLang,
+            onChange: function(html) {
+              if (block._sourceType) {
+                var newOverrides = Object.assign({}, block._overrides || {});
+                newOverrides[blockLang] = html;
+                props.onChange(Object.assign({}, block, {_overrides: newOverrides, _richHtml: html}));
+              } else {
+                props.onChange(Object.assign({}, block, {_richHtml: html}));
+              }
+            }
+          })
+        : e('textarea', {
+            value: displayText,
+            onChange: function(ev) {
+              var newVal = ev.target.value;
+              if (block._sourceType) {
+                var newOverrides = Object.assign({}, block._overrides || {});
+                newOverrides[blockLang] = newVal;
+                props.onChange(Object.assign({}, block, {_overrides: newOverrides}));
+              } else {
+                props.onChange(Object.assign({}, block, {text: newVal}));
+              }
+            },
+            placeholder: "Escribe tu texto aquí..."
+          }),
+      e('div', {style:{display:'flex',gap:'6px',marginTop:'4px',alignItems:'center'}},
+        e('button', {
+          className: 'lock-btn' + (isRich ? ' unlocked' : ''),
+          onClick: function() {
+            if (isRich) {
+              // Switch to plain text
+              var plain = block._richHtml ? block._richHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : displayText;
+              props.onChange(Object.assign({}, block, {_richHtml: null, text: plain}));
+            } else {
+              // Switch to rich text — convert plain to HTML paragraphs
+              var html = displayText.split('\n').filter(function(l){return l.trim()}).map(function(l){return '<p>' + escapeHtml(l) + '</p>'}).join('');
+              props.onChange(Object.assign({}, block, {_richHtml: html || '<p></p>'}));
+              bumpResetKey();
+            }
+          },
+          title: isRich ? 'Cambiar a texto plano' : 'Activar editor rico'
+        }, isRich ? '📝 Editor Rico' : 'Aa Texto Plano'),
+        block._sourceType === 'prewritten' && e('span', {style:{fontSize:'9px',color:'#9ca3af'}}, '📎 ' + (block._sourceId || '')),
+        e('button', {
+          style:{fontSize:'10px',padding:'3px 8px',borderRadius:'12px',border:'1px solid #d1d5db',background:'#f9fafb',cursor:'pointer',color:'#6b7280',display:'inline-flex',alignItems:'center',gap:'4px'},
+          onClick: function(){ if (props.onAiAssist) props.onAiAssist(block.id); },
+          title:'Redactar con IA'
+        }, '✨ IA')
+      )
     );
   } else if (block.type === 'product_single') {
     body = e('div', {className:'prod-selectors'},
@@ -2137,24 +2373,128 @@ function BlockEditor(props) {
       e('label', null, 'Der: ', e(ProductSelect, {value:block.product3, onChange:function(v){props.onChange(Object.assign({},block,{product3:v}))}, exclude:block.product1, exclude2:block.product2, products:props.products}))
     );
   } else if (block.type === 'pimpam_hero') {
+    var heroCtaButtons = block.heroCtaButtons || [];
+    // Legacy: if old single CTA exists and no buttons array, create one
+    if (heroCtaButtons.length === 0 && block.heroCtaText && block.heroCtaUrl) {
+      heroCtaButtons = [{text: block.heroCtaText, url: block.heroCtaUrl}];
+    }
+    var updateHeroBtn = function(idx, key, val) {
+      var btns = heroCtaButtons.slice();
+      btns[idx] = Object.assign({}, btns[idx]);
+      btns[idx][key] = val;
+      props.onChange(Object.assign({}, block, {heroCtaButtons: btns}));
+    };
+    var addHeroBtn = function() {
+      props.onChange(Object.assign({}, block, {heroCtaButtons: heroCtaButtons.concat([{text:'', url:'', bg:'', color:''}])}));
+    };
+    var removeHeroBtn = function(idx) {
+      props.onChange(Object.assign({}, block, {heroCtaButtons: heroCtaButtons.filter(function(_,i){return i!==idx})}));
+    };
+    // Use rich text for hero subtitle
+    var heroSubHtml = block._heroSubRich != null ? block._heroSubRich : (block.heroSubtitle || '');
+    var isHeroRich = block._heroSubRich != null;
     body = e('div', null,
       e('div', {style:{marginBottom:'8px'}},
         e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'4px'}},'Título'),
         e('input', {className:'form-input', value:block.heroTitle||'', onChange:function(ev){props.onChange(Object.assign({},block,{heroTitle:ev.target.value}))}, placeholder:'Título del hero', style:{fontSize:'11px'}})
       ),
       e('div', {style:{marginBottom:'8px'}},
-        e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'4px'}},'Subtítulo'),
-        e('input', {className:'form-input', value:block.heroSubtitle||'', onChange:function(ev){props.onChange(Object.assign({},block,{heroSubtitle:ev.target.value}))}, placeholder:'Subtítulo', style:{fontSize:'11px'}})
+        e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'4px'}},'Subtítulo / Texto'),
+        isHeroRich
+          ? e(RichTextEditor, {
+              value: heroSubHtml,
+              resetKey: 'hero-' + block.id + '-' + blockLang,
+              onChange: function(html) { props.onChange(Object.assign({}, block, {_heroSubRich: html, heroSubtitle: html})); },
+              style: {minHeight:'60px',maxHeight:'150px'}
+            })
+          : e('textarea', {className:'form-textarea', value:block.heroSubtitle||'', onChange:function(ev){props.onChange(Object.assign({},block,{heroSubtitle:ev.target.value}))}, placeholder:'Subtítulo', style:{fontSize:'11px',minHeight:'40px'}}),
+        e('button', {
+          className: 'lock-btn' + (isHeroRich ? ' unlocked' : ''),
+          onClick: function() {
+            if (isHeroRich) {
+              var plain = block._heroSubRich ? block._heroSubRich.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+              props.onChange(Object.assign({}, block, {_heroSubRich: null, heroSubtitle: plain}));
+            } else {
+              var html = '<p>' + escapeHtml(block.heroSubtitle || '') + '</p>';
+              props.onChange(Object.assign({}, block, {_heroSubRich: html}));
+            }
+          },
+          style:{marginTop:'4px'}
+        }, isHeroRich ? '📝 Editor Rico' : 'Aa Texto Plano')
       ),
       e('div', {style:{marginBottom:'8px'}},
         e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'4px'}},'Imagen (URL)'),
         e('input', {className:'form-input', value:block.heroImage||'', onChange:function(ev){props.onChange(Object.assign({},block,{heroImage:ev.target.value}))}, placeholder:'https://...', style:{fontSize:'11px'}})
       ),
-      e('p', {style:{fontSize:'9px',color:'#9ca3af',fontStyle:'italic',margin:'4px 0'}},'Configuración adicional en editor modal')
+      e('div', {style:{marginBottom:'8px'}},
+        e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'4px'}},'Enlace imagen'),
+        e('input', {className:'form-input', value:block.heroImageLink||'', onChange:function(ev){props.onChange(Object.assign({},block,{heroImageLink:ev.target.value}))}, placeholder:'https://...', style:{fontSize:'11px'}})
+      ),
+      e('div', {style:{marginBottom:'8px'}},
+        e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'4px'}},'Color de fondo'),
+        e('input', {type:'color', value:block.heroBgColor||'#ffffff', onChange:function(ev){props.onChange(Object.assign({},block,{heroBgColor:ev.target.value}))}, style:{width:'48px',height:'28px',border:'1px solid #d1d5db',borderRadius:'4px',cursor:'pointer'}})
+      ),
+      // CTA Buttons section
+      e('div', {style:{marginBottom:'8px',padding:'10px',background:'#f9fafb',borderRadius:'8px',border:'1px solid #e5e7eb'}},
+        e('label', {style:{fontSize:'10px',fontWeight:700,color:'#374151',display:'block',marginBottom:'8px'}},'Botones CTA (' + heroCtaButtons.length + ')'),
+        heroCtaButtons.map(function(btn, bi) {
+          return e('div', {key:bi, style:{display:'flex',gap:'4px',marginBottom:'6px',alignItems:'center'}},
+            e('input', {className:'form-input', value:btn.text||'', onChange:function(ev){updateHeroBtn(bi,'text',ev.target.value)}, placeholder:'Texto botón', style:{fontSize:'10px',flex:1}}),
+            e('input', {className:'form-input', value:btn.url||'', onChange:function(ev){updateHeroBtn(bi,'url',ev.target.value)}, placeholder:'URL', style:{fontSize:'10px',flex:1.5}}),
+            e('input', {type:'color', value:btn.bg||'#ea580c', onChange:function(ev){updateHeroBtn(bi,'bg',ev.target.value)}, title:'Color fondo', style:{width:'28px',height:'24px',border:'1px solid #d1d5db',borderRadius:'3px',cursor:'pointer',padding:0}}),
+            e('button', {onClick:function(){removeHeroBtn(bi)}, style:{fontSize:'10px',padding:'2px 6px',border:'1px solid #fca5a5',borderRadius:'4px',background:'#fef2f2',cursor:'pointer',color:'#dc2626'}}, '✕')
+          );
+        }),
+        e('button', {onClick:addHeroBtn, style:{fontSize:'10px',padding:'4px 10px',border:'1px dashed #d1d5db',borderRadius:'6px',background:'#fff',cursor:'pointer',color:'#6b7280',width:'100%'}}, '+ Añadir botón')
+      )
     );
   } else if (block.type === 'pimpam_steps') {
     var stepsSummary = (block.steps||[]).map(function(s){return s.t}).join(', ') || '4 pasos: Elige diseño, Personaliza, Paga, ¡Listo!';
-    body = e('p', {className:'fixed-msg'}, stepsSummary);
+    body = e('div', null,
+      e('p', {className:'fixed-msg'}, stepsSummary),
+      e('button', {className:'lock-btn' + (isUnlocked?' unlocked':''), onClick:function(){setUnlocked(!isUnlocked)}, style:{marginTop:'4px'}}, isUnlocked ? '🔓 Editando' : '🔒 Editar pasos'),
+      isUnlocked && e('div', {style:{marginTop:'8px',padding:'8px',background:'#f9fafb',borderRadius:'8px',border:'1px solid #e5e7eb'}},
+        (block.steps||[]).map(function(step, si) {
+          return e('div', {key:si, style:{display:'flex',gap:'4px',marginBottom:'4px',alignItems:'center'}},
+            e('input', {className:'form-input', value:step.n||'', onChange:function(ev){var s=(block.steps||[]).slice();s[si]=Object.assign({},s[si],{n:ev.target.value});props.onChange(Object.assign({},block,{steps:s}))}, style:{width:'40px',fontSize:'10px',textAlign:'center'}, placeholder:'#'}),
+            e('input', {className:'form-input', value:step.t||'', onChange:function(ev){var s=(block.steps||[]).slice();s[si]=Object.assign({},s[si],{t:ev.target.value});props.onChange(Object.assign({},block,{steps:s}))}, style:{flex:1,fontSize:'10px'}, placeholder:'Título'}),
+            e('input', {className:'form-input', value:step.s||'', onChange:function(ev){var s=(block.steps||[]).slice();s[si]=Object.assign({},s[si],{s:ev.target.value});props.onChange(Object.assign({},block,{steps:s}))}, style:{flex:1,fontSize:'10px'}, placeholder:'Subtítulo'})
+          );
+        }),
+        e('div', {style:{display:'flex',gap:'4px',marginTop:'4px'}},
+          e('label', {style:{fontSize:'9px',color:'#6b7280',display:'flex',alignItems:'center',gap:'4px'}}, 'Fondo: ', e('input', {type:'color', value:block.stepsBgColor||'#fff7ed', onChange:function(ev){props.onChange(Object.assign({},block,{stepsBgColor:ev.target.value}))}, style:{width:'28px',height:'20px',border:'1px solid #d1d5db',borderRadius:'3px',cursor:'pointer'}})),
+          e('label', {style:{fontSize:'9px',color:'#6b7280',display:'flex',alignItems:'center',gap:'4px'}}, 'Borde: ', e('input', {type:'color', value:block.stepsBorderColor||'#fed7aa', onChange:function(ev){props.onChange(Object.assign({},block,{stepsBorderColor:ev.target.value}))}, style:{width:'28px',height:'20px',border:'1px solid #d1d5db',borderRadius:'3px',cursor:'pointer'}}))
+        )
+      )
+    );
+  } else if (block.type === 'freebird') {
+    // Video block — editable
+    body = e('div', null,
+      e('p', {className:'fixed-msg'}, '▶ ' + (block.youtubeUrl || 'Freebird video')),
+      e('button', {className:'lock-btn' + (isUnlocked?' unlocked':''), onClick:function(){setUnlocked(!isUnlocked)}, style:{marginTop:'4px'}}, isUnlocked ? '🔓 Editando' : '🔒 Editar video'),
+      isUnlocked && e('div', {style:{marginTop:'8px'}},
+        e('div', {style:{marginBottom:'6px'}},
+          e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'2px'}}, 'YouTube URL'),
+          e('input', {className:'form-input', value:block.youtubeUrl||'', onChange:function(ev){props.onChange(Object.assign({},block,{youtubeUrl:ev.target.value}))}, placeholder:'https://www.youtube.com/watch?v=...', style:{fontSize:'11px'}})
+        ),
+        e('div', null,
+          e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'2px'}}, 'Thumbnail (override, opcional)'),
+          e('input', {className:'form-input', value:block.thumbnailOverride||'', onChange:function(ev){props.onChange(Object.assign({},block,{thumbnailOverride:ev.target.value}))}, placeholder:'URL imagen custom', style:{fontSize:'11px'}})
+        )
+      )
+    );
+  } else if (block.type && block.type.indexOf('brand_') === 0) {
+    // Brand strip — editable
+    body = e('div', null,
+      e('p', {className:'fixed-msg'}, '🏷 ' + (block.brand || block.type.replace('brand_',''))),
+      e('button', {className:'lock-btn' + (isUnlocked?' unlocked':''), onClick:function(){setUnlocked(!isUnlocked)}, style:{marginTop:'4px'}}, isUnlocked ? '🔓 Editando' : '🔒 Editar marca'),
+      isUnlocked && e('div', {style:{marginTop:'8px'}},
+        e('label', {style:{fontSize:'10px',color:'#6b7280',display:'block',marginBottom:'2px'}}, 'Marca'),
+        e('select', {className:'form-select', value:block.brand||'artisjet', onChange:function(ev){props.onChange(Object.assign({},block,{brand:ev.target.value, type:'brand_'+ev.target.value}))}, style:{fontSize:'11px'}},
+          (blockAppState.brands||[]).map(function(b){ return e('option', {key:b.id, value:b.id}, b.label); })
+        )
+      )
+    );
   } else if (block.type === 'composed') {
     var iBlocks = block.innerBlocks || [];
     // Find text blocks for inline editing
@@ -2163,40 +2503,78 @@ function BlockEditor(props) {
     var badgeStyle = {fontSize:'10px',padding:'2px 6px',borderRadius:'4px'};
     // Resolve display text for the inline text editor
     var composedDisplayText = '';
+    var composedIsRich = false;
     if (textBlockIdx >= 0) {
       var ibRef = iBlocks[textBlockIdx];
       composedDisplayText = ibRef._sourceType
         ? getTextInLanguage(ibRef, blockLang, blockAppState)
-        : (ibRef.text || '');
+        : (ibRef._richHtml != null ? ibRef._richHtml : (ibRef.text || ''));
+      composedIsRich = ibRef._richHtml != null || (composedDisplayText && /<[a-z][\s\S]*>/i.test(composedDisplayText));
     }
     body = e('div', null,
       block.title && e('div', {style:{fontWeight:600,fontSize:'12px',marginBottom:'6px',color:'#374151'}}, block.title),
       // Show inline editor for first text block if present
       textBlockIdx >= 0 && e('div', null,
-        e('textarea', {
-          value: composedDisplayText,
-          onChange: function(ev) {
-            var newVal = ev.target.value;
-            var newIbs = iBlocks.map(function(ib,i){
-              if (i !== textBlockIdx) return ib;
-              if (ib._sourceType) {
-                // Save edit to _overrides for current language
-                var newOvr = Object.assign({}, ib._overrides || {});
-                newOvr[blockLang] = newVal;
-                return Object.assign({}, ib, {_overrides: newOvr});
+        composedIsRich
+          ? e(RichTextEditor, {
+              value: composedDisplayText,
+              resetKey: 'composed-' + block.id + '-' + blockLang,
+              onChange: function(html) {
+                var newIbs = iBlocks.map(function(ib,i){
+                  if (i !== textBlockIdx) return ib;
+                  if (ib._sourceType) {
+                    var newOvr = Object.assign({}, ib._overrides || {});
+                    newOvr[blockLang] = html;
+                    return Object.assign({}, ib, {_overrides: newOvr, _richHtml: html});
+                  }
+                  return Object.assign({}, ib, {_richHtml: html});
+                });
+                props.onChange(Object.assign({}, block, {innerBlocks: newIbs}));
               }
-              return Object.assign({}, ib, {text: newVal});
-            });
-            props.onChange(Object.assign({}, block, {innerBlocks: newIbs}));
-          },
-          placeholder: 'Texto libre...',
-          style: {minHeight:'50px'}
-        }),
-        e('button', {
-          style:{fontSize:'10px',padding:'3px 8px',marginTop:'4px',borderRadius:'12px',border:'1px solid #d1d5db',background:'#f9fafb',cursor:'pointer',color:'#6b7280',display:'inline-flex',alignItems:'center',gap:'4px'},
-          onClick: function(){ if (props.onAiAssist) props.onAiAssist(block.id); },
-          title:'Redactar con IA'
-        }, '✨ IA')
+            })
+          : e('textarea', {
+              value: composedDisplayText,
+              onChange: function(ev) {
+                var newVal = ev.target.value;
+                var newIbs = iBlocks.map(function(ib,i){
+                  if (i !== textBlockIdx) return ib;
+                  if (ib._sourceType) {
+                    var newOvr = Object.assign({}, ib._overrides || {});
+                    newOvr[blockLang] = newVal;
+                    return Object.assign({}, ib, {_overrides: newOvr});
+                  }
+                  return Object.assign({}, ib, {text: newVal});
+                });
+                props.onChange(Object.assign({}, block, {innerBlocks: newIbs}));
+              },
+              placeholder: 'Texto libre...',
+              style: {minHeight:'50px'}
+            }),
+        e('div', {style:{display:'flex',gap:'6px',marginTop:'4px',alignItems:'center'}},
+          textBlockIdx >= 0 && e('button', {
+            className: 'lock-btn' + (composedIsRich ? ' unlocked' : ''),
+            onClick: function() {
+              var newIbs = iBlocks.map(function(ib,i){
+                if (i !== textBlockIdx) return ib;
+                if (composedIsRich) {
+                  var plain = ib._richHtml ? ib._richHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+                  return Object.assign({}, ib, {_richHtml: null, text: plain});
+                } else {
+                  var txt = ib.text || composedDisplayText || '';
+                  var html = txt.split('\n').filter(function(l){return l.trim()}).map(function(l){return '<p>'+escapeHtml(l)+'</p>'}).join('');
+                  return Object.assign({}, ib, {_richHtml: html || '<p></p>'});
+                }
+              });
+              props.onChange(Object.assign({}, block, {innerBlocks: newIbs}));
+              bumpResetKey();
+            }
+          }, composedIsRich ? '📝 Editor Rico' : 'Aa Texto Plano'),
+          e('button', {
+            style:{fontSize:'10px',padding:'3px 8px',borderRadius:'12px',border:'1px solid #d1d5db',background:'#f9fafb',cursor:'pointer',color:'#6b7280',display:'inline-flex',alignItems:'center',gap:'4px'},
+            onClick: function(){ if (props.onAiAssist) props.onAiAssist(block.id); },
+            title:'Redactar con IA'
+          }, '✨ IA')
+        )
       ),
       // Show badges for all inner blocks
       e('div', {style:{marginTop:'8px',display:'flex',flexWrap:'wrap',gap:'4px'}},
@@ -2270,25 +2648,59 @@ function EmailComposer() {
   var _boPassError = useState(false);
   var boPassError = _boPassError[0], setBoPassError = _boPassError[1];
 
-  // Default password hashes (not stored in clear text)
-  var DEFAULT_BO_HASH = 'h_tntwgw';
-  var DEFAULT_DATA_HASH = 'h_3vqgao';
-
-  // Simple hash for password storage (not crypto-grade, but sufficient for client-side app)
-  function simpleHash(str) {
-    var hash = 0;
-    for (var i = 0; i < str.length; i++) {
-      var ch = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + ch;
-      hash = hash & hash; // Convert to 32-bit int
-    }
-    return 'h_' + Math.abs(hash).toString(36);
+  // SHA-256 hash via Web Crypto API (async) — used for password verification
+  function sha256Hash(str) {
+    var encoder = new TextEncoder();
+    var data = encoder.encode(str);
+    return crypto.subtle.digest('SHA-256', data).then(function(buf) {
+      var arr = Array.from(new Uint8Array(buf));
+      return arr.map(function(b){ return b.toString(16).padStart(2, '0'); }).join('');
+    });
   }
 
-  function checkPassword(input, storedHash, defaultHash) {
-    var inputHash = simpleHash(input);
-    if (storedHash) return inputHash === storedHash;
-    return inputHash === defaultHash;
+  // Default password hashes (SHA-256)
+  var DEFAULT_BO_HASH = 'a1bfe0bf4fa8f02f1969c64276b15f55e455b3dd9f50f11a22fb8c284a9c2f48';
+  var DEFAULT_DATA_HASH = '6fab52fdf6384db663c2aae68b921a907422f9bdd102fbd35a90fc71dc8423ea';
+
+  // XSS sanitization for HTML preview
+  function sanitizeHtml(html) {
+    if (!html) return '';
+    // Remove script tags and their content
+    html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+    // Remove event handlers (onclick, onerror, onload, onmouseover, etc.)
+    html = html.replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+    // Remove javascript: protocol in href/src/action attributes
+    html = html.replace(/(href|src|action)\s*=\s*(?:"javascript:[^"]*"|'javascript:[^']*')/gi, '$1=""');
+    // Remove data: protocol in src (can be used for XSS)
+    html = html.replace(/src\s*=\s*(?:"data:[^"]*"|'data:[^']*')/gi, 'src=""');
+    // Remove iframe tags
+    html = html.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+    html = html.replace(/<iframe\b[^>]*\/?>/gi, '');
+    // Remove object/embed tags
+    html = html.replace(/<(?:object|embed)\b[^>]*\/?>/gi, '');
+    return html;
+  }
+
+  // Prototype pollution protection for imported JSON
+  function sanitizeJsonObj(obj) {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(sanitizeJsonObj);
+    var clean = {};
+    var keys = Object.keys(obj);
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+      clean[k] = sanitizeJsonObj(obj[k]);
+    }
+    return clean;
+  }
+
+  // Async password check (callback-based for SHA-256)
+  function checkPasswordAsync(input, storedHash, defaultHash, callback) {
+    sha256Hash(input).then(function(inputHash) {
+      var match = storedHash ? (inputHash === storedHash) : (inputHash === defaultHash);
+      callback(match, inputHash);
+    });
   }
 
   function tryOpenBackoffice() {
@@ -2299,23 +2711,26 @@ function EmailComposer() {
   }
 
   function submitBoPassword() {
-    if (checkPassword(boPass, appState.boPasswordHash, DEFAULT_BO_HASH)) {
-      setBoUnlocked(true);
-      setShowBoLogin(false);
-      setAppMode('backoffice');
-      setBoPass('');
-      setBoPassError(false);
-    } else {
-      setBoPassError(true);
-    }
+    checkPasswordAsync(boPass, appState.boPasswordHash, DEFAULT_BO_HASH, function(match) {
+      if (match) {
+        setBoUnlocked(true);
+        setShowBoLogin(false);
+        setAppMode('backoffice');
+        setBoPass('');
+        setBoPassError(false);
+      } else {
+        setBoPassError(true);
+      }
+    });
   }
 
-  function requireDataPassword(action) {
+  function requireDataPassword(callback) {
     var pass = window.prompt('Esta acción requiere el password de datos:');
-    if (!pass) return false;
-    if (checkPassword(pass, appState.dataPasswordHash, DEFAULT_DATA_HASH)) return true;
-    alert('Password de datos incorrecto.');
-    return false;
+    if (!pass) { if (callback) callback(false); return; }
+    checkPasswordAsync(pass, appState.dataPasswordHash, DEFAULT_DATA_HASH, function(match) {
+      if (!match) alert('Password de datos incorrecto.');
+      if (callback) callback(match);
+    });
   }
 
   var _appState = useState(function(){
@@ -2427,11 +2842,13 @@ function EmailComposer() {
   var filterBlk = _filterBlk[0], setFilterBlk = _filterBlk[1];
   var _filterOtr = useState([]);
   var filterOtr = _filterOtr[0], setFilterOtr = _filterOtr[1];
+  var _filterOtrType = useState('all');
+  var filterOtrType = _filterOtrType[0], setFilterOtrType = _filterOtrType[1];
 
   // OpenAI API key (stored in localStorage only, never in Supabase)
-  var _openaiKey = useState(function(){ try { return localStorage.getItem('bomedia_openai_key') || ''; } catch(e){ return ''; } });
+  var _openaiKey = useState(function(){ try { return sessionStorage.getItem('bomedia_openai_key') || ''; } catch(e){ return ''; } });
   var openaiKey = _openaiKey[0], setOpenaiKey = _openaiKey[1];
-  function saveOpenaiKey(key) { setOpenaiKey(key); try { localStorage.setItem('bomedia_openai_key', key); } catch(e){} }
+  function saveOpenaiKey(key) { setOpenaiKey(key); try { sessionStorage.setItem('bomedia_openai_key', key); } catch(e){} }
 
   // AI writing assistant state
   var _aiPromptOpen = useState(null);
@@ -2844,7 +3261,7 @@ function EmailComposer() {
   }
 
   function exportJSON() {
-    if (!requireDataPassword()) return;
+    requireDataPassword(function(ok) { if (!ok) return;
     var dataStr = JSON.stringify(appState, null, 2);
     var blob = new Blob([dataStr], {type:'application/json'});
     var url = URL.createObjectURL(blob);
@@ -2853,6 +3270,7 @@ function EmailComposer() {
     a.download = 'bomedia-config-' + new Date().getTime() + '.json';
     a.click();
     URL.revokeObjectURL(url);
+    });
   }
 
   function mergeArrayById(existing, incoming) {
@@ -2888,7 +3306,8 @@ function EmailComposer() {
   }
 
   function restoreBackup() {
-    if (!requireDataPassword()) return;
+    requireDataPassword(function(ok) {
+    if (!ok) return;
     // Gather local backups
     var localKeys = [];
     for (var i = 0; i < localStorage.length; i++) {
@@ -2927,7 +3346,7 @@ function EmailComposer() {
       var entry = entries[idx];
       if (entry.source === 'local') {
         try {
-          var data = JSON.parse(localStorage.getItem(entry.key));
+          var data = sanitizeJsonObj(JSON.parse(localStorage.getItem(entry.key)));
           if (data && window.confirm('¿Restaurar backup del ' + new Date(entry.ts).toLocaleString() + '?')) {
             persistState(data);
             alert('Backup restaurado.');
@@ -2945,6 +3364,7 @@ function EmailComposer() {
         });
       }
     });
+    }); // end requireDataPassword callback
   }
 
   function importJSON() {
@@ -2952,13 +3372,14 @@ function EmailComposer() {
     input.type = 'file';
     input.accept = 'application/json';
     input.onchange = function(e) {
-      if (!requireDataPassword()) return;
+      requireDataPassword(function(ok) {
+      if (!ok) return;
       autoBackup('pre-import');
       var file = e.target.files[0];
       var reader = new FileReader();
       reader.onload = function(evt) {
         try {
-          var data = JSON.parse(evt.target.result);
+          var data = sanitizeJsonObj(JSON.parse(evt.target.result));
           var choice = window.prompt('¿Qué quieres hacer?\n\n1 = Fusionar (añade lo nuevo, actualiza duplicados)\n2 = Reemplazar todo\n\nEscribe 1 o 2 (o vacío para cancelar):');
           if (choice === '1') {
             // Merge mode: combine arrays by id
@@ -2989,17 +3410,20 @@ function EmailComposer() {
         }
       };
       reader.readAsText(file);
+      }); // end requireDataPassword callback
     };
     input.click();
   }
 
   function resetToDefaults() {
-    if (!requireDataPassword()) return;
-    if(window.confirm('¿Restaurar configuración original? Se perderán todos los cambios.')) {
-      autoBackup('pre-reset');
-      var defaultState = getDefaultState();
-      persistState(defaultState);
-    }
+    requireDataPassword(function(ok) {
+      if (!ok) return;
+      if(window.confirm('¿Restaurar configuración original? Se perderán todos los cambios.')) {
+        autoBackup('pre-reset');
+        var defaultState = getDefaultState();
+        persistState(defaultState);
+      }
+    });
   }
 
   // Product management
@@ -3293,14 +3717,37 @@ function EmailComposer() {
             })
           ),
 
-          // OTROS BLOQUES (standalone, data-driven)
-          e(SidebarSection, {title:'OTROS BLOQUES'},
+          // BLOQUES SUELTOS (standalone, data-driven) — all sections, with type filter
+          e(SidebarSection, {title:'BLOQUES SUELTOS'},
+            // Type filter bar
+            e('div', {className:'type-filter-bar'},
+              e('button', {className:'type-filter-btn' + (filterOtrType==='all'?' active':''), onClick:function(){setFilterOtrType('all')}}, 'Todos'),
+              e('button', {className:'type-filter-btn' + (filterOtrType==='brand_strip'?' active':''), onClick:function(){setFilterOtrType('brand_strip')}}, 'Marcas'),
+              e('button', {className:'type-filter-btn' + (filterOtrType==='product'?' active':''), onClick:function(){setFilterOtrType('product')}}, 'Productos'),
+              e('button', {className:'type-filter-btn' + (filterOtrType==='pimpam_hero'?' active':''), onClick:function(){setFilterOtrType('pimpam_hero')}}, 'Heroes'),
+              e('button', {className:'type-filter-btn' + (filterOtrType==='video'?' active':''), onClick:function(){setFilterOtrType('video')}}, 'Video'),
+              e('button', {className:'type-filter-btn' + (filterOtrType==='pimpam_steps'?' active':''), onClick:function(){setFilterOtrType('pimpam_steps')}}, 'Pasos')
+            ),
+            // Brand filter bar
             e('div', {className:'brand-filter-bar', style:{marginBottom:'6px'}},
               e('button', {className:'brand-filter-btn' + (filterOtr.length===0?' active':''), onClick:function(){setFilterOtr([])}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Todos'),
               (appState.brands||[]).filter(function(br){return br.visible!==false}).map(function(br){ return e('button', {key:br.id, className:'brand-filter-btn' + (filterOtr.indexOf(br.id)>=0?' active':''), onClick:function(){setFilterOtr(function(p){ return p.indexOf(br.id)>=0?p.filter(function(x){return x!==br.id}):p.concat([br.id]); })}, style:{fontSize:'10px',padding:'2px 8px'}}, br.label); }),
               e('button', {className:'brand-filter-btn' + (filterOtr.indexOf('mix')>=0?' active':''), onClick:function(){setFilterOtr(function(p){ return p.indexOf('mix')>=0?p.filter(function(x){return x!=='mix'}):p.concat(['mix']); })}, style:{fontSize:'10px',padding:'2px 8px'}}, 'Mix')
             ),
-            appState.standaloneBlocks.filter(function(sb){return sb.section==='otros' && sb.visible !== false && isAvailableInLang(sb, lang) && (filterOtr.length===0 || filterOtr.indexOf(sb.brand||'mix')>=0)}).map(function(sb) {
+            appState.standaloneBlocks.filter(function(sb){
+              if (sb.visible === false) return false;
+              if (!isAvailableInLang(sb, lang)) return false;
+              if (filterOtr.length > 0 && filterOtr.indexOf(sb.brand||'mix') < 0) return false;
+              // Type filter
+              if (filterOtrType !== 'all') {
+                if (filterOtrType === 'product') {
+                  if (sb.blockType !== 'product_single' && sb.blockType !== 'product_pair' && sb.blockType !== 'product_trio') return false;
+                } else {
+                  if (sb.blockType !== filterOtrType) return false;
+                }
+              }
+              return true;
+            }).map(function(sb) {
               return e('button', {key:sb.id, className:'add-btn', onClick:function(){addStandaloneBlock(sb)}},
                 e('span', {className:'add-btn-icon', style:{background:sb.iconBg, color:sb.iconColor||'#000'}}, sb.icon),
                 e('div', null,
@@ -3367,7 +3814,7 @@ function EmailComposer() {
           showHtmlCode
             ? e('pre', {className:'html-code'}, fullHtml)
             : e('div', {className:'preview-content'},
-                e('div', {className:'preview-frame', dangerouslySetInnerHTML:{__html:fullHtml}})
+                e('div', {className:'preview-frame', dangerouslySetInnerHTML:{__html:sanitizeHtml(fullHtml)}})
               )
         )
       ),
@@ -3747,26 +4194,34 @@ function EmailComposer() {
               e('button', {className:'btn btn-primary btn-sm', onClick:function(){
                 var current = window.prompt('Password actual de backoffice:');
                 if (!current) return;
-                if (!checkPassword(current, appState.boPasswordHash, DEFAULT_BO_HASH)) { alert('Password incorrecto.'); return; }
-                var newPass = window.prompt('Nuevo password de backoffice:');
-                if (!newPass || !newPass.trim()) { alert('Cancelado.'); return; }
-                var confirm2 = window.prompt('Repite el nuevo password:');
-                if (newPass !== confirm2) { alert('No coinciden.'); return; }
-                var newState = Object.assign({}, appState, {boPasswordHash: simpleHash(newPass)});
-                persistState(newState);
-                alert('Password de backoffice cambiado.');
+                checkPasswordAsync(current, appState.boPasswordHash, DEFAULT_BO_HASH, function(match) {
+                  if (!match) { alert('Password incorrecto.'); return; }
+                  var newPass = window.prompt('Nuevo password de backoffice:');
+                  if (!newPass || !newPass.trim()) { alert('Cancelado.'); return; }
+                  var confirm2 = window.prompt('Repite el nuevo password:');
+                  if (newPass !== confirm2) { alert('No coinciden.'); return; }
+                  sha256Hash(newPass).then(function(newHash) {
+                    var newState = Object.assign({}, appState, {boPasswordHash: newHash});
+                    persistState(newState);
+                    alert('Password de backoffice cambiado.');
+                  });
+                });
               }}, 'Cambiar pass backoffice'),
               e('button', {className:'btn btn-primary btn-sm', onClick:function(){
                 var current = window.prompt('Password actual de datos:');
                 if (!current) return;
-                if (!checkPassword(current, appState.dataPasswordHash, DEFAULT_DATA_HASH)) { alert('Password incorrecto.'); return; }
-                var newPass = window.prompt('Nuevo password de datos:');
-                if (!newPass || !newPass.trim()) { alert('Cancelado.'); return; }
-                var confirm2 = window.prompt('Repite el nuevo password:');
-                if (newPass !== confirm2) { alert('No coinciden.'); return; }
-                var newState = Object.assign({}, appState, {dataPasswordHash: simpleHash(newPass)});
-                persistState(newState);
-                alert('Password de datos cambiado.');
+                checkPasswordAsync(current, appState.dataPasswordHash, DEFAULT_DATA_HASH, function(match) {
+                  if (!match) { alert('Password incorrecto.'); return; }
+                  var newPass = window.prompt('Nuevo password de datos:');
+                  if (!newPass || !newPass.trim()) { alert('Cancelado.'); return; }
+                  var confirm2 = window.prompt('Repite el nuevo password:');
+                  if (newPass !== confirm2) { alert('No coinciden.'); return; }
+                  sha256Hash(newPass).then(function(newHash) {
+                    var newState = Object.assign({}, appState, {dataPasswordHash: newHash});
+                    persistState(newState);
+                    alert('Password de datos cambiado.');
+                  });
+                });
               }}, 'Cambiar pass datos'),
               appState.boPasswordHash && e('span', {style:{fontSize:'11px',color:'#16a34a',alignSelf:'center'}}, '✓ Pass backoffice personalizado'),
               appState.dataPasswordHash && e('span', {style:{fontSize:'11px',color:'#16a34a',alignSelf:'center'}}, '✓ Pass datos personalizado')
