@@ -2486,7 +2486,7 @@ function BlockEditor(props) {
       e('label', null, 'Centro: ', e(ProductSelect, {value:block.product2, onChange:function(v){props.onChange(Object.assign({},block,{product2:v}))}, exclude:block.product1, exclude2:block.product3, products:props.products})),
       e('label', null, 'Der: ', e(ProductSelect, {value:block.product3, onChange:function(v){props.onChange(Object.assign({},block,{product3:v}))}, exclude:block.product1, exclude2:block.product2, products:props.products}))
     );
-  } else if (block.type === 'pimpam_hero') {
+  } else if (block.type === 'hero' || block.type === 'pimpam_hero') {
     var heroCtaButtons = block.heroCtaButtons || [];
     // Legacy: if old single CTA exists and no buttons array, create one
     if (heroCtaButtons.length === 0 && block.heroCtaText && block.heroCtaUrl) {
@@ -3091,7 +3091,7 @@ function EmailComposer() {
               result.push(unlinkedText);
             }
             else if (ib.type === 'brand_strip') result.push({id: ++blockIdCounter, type:'brand_' + ib.brand, brand: ib.brand});
-            else if (ib.type === 'pimpam_hero') result.push({id: ++blockIdCounter, type:'pimpam_hero'});
+            else if (ib.type === 'pimpam_hero' || ib.type === 'hero') result.push({id: ++blockIdCounter, type:'hero'});
             else if (ib.type === 'pimpam_steps') result.push({id: ++blockIdCounter, type:'pimpam_steps'});
             else if (ib.type === 'product_trio') result.push({id: ++blockIdCounter, type:'product_trio', product1:ib.product1, product2:ib.product2, product3:ib.product3});
             else if (ib.type === 'product_pair') result.push({id: ++blockIdCounter, type:'product_pair', product1:ib.product1, product2:ib.product2});
@@ -3117,7 +3117,7 @@ function EmailComposer() {
         delete nib.text; // Don't copy text — resolve at render
         delete nib.i18n; // i18n lives in source definition
       }
-      if (ib.type === 'pimpam_hero') {
+      if (ib.type === 'pimpam_hero' || ib.type === 'hero') {
         nib._sourceType = 'composed_inner';
         nib._composedSourceId = composedBlock.id;
         nib._innerIdx = idx;
@@ -3129,7 +3129,7 @@ function EmailComposer() {
     if (refInnerBlocks.length === 0 && (composedBlock.introText || composedBlock.blockType)) {
       refInnerBlocks.push({type:'text', _sourceType:'composed_inner', _composedSourceId:composedBlock.id, _innerIdx:-1, _overrides:{}});
       if (composedBlock.brandStrip && composedBlock.brandStrip !== 'none') refInnerBlocks.push({type:'brand_strip', brand:composedBlock.brandStrip});
-      if (composedBlock.includeHero) refInnerBlocks.push({type:'pimpam_hero', _sourceType:'composed_inner', _composedSourceId:composedBlock.id, _innerIdx:-2, _overrides:{}});
+      if (composedBlock.includeHero) refInnerBlocks.push({type:'hero', _sourceType:'composed_inner', _composedSourceId:composedBlock.id, _innerIdx:-2, _overrides:{}});
       var prods = composedBlock.products || [];
       if (composedBlock.blockType === 'product_trio' && prods.length >= 3) refInnerBlocks.push({type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
       else if (composedBlock.blockType === 'product_pair' && prods.length >= 2) refInnerBlocks.push({type:'product_pair', product1:prods[0], product2:prods[1]});
@@ -3167,7 +3167,8 @@ function EmailComposer() {
       case 'product_single': newBlock = {id: ++blockIdCounter, type:'product_single', product1: cfg.defaultProduct || 'young'}; break;
       case 'product_pair': newBlock = {id: ++blockIdCounter, type:'product_pair', product1: cfg.defaultProduct1 || 'young', product2: cfg.defaultProduct2 || '3000pro'}; break;
       case 'product_trio': newBlock = {id: ++blockIdCounter, type:'product_trio', product1: cfg.defaultProduct1 || 'uv1612g', product2: cfg.defaultProduct2 || 'uv1812', product3: cfg.defaultProduct3 || 'uv2513'}; break;
-      case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'pimpam_hero', _sourceType:'standalone', _sourceId:sb.id, _overrides:{}, heroImage: cfg.heroImage||'', heroTitle: cfg.heroTitle||'', heroSubtitle: cfg.heroSubtitle||'', heroBullets: cfg.heroBullets||[], heroImageLink: cfg.heroImageLink||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#fff'}; break;
+      case 'product_hero': newBlock = {id: ++blockIdCounter, type:'product_hero', _sourceType:'standalone', _sourceId:sb.id, _overrides:{}, product1: cfg.defaultProduct||'flexone', heroSubtitle: cfg.heroSubtitle||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#ffffff'}; break;
+      case 'hero': case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'hero', _sourceType:'standalone', _sourceId:sb.id, _overrides:{}, heroImage: cfg.heroImage||'', heroTitle: cfg.heroTitle||'', heroSubtitle: cfg.heroSubtitle||'', heroBullets: cfg.heroBullets||[], heroImageLink: cfg.heroImageLink||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#fff'}; break;
       case 'pimpam_steps': newBlock = {id: ++blockIdCounter, type:'pimpam_steps', steps: cfg.steps||[], stepsBgColor: cfg.stepsBgColor||'#fff7ed', stepsBorderColor: cfg.stepsBorderColor||'#fed7aa'}; break;
       default: newBlock = {id: ++blockIdCounter, type: sb.blockType}; break;
     }
@@ -3203,13 +3204,13 @@ function EmailComposer() {
         var refIbs = (composed.innerBlocks || []).map(function(ib, idx) {
           var nib = Object.assign({}, ib);
           if (ib.type === 'text') { nib._sourceType='composed_inner'; nib._composedSourceId=composed.id; nib._innerIdx=idx; nib._overrides={}; delete nib.text; delete nib.i18n; }
-          if (ib.type === 'pimpam_hero') { nib._sourceType='composed_inner'; nib._composedSourceId=composed.id; nib._innerIdx=idx; nib._overrides={}; }
+          if (ib.type === 'pimpam_hero' || ib.type === 'hero') { nib._sourceType='composed_inner'; nib._composedSourceId=composed.id; nib._innerIdx=idx; nib._overrides={}; }
           return nib;
         });
         if (refIbs.length === 0 && (composed.introText || composed.blockType)) {
           refIbs.push({type:'text', _sourceType:'composed_inner', _composedSourceId:composed.id, _innerIdx:-1, _overrides:{}});
           if (composed.brandStrip && composed.brandStrip !== 'none') refIbs.push({type:'brand_strip', brand:composed.brandStrip});
-          if (composed.includeHero) refIbs.push({type:'pimpam_hero', _sourceType:'composed_inner', _composedSourceId:composed.id, _innerIdx:-2, _overrides:{}});
+          if (composed.includeHero) refIbs.push({type:'hero', _sourceType:'composed_inner', _composedSourceId:composed.id, _innerIdx:-2, _overrides:{}});
           var prods = composed.products || [];
           if (composed.blockType === 'product_trio' && prods.length >= 3) refIbs.push({type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
           else if (composed.blockType === 'product_pair' && prods.length >= 2) refIbs.push({type:'product_pair', product1:prods[0], product2:prods[1]});
@@ -3269,7 +3270,7 @@ function EmailComposer() {
       }
 
       // For hero blocks: store i18n from standalone source
-      if (clone.type === 'pimpam_hero' && clone._sourceType === 'standalone' && clone._sourceId) {
+      if ((clone.type === 'pimpam_hero' || clone.type === 'hero') && clone._sourceType === 'standalone' && clone._sourceId) {
         var srcSb = (appState.standaloneBlocks || []).find(function(sb){ return sb.id === clone._sourceId; });
         if (srcSb && srcSb.config && srcSb.config.i18n) {
           clone.i18n = srcSb.config.i18n;
@@ -3833,7 +3834,7 @@ function EmailComposer() {
               e('button', {className:'type-filter-btn' + (filterOtrType==='all'?' active':''), onClick:function(){setFilterOtrType('all')}}, 'Todos'),
               e('button', {className:'type-filter-btn' + (filterOtrType==='brand_strip'?' active':''), onClick:function(){setFilterOtrType('brand_strip')}}, 'Marcas'),
               e('button', {className:'type-filter-btn' + (filterOtrType==='product'?' active':''), onClick:function(){setFilterOtrType('product')}}, 'Productos'),
-              e('button', {className:'type-filter-btn' + (filterOtrType==='pimpam_hero'?' active':''), onClick:function(){setFilterOtrType('pimpam_hero')}}, 'Heroes'),
+              e('button', {className:'type-filter-btn' + (filterOtrType==='hero'?' active':''), onClick:function(){setFilterOtrType('pimpam_hero')}}, 'Heroes'),
               e('button', {className:'type-filter-btn' + (filterOtrType==='video'?' active':''), onClick:function(){setFilterOtrType('video')}}, 'Video'),
               e('button', {className:'type-filter-btn' + (filterOtrType==='pimpam_steps'?' active':''), onClick:function(){setFilterOtrType('pimpam_steps')}}, 'Pasos')
             ),
