@@ -368,7 +368,7 @@ function getHeroDataInLanguage(block, lang, appState) {
       var innerIdx2 = typeof block._innerIdx === 'number' ? block._innerIdx : -1;
       if (innerIdx2 >= 0 && srcCb2.innerBlocks && srcCb2.innerBlocks[innerIdx2]) {
         var srcIb2 = srcCb2.innerBlocks[innerIdx2];
-        if (srcIb2.type === 'hero' || srcIb2.type === 'pimpam_hero') srcConfig = srcIb2;
+        if (srcIb2.type === 'pimpam_hero') srcConfig = srcIb2;
       }
     }
   }
@@ -678,12 +678,12 @@ function createBlock(type) {
     case "brand_mbo": return { id:id, type:type, brand:"mbo" };
     case "brand_pimpam": return { id:id, type:type, brand:"pimpam" };
     case "brand_flux": return { id:id, type:type, brand:"flux" };
+    case "brand_smartjet": return { id:id, type:type, brand:"smartjet" };
     case "product_single": return { id:id, type:type, product1:"young" };
     case "product_pair": return { id:id, type:type, product1:"young", product2:"3000pro" };
     case "product_trio": return { id:id, type:type, product1:"uv1612g", product2:"uv1812", product3:"uv2513" };
     case "freebird": return { id:id, type:type };
-    case "hero": case "pimpam_hero": return { id:id, type:type };
-    case "product_hero": return { id:id, type:type, product1:"flexone", heroCtaText:"", heroCtaUrl:"", heroSubtitle:"" };
+    case "pimpam_hero": return { id:id, type:type };
     case "pimpam_steps": return { id:id, type:type };
     default: return { id:id, type:type };
   }
@@ -940,66 +940,6 @@ function pimpamHeroHtml(config, lang) {
     '</td></tr></table></td></tr>';
 }
 
-
-function productHeroHtml(p, config, lang) {
-  config = config || {};
-  var bgColor = p.accent || '#0d9488';
-  var isDark = false;
-  var hexMatch = bgColor.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
-  if (hexMatch) {
-    var r = parseInt(hexMatch[1],16), g = parseInt(hexMatch[2],16), bv = parseInt(hexMatch[3],16);
-    isDark = (r*0.299 + g*0.587 + bv*0.114) < 128;
-  }
-  var heroBg = config.heroBgColor || '#ffffff';
-  var titleColor = '#0f172a';
-  var subColor = '#64748b';
-  var specColor = '#475569';
-
-  // Image cell
-  var imgHtml = '<div style="position:relative;width:100%;padding-bottom:100%;overflow:hidden;border-radius:10px 0 0 10px">' +
-    '<img src="' + p.img + '" alt="' + p.name + '" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;padding:12px;background:#fff;border-radius:10px 0 0 10px">' +
-    '</div>';
-
-  // Badge
-  var badgeHtml = '<span style="display:inline-block;font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;background:' + p.badgeBg + ';color:' + p.badgeColor + '">' + p.badge + '</span>';
-
-  // Specs
-  var specsHtml = '<p style="font-size:11px;color:' + specColor + ';margin:6px 0 2px">\u2713 ' + p.feat1 + '</p>' +
-    '<p style="font-size:11px;color:' + specColor + ';margin:2px 0">\u2713 ' + p.feat2 + '</p>';
-  if (p.area && p.area !== '-') {
-    specsHtml += '<p style="font-size:10px;color:#94a3b8;margin:4px 0 0">' + p.area + (p.alt && p.alt !== '-' ? ' \u00b7 Alt. ' + p.alt : '') + '</p>';
-  }
-
-  // Subtitle (optional custom text)
-  var subtitle = config.heroSubtitle || p.desc;
-  var subtitleHtml = '<p style="font-size:11px;color:' + subColor + ';margin:6px 0 10px;line-height:1.5">' + subtitle + '</p>';
-
-  // CTA button
-  var ctaText = config.heroCtaText || (lang==='fr'?'Plus d\'infos':lang==='de'?'Mehr Infos':lang==='en'?'More info':lang==='nl'?'Meer info':'M\u00e1s info');
-  var ctaUrl = config.heroCtaUrl || p.link;
-  var ctaHtml = '';
-  if (ctaText && ctaUrl) {
-    ctaHtml = '<table cellpadding="0" cellspacing="0" border="0" style="margin-top:10px"><tr>' +
-      '<td style="background:' + (p.gradient || bgColor) + ';border-radius:6px;padding:9px 20px">' +
-      '<a href="' + ctaUrl + '" target="_blank" rel="noopener noreferrer" style="color:#fff;font-size:12px;font-weight:700;text-decoration:none;font-family:system-ui,sans-serif">' + ctaText + ' \u2192</a>' +
-      '</td></tr></table>';
-  }
-
-  // Price
-  var priceHtml = p.price ? '<p style="font-size:14px;font-weight:900;color:' + (p.accent || '#0d9488') + ';margin:8px 0 0">' + p.price + '</p>' : '';
-
-  return '<tr><td style="padding:12px 8px 16px"><table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:' + heroBg + ';border-radius:10px;overflow:hidden;border:1.5px solid #e2e8f0"><tr>' +
-    '<td class="pp-img-cell" width="45%" valign="top" style="padding:0;font-size:0;line-height:0">' + imgHtml + '</td>' +
-    '<td class="pp-body-cell" valign="top" style="padding:16px 18px 16px 16px">' +
-    badgeHtml +
-    '<p style="font-size:16px;font-weight:900;color:' + titleColor + ';margin:8px 0 0">' + p.name + '</p>' +
-    subtitleHtml +
-    specsHtml +
-    priceHtml +
-    ctaHtml +
-    '</td></tr></table></td></tr>';
-}
-
 function pimpamStepsHtml(config, lang) {
   var cfg = config || {};
   var steps = cfg.steps || [
@@ -1065,10 +1005,8 @@ function generateFullHtml(blocks, products, lang, brands, appState) {
         var resolvedText = resolveText(b);
         if (resolvedText) rows += textBlockHtml(resolvedText);
         break;
-      case 'brand_artisjet': rows += brandStripHtml(b.brand||'artisjet', lang, brands); break;
-      case 'brand_mbo': rows += brandStripHtml(b.brand||'mbo', lang, brands); break;
-      case 'brand_pimpam': rows += brandStripHtml(b.brand||'pimpam', lang, brands); break;
-      case 'brand_flux': rows += brandStripHtml(b.brand||'flux', lang, brands); break;
+      case 'brand_artisjet': case 'brand_mbo': case 'brand_pimpam': case 'brand_flux': case 'brand_smartjet':
+        rows += brandStripHtml(b.brand || b.type.replace('brand_',''), lang, brands); break;
       case 'product_single':
         var ps = products.find(function(p){return p.id===b.product1});
         if(ps) { ps = getLocalizedProduct(ps, lang); rows += productSingleHtml(ps, lang); }
@@ -1085,11 +1023,7 @@ function generateFullHtml(blocks, products, lang, brands, appState) {
         if(pt1&&pt2&&pt3) { pt1 = getLocalizedProduct(pt1, lang); pt2 = getLocalizedProduct(pt2, lang); pt3 = getLocalizedProduct(pt3, lang); rows += productTrioHtml(pt1,pt2,pt3,lang); }
         break;
       case 'freebird': rows += freebirdHtml(b, lang); break;
-      case 'product_hero':
-        var ph = products.find(function(p){return p.id===b.product1});
-        if(ph) { ph = getLocalizedProduct(ph, lang); rows += productHeroHtml(ph, b, lang); }
-        break;
-      case 'hero': case 'pimpam_hero':
+      case 'pimpam_hero':
         var heroData = resolveHero(b);
         if (heroData === b) {
           rows += pimpamHeroHtml(b, lang);
@@ -1105,7 +1039,7 @@ function generateFullHtml(blocks, products, lang, brands, appState) {
         if (ibs.length === 0) {
           if (b.introText) ibs.push({type:'text', text:b.introText});
           if (b.brandStrip && b.brandStrip !== 'none') ibs.push({type:'brand_strip', brand:b.brandStrip});
-          if (b.includeHero) ibs.push({type:'hero'});
+          if (b.includeHero) ibs.push({type:'pimpam_hero'});
           var cProds = b.products || [];
           if (b.blockType === 'product_trio' && cProds.length >= 3) ibs.push({type:'product_trio', product1:cProds[0], product2:cProds[1], product3:cProds[2]});
           else if (b.blockType === 'product_pair' && cProds.length >= 2) ibs.push({type:'product_pair', product1:cProds[0], product2:cProds[1]});
@@ -1118,10 +1052,7 @@ function generateFullHtml(blocks, products, lang, brands, appState) {
             if (ibText) rows += textBlockHtml(ibText);
           } else if (ib.type === 'brand_strip' && ib.brand) {
             rows += brandStripHtml(ib.brand, lang, brands);
-          } else if (ib.type === 'product_hero') {
-            var iph = products.find(function(p){return p.id===ib.product1});
-            if(iph) { iph = getLocalizedProduct(iph,lang); rows += productHeroHtml(iph, ib, lang); }
-          } else if (ib.type === 'hero' || ib.type === 'pimpam_hero') {
+          } else if (ib.type === 'pimpam_hero') {
             var ibHero = resolveHero(ib);
             if (ibHero === ib) {
               rows += pimpamHeroHtml(ib.heroImage ? ib : b, lang);
@@ -1141,18 +1072,16 @@ function generateFullHtml(blocks, products, lang, brands, appState) {
             var cp1 = products.find(function(p){return p.id===ib.product1});
             var cp2 = products.find(function(p){return p.id===ib.product2});
             if(cp1&&cp2) { cp1 = getLocalizedProduct(cp1,lang); cp2 = getLocalizedProduct(cp2,lang); rows += productPairHtml(cp1,cp2,lang); }
-          } else if (ib.type === 'product_hero') {
-      editorContent = e('div', null,
-        e('select', {value:ib.product1||'', onChange:function(ev){updateInnerBlock(idx, {product1:ev.target.value}); refreshPreview()}, style:{width:'100%',marginBottom:'6px'}}, products.filter(function(p){return p.visible!==false}).map(function(p){return e('option',{key:p.id,value:p.id},p.name)})),
-        e('input', {type:'text', placeholder:'Subtítulo (opcional)', value:ib.heroSubtitle||'', onChange:function(ev){updateInnerBlock(idx, {heroSubtitle:ev.target.value})}, onBlur:refreshPreview, style:{width:'100%',marginBottom:'4px',fontSize:'12px',padding:'4px'}}),
-        e('input', {type:'text', placeholder:'CTA texto', value:ib.heroCtaText||'', onChange:function(ev){updateInnerBlock(idx, {heroCtaText:ev.target.value})}, onBlur:refreshPreview, style:{width:'48%',marginRight:'4%',fontSize:'12px',padding:'4px'}}),
-        e('input', {type:'text', placeholder:'CTA url', value:ib.heroCtaUrl||'', onChange:function(ev){updateInnerBlock(idx, {heroCtaUrl:ev.target.value})}, onBlur:refreshPreview, style:{width:'48%',fontSize:'12px',padding:'4px'}})
-      );
-    } else if (ib.type === 'product_single') {
+          } else if (ib.type === 'product_single') {
             var cps = products.find(function(p){return p.id===ib.product1});
             if(cps) { cps = getLocalizedProduct(cps,lang); rows += productSingleHtml(cps,lang); }
           }
         });
+        break;
+      default:
+        if (b.type && b.type.indexOf('brand_') === 0) {
+          rows += brandStripHtml(b.brand || b.type.replace('brand_',''), lang, brands);
+        }
         break;
     }
   }
@@ -1502,8 +1431,7 @@ function BlockLibraryPicker(props) {
       case 'product_single': action = {type:'product_single', product1:cfg.defaultProduct||''}; break;
       case 'product_pair': action = {type:'product_pair', product1:cfg.defaultProduct1||'', product2:cfg.defaultProduct2||''}; break;
       case 'product_trio': action = {type:'product_trio', product1:cfg.defaultProduct1||'', product2:cfg.defaultProduct2||'', product3:cfg.defaultProduct3||''}; break;
-      case 'product_hero': action = {type:'product_hero', product1:cfg.defaultProduct||'flexone', heroCtaText:cfg.heroCtaText||'', heroCtaUrl:cfg.heroCtaUrl||'', heroSubtitle:cfg.heroSubtitle||'', heroBgColor:cfg.heroBgColor||'#ffffff'}; break;
-      case 'hero': case 'pimpam_hero': action = {type:'hero', heroImage:cfg.heroImage||'', heroTitle:cfg.heroTitle||'', heroSubtitle:cfg.heroSubtitle||'', heroBullets:cfg.heroBullets||[], heroImageLink:cfg.heroImageLink||'', heroCtaText:cfg.heroCtaText||'', heroCtaUrl:cfg.heroCtaUrl||'', heroBgColor:cfg.heroBgColor||'#fff'}; break;
+      case 'pimpam_hero': action = {type:'pimpam_hero', heroImage:cfg.heroImage||'', heroTitle:cfg.heroTitle||'', heroSubtitle:cfg.heroSubtitle||'', heroBullets:cfg.heroBullets||[], heroImageLink:cfg.heroImageLink||'', heroCtaText:cfg.heroCtaText||'', heroCtaUrl:cfg.heroCtaUrl||'', heroBgColor:cfg.heroBgColor||'#fff'}; break;
       case 'pimpam_steps': action = {type:'pimpam_steps', steps:cfg.steps||[], stepsBgColor:cfg.stepsBgColor||'', stepsBorderColor:cfg.stepsBorderColor||''}; break;
       default: action = {type:sb.blockType}; break;
     }
@@ -1563,7 +1491,7 @@ function BlockEditorModal(props) {
   if (initialInnerBlocks.length === 0 && (block.introText || block.blockType || block.includeHero || block.includeSteps)) {
     if (block.introText) initialInnerBlocks.push({_id:++innerBlockIdCounter, type:'text', text:block.introText, i18n:block.i18n||{}});
     if (block.brandStrip && block.brandStrip !== 'none') initialInnerBlocks.push({_id:++innerBlockIdCounter, type:'brand_strip', brand:block.brandStrip});
-    if (block.includeHero) initialInnerBlocks.push({_id:++innerBlockIdCounter, type:'hero'});
+    if (block.includeHero) initialInnerBlocks.push({_id:++innerBlockIdCounter, type:'pimpam_hero'});
     var prods = block.products || [];
     if (block.blockType === 'product_trio' && prods.length >= 3) initialInnerBlocks.push({_id:++innerBlockIdCounter, type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
     else if (block.blockType === 'product_pair' && prods.length >= 2) initialInnerBlocks.push({_id:++innerBlockIdCounter, type:'product_pair', product1:prods[0], product2:prods[1]});
@@ -1627,7 +1555,7 @@ function BlockEditorModal(props) {
   };
 
   // Icon/label map for inner block types
-  var typeLabels = {text:{icon:'Aa',label:'Texto'},brand_strip:{icon:'🏷',label:'Marca'},product_single:{icon:'📦',label:'Producto (1)'},product_pair:{icon:'📦📦',label:'Productos (2)'},product_trio:{icon:'📦³',label:'Productos (3)'},hero:{icon:'🖼',label:'Hero'},product_hero:{icon:'🌟',label:'Producto Hero'},pimpam_steps:{icon:'1234',label:'Pasos'},separator:{icon:'—',label:'Separador'},freebird:{icon:'▶',label:'Vídeo'}};
+  var typeLabels = {text:{icon:'Aa',label:'Texto'},brand_strip:{icon:'🏷',label:'Marca'},product_single:{icon:'📦',label:'Producto (1)'},product_pair:{icon:'📦📦',label:'Productos (2)'},product_trio:{icon:'📦³',label:'Productos (3)'},pimpam_hero:{icon:'🖼',label:'Hero'},pimpam_steps:{icon:'1234',label:'Pasos'},separator:{icon:'—',label:'Separador'},freebird:{icon:'▶',label:'Vídeo'}};
 
   // Render an inner block editor row
   var renderInnerBlockRow = function(ib, idx) {
@@ -1656,7 +1584,7 @@ function BlockEditorModal(props) {
         e('div', {style:{display:'flex',gap:'6px',alignItems:'center'}}, e('span',{style:{fontSize:'10px',color:'#999',width:'18px'}},'2:'), e(ProductSelect, {value:ib.product2||'', products:props.products||[], exclude:ib.product1, exclude2:ib.product3, onChange:function(v){updateInnerBlock(idx,'product2',v)}})),
         e('div', {style:{display:'flex',gap:'6px',alignItems:'center'}}, e('span',{style:{fontSize:'10px',color:'#999',width:'18px'}},'3:'), e(ProductSelect, {value:ib.product3||'', products:props.products||[], exclude:ib.product1, exclude2:ib.product2, onChange:function(v){updateInnerBlock(idx,'product3',v)}}))
       );
-    } else if (ib.type === 'hero' || ib.type === 'pimpam_hero') {
+    } else if (ib.type === 'pimpam_hero') {
       if (editLang === 'es') {
         content = e('div', {style:{display:'flex',flexDirection:'column',gap:'6px'}},
           e('input', {className:'form-input', value:ib.heroTitle||'', onChange:function(ev){updateInnerBlock(idx,'heroTitle',ev.target.value)}, placeholder:'Título hero', style:{fontSize:'11px'}}),
@@ -2054,8 +1982,7 @@ function StandaloneBlockEditorModal(props) {
               e('option', {value:'product_single'}, 'Producto individual'),
               e('option', {value:'product_pair'}, 'Par de productos'),
               e('option', {value:'product_trio'}, 'Trío de productos'),
-              e('option', {value:'hero'}, 'Hero'),
-              e('option', {value:'product_hero'}, 'Producto Hero'),
+              e('option', {value:'pimpam_hero'}, 'PimPam Hero'),
               e('option', {value:'pimpam_steps'}, 'PimPam 4 Pasos')
             )
           ),
@@ -2146,7 +2073,7 @@ function StandaloneBlockEditorModal(props) {
             )
           ),
 
-          (form.blockType === 'hero' || form.blockType === 'pimpam_hero') && e('div', null,
+          form.blockType === 'pimpam_hero' && e('div', null,
             e('div', {className:'form-group form-group-full'},
               e('label', {className:'form-label'}, 'Imagen (URL)'),
               e('input', {className:'form-input', value:cfg.heroImage||'', onChange:function(ev){updateConfig('heroImage', ev.target.value)}, placeholder:'https://...'})
@@ -2373,11 +2300,12 @@ function BlockEditor(props) {
     'brand_mbo':{icon:'M',label:'MBO',cardClass:'purple'},
     'brand_pimpam':{icon:'PP',label:'PimPam',cardClass:'orange'},
     'brand_flux':{icon:'FL',label:'FLUX Lasers',cardClass:'cyan'},
+    'brand_smartjet':{icon:'SJ',label:'SmartJet',cardClass:'teal'},
     'product_single':{icon:'📦',label:'1 Producto',cardClass:'green'},
     'product_pair':{icon:'📦📦',label:'2 Productos',cardClass:'green'},
     'product_trio':{icon:'3️⃣',label:'3 Productos',cardClass:'green'},
     'freebird':{icon:'▶',label:'Freebird',cardClass:'blue'},
-    'hero':{icon:'📱',label:'Hero',cardClass:'orange'},'product_hero':{icon:'🌟',label:'Producto Hero',cardClass:'teal'},
+    'pimpam_hero':{icon:'📱',label:'Hero',cardClass:'orange'},
     'pimpam_steps':{icon:'1234',label:'Pasos',cardClass:'orange'},
     'composed':{icon:'📋',label:'Bloque compuesto',cardClass:'dark'}
   };
@@ -2486,7 +2414,7 @@ function BlockEditor(props) {
       e('label', null, 'Centro: ', e(ProductSelect, {value:block.product2, onChange:function(v){props.onChange(Object.assign({},block,{product2:v}))}, exclude:block.product1, exclude2:block.product3, products:props.products})),
       e('label', null, 'Der: ', e(ProductSelect, {value:block.product3, onChange:function(v){props.onChange(Object.assign({},block,{product3:v}))}, exclude:block.product1, exclude2:block.product2, products:props.products}))
     );
-  } else if (block.type === 'hero' || block.type === 'pimpam_hero') {
+  } else if (block.type === 'pimpam_hero') {
     var heroCtaButtons = block.heroCtaButtons || [];
     // Legacy: if old single CTA exists and no buttons array, create one
     if (heroCtaButtons.length === 0 && block.heroCtaText && block.heroCtaUrl) {
@@ -2705,8 +2633,7 @@ function BlockEditor(props) {
       e('div', {style:{marginTop:'8px',display:'flex',flexWrap:'wrap',gap:'4px'}},
         iBlocks.map(function(ib, i){
           if (ib.type === 'brand_strip') return e('span', {key:i, style:Object.assign({},badgeStyle,{background:'#ede9fe',color:'#6d28d9'})}, '🏷 ' + (ib.brand||''));
-          if (ib.type === 'product_hero') return e('span', {key:i, style:Object.assign({},badgeStyle,{background:'#ccfbf1',color:'#0d9488'})}, '🌟 ProdHero');
-          if (ib.type === 'hero' || ib.type === 'pimpam_hero') return e('span', {key:i, style:Object.assign({},badgeStyle,{background:'#ffedd5',color:'#c2410c'})}, '📱 Hero');
+          if (ib.type === 'pimpam_hero') return e('span', {key:i, style:Object.assign({},badgeStyle,{background:'#ffedd5',color:'#c2410c'})}, '📱 Hero');
           if (ib.type === 'pimpam_steps') return e('span', {key:i, style:Object.assign({},badgeStyle,{background:'#ffedd5',color:'#c2410c'})}, '1234 Pasos');
           if (ib.type === 'separator') return e('span', {key:i, style:Object.assign({},badgeStyle,{background:'#f3f4f6',color:'#6b7280'})}, '— Sep');
           if (ib.type === 'product_single') return e('span', {key:i, style:Object.assign({},badgeStyle,{background:'#dcfce7',color:'#16a34a'})}, '📦×1');
@@ -3077,7 +3004,7 @@ function EmailComposer() {
           if (ibs.length === 0) {
             if (b.introText) ibs.push({type:'text', text:b.introText});
             if (b.brandStrip && b.brandStrip !== 'none') ibs.push({type:'brand_strip', brand:b.brandStrip});
-            if (b.includeHero) ibs.push({type:'hero'});
+            if (b.includeHero) ibs.push({type:'pimpam_hero'});
             var prods = b.products || [];
             if (b.blockType === 'product_trio' && prods.length >= 3) ibs.push({type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
             else if (b.blockType === 'product_pair' && prods.length >= 2) ibs.push({type:'product_pair', product1:prods[0], product2:prods[1]});
@@ -3091,7 +3018,7 @@ function EmailComposer() {
               result.push(unlinkedText);
             }
             else if (ib.type === 'brand_strip') result.push({id: ++blockIdCounter, type:'brand_' + ib.brand, brand: ib.brand});
-            else if (ib.type === 'pimpam_hero' || ib.type === 'hero') result.push({id: ++blockIdCounter, type:'hero'});
+            else if (ib.type === 'pimpam_hero') result.push({id: ++blockIdCounter, type:'pimpam_hero'});
             else if (ib.type === 'pimpam_steps') result.push({id: ++blockIdCounter, type:'pimpam_steps'});
             else if (ib.type === 'product_trio') result.push({id: ++blockIdCounter, type:'product_trio', product1:ib.product1, product2:ib.product2, product3:ib.product3});
             else if (ib.type === 'product_pair') result.push({id: ++blockIdCounter, type:'product_pair', product1:ib.product1, product2:ib.product2});
@@ -3117,7 +3044,7 @@ function EmailComposer() {
         delete nib.text; // Don't copy text — resolve at render
         delete nib.i18n; // i18n lives in source definition
       }
-      if (ib.type === 'pimpam_hero' || ib.type === 'hero') {
+      if (ib.type === 'pimpam_hero') {
         nib._sourceType = 'composed_inner';
         nib._composedSourceId = composedBlock.id;
         nib._innerIdx = idx;
@@ -3129,7 +3056,7 @@ function EmailComposer() {
     if (refInnerBlocks.length === 0 && (composedBlock.introText || composedBlock.blockType)) {
       refInnerBlocks.push({type:'text', _sourceType:'composed_inner', _composedSourceId:composedBlock.id, _innerIdx:-1, _overrides:{}});
       if (composedBlock.brandStrip && composedBlock.brandStrip !== 'none') refInnerBlocks.push({type:'brand_strip', brand:composedBlock.brandStrip});
-      if (composedBlock.includeHero) refInnerBlocks.push({type:'hero', _sourceType:'composed_inner', _composedSourceId:composedBlock.id, _innerIdx:-2, _overrides:{}});
+      if (composedBlock.includeHero) refInnerBlocks.push({type:'pimpam_hero', _sourceType:'composed_inner', _composedSourceId:composedBlock.id, _innerIdx:-2, _overrides:{}});
       var prods = composedBlock.products || [];
       if (composedBlock.blockType === 'product_trio' && prods.length >= 3) refInnerBlocks.push({type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
       else if (composedBlock.blockType === 'product_pair' && prods.length >= 2) refInnerBlocks.push({type:'product_pair', product1:prods[0], product2:prods[1]});
@@ -3167,8 +3094,7 @@ function EmailComposer() {
       case 'product_single': newBlock = {id: ++blockIdCounter, type:'product_single', product1: cfg.defaultProduct || 'young'}; break;
       case 'product_pair': newBlock = {id: ++blockIdCounter, type:'product_pair', product1: cfg.defaultProduct1 || 'young', product2: cfg.defaultProduct2 || '3000pro'}; break;
       case 'product_trio': newBlock = {id: ++blockIdCounter, type:'product_trio', product1: cfg.defaultProduct1 || 'uv1612g', product2: cfg.defaultProduct2 || 'uv1812', product3: cfg.defaultProduct3 || 'uv2513'}; break;
-      case 'product_hero': newBlock = {id: ++blockIdCounter, type:'product_hero', _sourceType:'standalone', _sourceId:sb.id, _overrides:{}, product1: cfg.defaultProduct||'flexone', heroSubtitle: cfg.heroSubtitle||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#ffffff'}; break;
-      case 'hero': case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'hero', _sourceType:'standalone', _sourceId:sb.id, _overrides:{}, heroImage: cfg.heroImage||'', heroTitle: cfg.heroTitle||'', heroSubtitle: cfg.heroSubtitle||'', heroBullets: cfg.heroBullets||[], heroImageLink: cfg.heroImageLink||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#fff'}; break;
+      case 'pimpam_hero': newBlock = {id: ++blockIdCounter, type:'pimpam_hero', _sourceType:'standalone', _sourceId:sb.id, _overrides:{}, heroImage: cfg.heroImage||'', heroTitle: cfg.heroTitle||'', heroSubtitle: cfg.heroSubtitle||'', heroBullets: cfg.heroBullets||[], heroImageLink: cfg.heroImageLink||'', heroCtaText: cfg.heroCtaText||'', heroCtaUrl: cfg.heroCtaUrl||'', heroBgColor: cfg.heroBgColor||'#fff'}; break;
       case 'pimpam_steps': newBlock = {id: ++blockIdCounter, type:'pimpam_steps', steps: cfg.steps||[], stepsBgColor: cfg.stepsBgColor||'#fff7ed', stepsBorderColor: cfg.stepsBorderColor||'#fed7aa'}; break;
       default: newBlock = {id: ++blockIdCounter, type: sb.blockType}; break;
     }
@@ -3204,13 +3130,13 @@ function EmailComposer() {
         var refIbs = (composed.innerBlocks || []).map(function(ib, idx) {
           var nib = Object.assign({}, ib);
           if (ib.type === 'text') { nib._sourceType='composed_inner'; nib._composedSourceId=composed.id; nib._innerIdx=idx; nib._overrides={}; delete nib.text; delete nib.i18n; }
-          if (ib.type === 'pimpam_hero' || ib.type === 'hero') { nib._sourceType='composed_inner'; nib._composedSourceId=composed.id; nib._innerIdx=idx; nib._overrides={}; }
+          if (ib.type === 'pimpam_hero') { nib._sourceType='composed_inner'; nib._composedSourceId=composed.id; nib._innerIdx=idx; nib._overrides={}; }
           return nib;
         });
         if (refIbs.length === 0 && (composed.introText || composed.blockType)) {
           refIbs.push({type:'text', _sourceType:'composed_inner', _composedSourceId:composed.id, _innerIdx:-1, _overrides:{}});
           if (composed.brandStrip && composed.brandStrip !== 'none') refIbs.push({type:'brand_strip', brand:composed.brandStrip});
-          if (composed.includeHero) refIbs.push({type:'hero', _sourceType:'composed_inner', _composedSourceId:composed.id, _innerIdx:-2, _overrides:{}});
+          if (composed.includeHero) refIbs.push({type:'pimpam_hero', _sourceType:'composed_inner', _composedSourceId:composed.id, _innerIdx:-2, _overrides:{}});
           var prods = composed.products || [];
           if (composed.blockType === 'product_trio' && prods.length >= 3) refIbs.push({type:'product_trio', product1:prods[0], product2:prods[1], product3:prods[2]});
           else if (composed.blockType === 'product_pair' && prods.length >= 2) refIbs.push({type:'product_pair', product1:prods[0], product2:prods[1]});
@@ -3270,7 +3196,7 @@ function EmailComposer() {
       }
 
       // For hero blocks: store i18n from standalone source
-      if ((clone.type === 'pimpam_hero' || clone.type === 'hero') && clone._sourceType === 'standalone' && clone._sourceId) {
+      if (clone.type === 'pimpam_hero' && clone._sourceType === 'standalone' && clone._sourceId) {
         var srcSb = (appState.standaloneBlocks || []).find(function(sb){ return sb.id === clone._sourceId; });
         if (srcSb && srcSb.config && srcSb.config.i18n) {
           clone.i18n = srcSb.config.i18n;
@@ -3834,7 +3760,7 @@ function EmailComposer() {
               e('button', {className:'type-filter-btn' + (filterOtrType==='all'?' active':''), onClick:function(){setFilterOtrType('all')}}, 'Todos'),
               e('button', {className:'type-filter-btn' + (filterOtrType==='brand_strip'?' active':''), onClick:function(){setFilterOtrType('brand_strip')}}, 'Marcas'),
               e('button', {className:'type-filter-btn' + (filterOtrType==='product'?' active':''), onClick:function(){setFilterOtrType('product')}}, 'Productos'),
-              e('button', {className:'type-filter-btn' + (filterOtrType==='hero'?' active':''), onClick:function(){setFilterOtrType('pimpam_hero')}}, 'Heroes'),
+              e('button', {className:'type-filter-btn' + (filterOtrType==='pimpam_hero'?' active':''), onClick:function(){setFilterOtrType('pimpam_hero')}}, 'Heroes'),
               e('button', {className:'type-filter-btn' + (filterOtrType==='video'?' active':''), onClick:function(){setFilterOtrType('video')}}, 'Video'),
               e('button', {className:'type-filter-btn' + (filterOtrType==='pimpam_steps'?' active':''), onClick:function(){setFilterOtrType('pimpam_steps')}}, 'Pasos')
             ),
